@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Post } from '../models/user';
+import { Post } from '../models/prisma';
 
 export const createPost = async (req: Request, res: Response) => {
   const { title, content, authorId } = req.body;

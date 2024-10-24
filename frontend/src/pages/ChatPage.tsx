@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, LogOut} from 'lucide-react'
+import { Search, LogOut, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChatList } from '@/components/ChatList'
@@ -10,26 +10,49 @@ import { useAuth } from '@/context/AuthContext'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { chats } from '@/constants/mockData'
 import { Chat } from '@/types/chat'
-import { NewMessagePopover } from '@/components/NewMessagePopover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
-// Mock user search results
+// Mock user data for new message feature
 const mockUsers = [
   { id: 'user1', name: 'Alice Johnson', email: 'alice@example.com' },
   { id: 'user2', name: 'Bob Smith', email: 'bob@example.com' },
   { id: 'user3', name: 'Carol Williams', email: 'carol@example.com' },
-  { id: 'user4', name: 'David Brown', email: 'david@example.com' },
+  { id: 'user4', name: 'Nhan Dong', email: 'david@example.com' },
 ]
 
 export const ChatPage: React.FC = () => {
   const { user, logout } = useAuth()
   const { messages, sendMessage } = useWebSocket()
   const [selectedChat, setSelectedChat] = useState<Chat>(chats[0])
-  const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
   const navigate = useNavigate()
 
+  // New state for Create New Message feature
+  const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredUsers, setFilteredUsers] = useState(mockUsers)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (isNewMessageOpen && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }, [isNewMessageOpen])
+
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase()
+    const filtered = mockUsers.filter(user => 
+      user.name.toLowerCase().includes(lowercasedFilter) ||
+      user.email.toLowerCase().includes(lowercasedFilter)
+    )
+    setFilteredUsers(filtered)
+  }, [searchTerm])
+
   const handleSendMessage = (content: string) => {
-    if (user && selectedChat) {
+    if (user) {
       const newMessage = {
         id: Date.now(),
         sender: user.name,
@@ -46,21 +69,21 @@ export const ChatPage: React.FC = () => {
     navigate('/login')
   }
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term)
-  }
-
-  const handleNewChat = (selectedUser: { id: string; name: string; email: string }) => {
+  const handleNewChat = (newUser: { id: string; name: string; email: string }) => {
+    console.log('Starting new chat with:', newUser)
+    setIsNewMessageOpen(false)
+    setSearchTerm('')
+    // Here you would typically start a new chat or navigate to a new chat page
+    // For now, let's create a new chat and set it as selected
     const newChat: Chat = {
       id: Date.now(),
-      name: selectedUser.name,
+      name: newUser.name,
       lastMessage: '',
       time: 'Now',
       unread: 0,
       avatar: '/placeholder.svg?height=40&width=40'
     }
     setSelectedChat(newChat)
-    setIsNewMessageOpen(false)
   }
 
   const closeNewMessagePopover = () => {
@@ -75,15 +98,49 @@ export const ChatPage: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-800">Chats</h1>
             <div className="flex items-center space-x-2">
-            <NewMessagePopover
-              isOpen={isNewMessageOpen}
-              onOpenChange={setIsNewMessageOpen}
-              searchTerm={searchTerm}
-              onSearch={handleSearch}
-              onSelectUser={handleNewChat}
-              onClose={closeNewMessagePopover}
-              users={mockUsers}
-            />
+              <Popover open={isNewMessageOpen} onOpenChange={setIsNewMessageOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[300px] p-0" align="end">
+                  <div className="flex flex-col">
+                    <div className="flex items-center justify-between p-2 border-b">
+                      <h2 className="text-sm font-semibold">New Message</h2>
+                      <Button variant="ghost" size="icon" onClick={closeNewMessagePopover}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="p-2">
+                      <Input
+                        ref={searchInputRef}
+                        type="text"
+                        placeholder="Search user..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto">
+                      {filteredUsers.length === 0 ? (
+                        <div className="p-2 text-sm text-gray-500">No user found.</div>
+                      ) : (
+                        filteredUsers.map(user => (
+                          <button
+                            key={user.id}
+                            className="w-full text-left px-2 py-1 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                            onClick={() => handleNewChat(user)}
+                          >
+                            <div>{user.name}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
               </Button>

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Comment } from '../models/user';
+import { Comment } from '../models/prisma';
 
 export const createComment = async (req: Request, res: Response) => {
   const { postId, content } = req.body;
