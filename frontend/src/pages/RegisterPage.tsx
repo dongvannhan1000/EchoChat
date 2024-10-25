@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/hooks/useAuth';
 
 export const RegisterPage: React.FC = () => {
   const [username, setUsername] = React.useState('')
@@ -12,10 +12,14 @@ export const RegisterPage: React.FC = () => {
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    register(username, email, password)
-    navigate('/chat')
+    try {
+      await register(name, email, password)
+      navigate('/chat')
+    } catch (error) {
+      console.error("Login failed:", error)
+    }
   }
 
   return (

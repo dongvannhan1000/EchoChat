@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { ChatList } from '@/components/ChatList'
 import { ChatWindow } from '@/components/ChatWindow'
 import { MessageInput } from '@/components/MessageInput'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/hooks/useAuth'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { chats } from '@/constants/mockData'
 import { Chat } from '@/types/chat'
@@ -64,8 +64,8 @@ export const ChatPage: React.FC = () => {
     }
   }
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login')
   }
 

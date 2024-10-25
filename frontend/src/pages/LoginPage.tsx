@@ -3,18 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/hooks/useAuth';
 
 export const LoginPage: React.FC = () => {
-  const [username, setUsername] = React.useState('')
+  const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    login(username, password)
-    navigate('/chat')
+    try {
+      await login(email, password)
+      navigate('/chat')
+    } catch (error) {
+      console.error("Login failed:", error)
+    }
   }
 
   return (
@@ -24,14 +28,14 @@ export const LoginPage: React.FC = () => {
           <CardTitle>Login</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Username</label>
+              <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Username</label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => {setEmail(e.target.value)}}
                 required
               />
             </div>
@@ -41,7 +45,7 @@ export const LoginPage: React.FC = () => {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {setPassword(e.target.value)}}
                 required
               />
             </div>
@@ -49,7 +53,7 @@ export const LoginPage: React.FC = () => {
           </form>
           <p className="mt-4 text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <Button variant="link" onClick={() => navigate('/register')} className="p-0">
+            <Button variant="link" onClick={() => {navigate('/register')}} className="p-0">
               Register
             </Button>
           </p>

@@ -1,45 +1,69 @@
-import React, { createContext, useState, useContext } from 'react'
+import React, { createContext, useState} from 'react'
 import { User } from '@/types/user'
 
 interface AuthContextType {
   user: User | null
-  login: (username: string, password: string) => void
-  register: (username: string, email: string, password: string) => void
-  logout: () => void
+  login: (email: string, password: string) => Promise<void>
+  register: (name: string, email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
 
-  const login = (username: string, password: string) => {
-    // In a real app, you'd validate credentials against a backend
-    console.log(`Logging in with username: ${username} and password: ${password}`);
-    setUser({ id: 'user1', name: username, avatar: '/placeholder.svg?height=40&width=40' })
-  }
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        
+      });
 
-  const register = (username: string, email: string, password: string) => {
-    // In a real app, you'd send this information to a backend to create a new user
-    console.log(`Registering with username: ${username}, email: ${email}, and password: ${password}`);
-    setUser({ id: 'user1', name: username, avatar: '/placeholder.svg?height=40&width=40' })
-  }
+      console.log('Response status:', response.status); // Log status code
+      console.log('Response body:', await response.text()); // Log response body
 
-  const logout = () => {
-    setUser(null)
-  }
+      if (!response.ok) throw new Error('Login failed');
+      const data = await response.json() as { user: User };
+      setUser(data.user); // Assuming backend returns `user` object
+    } catch (error) {
+      console.error('Error logging in:', error);
+    }
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      const response = await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      if (!response.ok) throw new Error('Registration failed');
+      const data = await response.json() as { user: User};
+      setUser(data.user);
+    } catch (error) {
+      console.error('Error registering:', error);
+    }
+  };
+
+  const logout = async(): Promise<void> => {
+    await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+      .then(() => {
+        setUser(null)
+    })
+      .catch((error: unknown) => {
+        console.error('Error logging out:', error)
+      });
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }

@@ -1,9 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import passport from './config/passport';
 import authRoutes from './routes/authRoutes';
-import postRoutes from './routes/postRoutes';
-import commentRoutes from './routes/commentRoutes';
+import userRoutes from './routes/userRoutes';
 import { sessionMiddleware } from './config/session';
 import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
@@ -14,6 +14,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cors());
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
@@ -24,8 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/', authRoutes);
-app.use('/', postRoutes);
-app.use('/', commentRoutes);
+app.use('/', userRoutes);
 
 app.use(errorHandler);
 
