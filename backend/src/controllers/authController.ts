@@ -20,7 +20,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ message: 'Login fail', info });
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
-    return res.json({ message: 'Login successful', token });
+    return res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email }, token });
   })(req, res, next);
 };
 
