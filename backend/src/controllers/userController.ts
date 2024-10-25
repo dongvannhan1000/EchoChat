@@ -52,12 +52,14 @@ export const getUsers = async (req: Request, res: Response) => {
 
   try {
     const users = await User.findMany({
-      where: {
-        OR: [
-          { name: { contains: search as string, mode: 'insensitive' } },
-          { email: { contains: search as string, mode: 'insensitive' } }
-        ]
-      }
+      where: search
+        ? {
+          OR: [
+            { name: { contains: search as string, mode: 'insensitive' } },
+            { email: { contains: search as string, mode: 'insensitive' } }
+          ]
+        }
+        : {} 
     });
 
     res.status(200).json(users);
@@ -65,4 +67,5 @@ export const getUsers = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Unable to retrieve users' });
   }
 };
+
 
