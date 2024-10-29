@@ -19,7 +19,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/client": "^5.21.1",
     "@quixo3/prisma-session-store": "^3.1.13",
     "@types/method-override": "^0.0.35",
     "@types/multer": "^1.4.12",
@@ -55,7 +55,7 @@
     "globals": "^15.11.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
-    "prisma": "^5.20.0",
+    "prisma": "^5.21.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.8.1"

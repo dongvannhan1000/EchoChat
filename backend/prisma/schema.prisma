@@ -83,4 +83,6 @@ model OnlineStatus {
   isOnline  Boolean   @default(false) // Whether the user is online
   lastActiveAt DateTime? // The last time the user was active
   user      User      @relation(fields: [userId], references: [id])
+
+  @@map("online_status")
 }
