@@ -4,9 +4,11 @@ import cors from 'cors';
 import passport from './config/passport';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import chatRoutes from './routes/chatRoutes';
 import { sessionMiddleware } from './config/session';
 import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
+import { isAuth } from './middleware/authMiddleware';
 
 dotenv.config();
 
@@ -25,7 +27,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/', authRoutes);
-app.use('/', userRoutes);
+app.use('/', isAuth, userRoutes);
+app.use('/', isAuth, chatRoutes);
 
 app.use(errorHandler);
 
