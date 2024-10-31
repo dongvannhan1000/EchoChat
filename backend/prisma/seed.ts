@@ -1,5 +1,6 @@
 import { PrismaClient, ChatType, ChatRole } from '@prisma/client'
 import { faker } from '@faker-js/faker'
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient()
 
@@ -21,10 +22,12 @@ async function seedDatabase() {
   // Generate Users
   const users = await Promise.all(
     Array.from({ length: 10 }).map(async () => {
+      const hashedPassword = await bcrypt.hash(faker.internet.password(), 10);
       return prisma.user.create({
         data: {
           name: sanitizeName(`${faker.person.firstName()} ${faker.person.lastName()}`),
           email: faker.internet.email(),
+          password: hashedPassword,
           avatar: faker.image.avatarGitHub(),
           block: [],
           statusMessage: faker.person.bio(),

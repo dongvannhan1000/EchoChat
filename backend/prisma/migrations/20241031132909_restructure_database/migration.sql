@@ -9,6 +9,7 @@ CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "avatar" TEXT,
     "block" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     "statusMessage" TEXT,
