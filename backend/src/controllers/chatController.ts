@@ -5,9 +5,21 @@ const prisma = new PrismaClient();
 
 // Conversations
 export const createConversation = async (req: Request, res: Response) => {
+  const { participants } = req.body;
+
   try {
     const conversation = await prisma.conversation.create({
-      data: {},
+      data: {
+        participants: {
+          create: participants.map((participant: { userId: number}) => ({
+            userId: participant.userId,
+            joinedAt: new Date(),
+          })),
+        },
+      },
+      include: {
+        participants: true, 
+      },
     });
     res.status(201).json(conversation);
   } catch (error) {
@@ -29,7 +41,7 @@ export const getConversation = async (req: Request, res: Response) => {
   try {
     const conversation = await prisma.conversation.findUnique({
       where: { id: Number(id) },
-      include: { participants: true, messages: true },
+      include: { participants: true, messages: true }
     });
     if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
     res.status(200).json(conversation);
@@ -43,7 +55,7 @@ export const updateConversation = async (req: Request, res: Response) => {
   try {
     const updatedConversation = await prisma.conversation.update({
       where: { id: Number(id) },
-      data: req.body,
+      data: req.body
     });
     res.status(200).json(updatedConversation);
   } catch (error) {
@@ -55,7 +67,7 @@ export const deleteConversation = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     await prisma.conversation.delete({
-      where: { id: Number(id) },
+      where: { id: Number(id) }
     });
     res.status(204).send();
   } catch (error) {
@@ -71,8 +83,8 @@ export const addParticipant = async (req: Request, res: Response) => {
     const participant = await prisma.participant.create({
       data: {
         userId,
-        conversationId: Number(id),
-      },
+        conversationId: Number(id)
+      }
     });
     res.status(201).json(participant);
   } catch (error) {
@@ -87,9 +99,9 @@ export const deleteParticipant = async (req: Request, res: Response) => {
       where: {
         userId_conversationId: {
           userId: Number(userId),
-          conversationId: Number(id),
-        },
-      },
+          conversationId: Number(id)
+        }
+      }
     });
     res.status(204).send();
   } catch (error) {
@@ -102,7 +114,7 @@ export const getParticipants = async (req: Request, res: Response) => {
   try {
     const participants = await prisma.participant.findMany({
       where: { conversationId: Number(id) },
-      include: { user: true },
+      include: { user: true }
     });
     res.status(200).json(participants);
   } catch (error) {
@@ -119,8 +131,8 @@ export const addMessage = async (req: Request, res: Response) => {
       data: {
         content,
         senderId,
-        conversationId: Number(id),
-      },
+        conversationId: Number(id)
+      }
     });
     res.status(201).json(message);
   } catch (error) {
@@ -133,7 +145,7 @@ export const getMessages = async (req: Request, res: Response) => {
   try {
     const messages = await prisma.message.findMany({
       where: { conversationId: Number(id) },
-      include: { sender: true },
+      include: { sender: true }
     });
     res.status(200).json(messages);
   } catch (error) {
@@ -146,7 +158,7 @@ export const getMessage = async (req: Request, res: Response) => {
   try {
     const message = await prisma.message.findUnique({
       where: { id: Number(id) },
-      include: { sender: true },
+      include: { sender: true }
     });
     if (!message) return res.status(404).json({ error: 'Message not found' });
     res.status(200).json(message);
@@ -159,7 +171,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     await prisma.message.delete({
-      where: { id: Number(id) },
+      where: { id: Number(id) }
     });
     res.status(204).send();
   } catch (error) {
