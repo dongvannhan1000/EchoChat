@@ -13,13 +13,13 @@ export const createConversation = async (req: Request, res: Response) => {
         participants: {
           create: participants.map((participant: { userId: number}) => ({
             userId: participant.userId,
-            joinedAt: new Date(),
-          })),
-        },
+            joinedAt: new Date()
+          }))
+        }
       },
       include: {
-        participants: true, 
-      },
+        participants: true 
+      }
     });
     res.status(201).json(conversation);
   } catch (error) {
