@@ -1,6 +1,6 @@
-import { Response } from "express";
-import { AuthenticatedRequest } from "middleware/authMiddleware";
-import { MessageService } from "services/messageService";
+import { Response } from 'express';
+import { AuthenticatedRequest } from 'middleware/authMiddleware';
+import { MessageService } from 'services/messageService';
 
 const messageService = new MessageService();
 
@@ -14,8 +14,12 @@ export class MessageController {
 
       const messages = await messageService.getChatMessages(chatId, userId, cursor, limit);
       res.json(messages);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Failed to get messages.' });
+      }
     }
   }
 
@@ -29,8 +33,12 @@ export class MessageController {
         senderId: userId
       });
       res.status(201).json(message);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Failed to send message.' });
+      }
     }
   }
 

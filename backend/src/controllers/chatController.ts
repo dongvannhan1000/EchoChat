@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "middleware/authMiddleware";
-import { ChatService } from "services/chatService";
+import { Request, Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from 'middleware/authMiddleware';
+import { ChatService } from 'services/chatService';
 
 const chatService = new ChatService();
 

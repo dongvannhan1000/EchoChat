@@ -8,7 +8,6 @@ import chatRoutes from './routes/chatRoutes';
 import { sessionMiddleware } from './config/session';
 import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
-import { isAuth } from './middleware/authMiddleware';
 
 dotenv.config();
 
@@ -27,8 +26,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/', authRoutes);
-app.use('/', isAuth, userRoutes);
-app.use('/', isAuth, chatRoutes);
+app.use('/', userRoutes);
+app.use('/', chatRoutes);
 
 app.use(errorHandler);
 
