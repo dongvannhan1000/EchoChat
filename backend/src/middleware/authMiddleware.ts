@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    id: number; // Đảm bảo thuộc tính này tồn tại
+    id: number;
     name: string;
     email: string;
     avatar?: string;

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { AuthenticatedRequest } from "middleware/authMiddleware";
 import { ChatService } from "services/chatService";
 
