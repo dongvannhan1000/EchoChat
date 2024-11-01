@@ -1,13 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { User } from 'types/user';
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    name: string;
-    email: string;
-    avatar?: string;
-  }
+  user?: User
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {

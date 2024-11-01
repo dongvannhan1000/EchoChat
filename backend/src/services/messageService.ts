@@ -1,4 +1,4 @@
-import { Message, prisma, UserChat } from 'models/prisma';
+import { Message, prisma, UserChat } from '../models/prisma';
 
 export class MessageService {
   async getChatMessages(chatId: number, userId: number, cursor?: number, limit: number = 20) {

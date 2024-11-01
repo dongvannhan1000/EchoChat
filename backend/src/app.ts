@@ -8,6 +8,7 @@ import chatRoutes from './routes/chatRoutes';
 import { sessionMiddleware } from './config/session';
 import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
+import messageRoutes from './routes/messageRoutes';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 app.use('/', authRoutes);
 app.use('/', userRoutes);
 app.use('/', chatRoutes);
+app.use('/', messageRoutes);
 
 app.use(errorHandler);
 

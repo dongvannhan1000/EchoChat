@@ -1,10 +1,12 @@
 import { ChatType, ChatRole } from '@prisma/client';
-import { Chat, UserChat } from 'models/prisma';
+import { Chat, UserChat } from '../models/prisma';
 
 export class ChatService {
+
+  // This function retrieves all chats that a user (`userId`) is involved in. It returns details about the chats, including participant information and the most recent message
   async getUserChats(userId: number) {
     return await UserChat.findMany({
-      where: { userId },
+      where: { userId }, 
       select: {
         chat: {
           include: {
@@ -49,6 +51,7 @@ export class ChatService {
     });
   }
 
+  // Creating a new chat or returning an existing chat
   async createChat(creatorId: number, data: {
     chatType: ChatType;
     participantIds: number[];
@@ -115,6 +118,7 @@ export class ChatService {
     });
   }
 
+  // Retrieving detailed information about a specific conversation that a user participates in
   async getChatDetails(chatId: number, userId: number) {
     const chat = await Chat.findFirst({
       where: {
