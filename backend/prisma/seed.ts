@@ -22,7 +22,7 @@ async function seedDatabase() {
   // Generate Users
   const users = await Promise.all(
     Array.from({ length: 10 }).map(async () => {
-      const hashedPassword = await bcrypt.hash(faker.internet.password(), 10);
+      const hashedPassword = await bcrypt.hash('123456', 10);
       return prisma.user.create({
         data: {
           name: sanitizeName(`${faker.person.firstName()} ${faker.person.lastName()}`),
