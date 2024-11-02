@@ -20,7 +20,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ message: 'Login fail', info });
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
-    return res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email }, token });
+    return res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, avatar: user?.avatar }, token });
   })(req, res, next);
 };
 
@@ -52,8 +52,4 @@ export const refreshToken = (req: Request, res: Response) => {
     const newToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
     return res.json({ message: 'Token refreshed', token: newToken });
   });
-};
-
-export const profile = (req: Request, res: Response) => {
-  res.json(req.user);
 };

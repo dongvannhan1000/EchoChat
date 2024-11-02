@@ -7,17 +7,16 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ msg: 'You are not authorized to view this resource' });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret', (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ msg: 'Token is not valid' });
-    }
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ msg: 'You are not authorized to view this resource' });
+    };
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
     req.user = decoded;
     next();
-  });
+  } catch (error) {
+    return res.status(401).json({ msg: 'Token is not valid' });
+  }
 };
