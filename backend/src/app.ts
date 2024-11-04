@@ -35,7 +35,11 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Open your browser and visit: http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(5000, () => {
+    console.log('Server is running on port 5000');
+    console.log('Open your browser and visit: http://localhost:5000');
+  });
+}
+
+export default app;

@@ -43,13 +43,24 @@ export const refreshToken = (req: Request, res: Response) => {
     return res.status(401).json({ message: 'No token provided' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret', (err: jwt.JsonWebTokenError | null, decoded: any) => {
-    if (err) {
-      return res.status(401).json({ message: 'Token is not valid' });
-    }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { id: number };
 
     // Tạo token mới
-    const newToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
-    return res.json({ message: 'Token refreshed', token: newToken });
-  });
+    const newToken = jwt.sign(
+      { id: decoded.id },
+      process.env.JWT_SECRET || 'your_jwt_secret',
+      { expiresIn: '1h' }
+    );
+
+    return res.json({
+      message: 'Token refreshed',
+      token: newToken
+    });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ message: 'Token is not valid' });
+    }
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
