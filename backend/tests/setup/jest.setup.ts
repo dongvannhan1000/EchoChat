@@ -2,6 +2,7 @@
 import { beforeAll, afterAll } from '@jest/globals';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import { User, UserChat, Message } from '../../src/models/prisma';
 
 // Load test environment variables
 dotenv.config({ path: '.env.test' });
@@ -15,6 +16,12 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await prisma.$disconnect();
+});
+
+afterEach(async () => {
+  await UserChat.deleteMany();
+  await Message.deleteMany();
+  await User.deleteMany();
 });
 
 // Export prisma client for use in tests
