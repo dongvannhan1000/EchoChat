@@ -1,8 +1,8 @@
 // tests/setup/jest.setup.ts
-import { beforeAll, afterAll } from '@jest/globals';
+import { beforeAll, afterAll, beforeEach } from '@jest/globals';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import { User, UserChat, Message } from '../../src/models/prisma';
+import { User, UserChat, Message, Chat } from '../../src/models/prisma';
 
 // Load test environment variables
 dotenv.config({ path: '.env.test' });
@@ -18,9 +18,10 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-afterEach(async () => {
+beforeEach(async () => {
   await UserChat.deleteMany();
   await Message.deleteMany();
+  await Chat.deleteMany();
   await User.deleteMany();
 });
 
