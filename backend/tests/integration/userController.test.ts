@@ -1,13 +1,13 @@
 // tests/integration/userController.test.ts
 import request from 'supertest';
 import app from '../../src/app';
-import { User } from '../../src/models/prisma';
+import { prisma } from '../setup/jest.setup';
 
 describe('User Controller', () => {
   
   describe('GET /api/users/:id', () => {
     it('should retrieve a user by ID successfully', async () => {
-      const user = await User.create({
+      const user = await prisma.user.create({
         data: {
           name: 'Test User',
           email: 'testuser@example.com',
@@ -32,7 +32,7 @@ describe('User Controller', () => {
 
   describe('PUT /api/users/:id', () => {
     it('should update a user successfully', async () => {
-      const user = await User.create({
+      const user = await prisma.user.create({
         data: {
           name: 'Old Name',
           email: 'olduser@example.com',
@@ -61,7 +61,7 @@ describe('User Controller', () => {
 
   describe('DELETE /api/users/:id', () => {
     it('should delete a user successfully', async () => {
-      const user = await User.create({
+      const user = await prisma.user.create({
         data: {
           name: 'Delete User',
           email: 'deleteuser@example.com',
@@ -73,7 +73,7 @@ describe('User Controller', () => {
         .delete(`/api/users/${user.id}`)
         .expect(204);
 
-      const deletedUser = await User.findUnique({ where: { id: user.id } });
+      const deletedUser = await prisma.user.findUnique({ where: { id: user.id } });
       expect(deletedUser).toBeNull();
     });
 
@@ -86,7 +86,7 @@ describe('User Controller', () => {
 
   describe('GET /api/users', () => {
     it('should retrieve users based on search query', async () => {
-      await User.createMany({
+      await prisma.user.createMany({
         data: [
           { name: 'Alice', email: 'alice@example.com', password: 'Password123!' },
           { name: 'Bob', email: 'bob@example.com', password: 'Password123!' },

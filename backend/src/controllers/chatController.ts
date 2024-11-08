@@ -22,6 +22,12 @@ export const createChat = async (req: AuthenticatedRequest, res: Response, next:
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
+
+    const { chatType, participantIds } = req.body;
+    if (!['group', 'private'].includes(chatType) || !Array.isArray(participantIds) || participantIds.length === 0) {
+      return res.status(400).json({ message: 'Invalid input data' });
+    }
+
     const userId = req.user.id;
     const chat = await chatService.createChat(userId, req.body);
     res.status(201).json(chat);
@@ -51,6 +57,7 @@ export const leaveChat = async (req: AuthenticatedRequest, res: Response, next: 
     }
     const userId = req.user.id;
     const chatId = parseInt(req.params.chatId);
+
     await chatService.leaveChat(chatId, userId);
     res.json({ message: 'Successfully left chat' });
   } catch (error: unknown) {

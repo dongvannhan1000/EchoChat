@@ -1,25 +1,18 @@
-// tests/integration/authController.test.ts
 import request from 'supertest';
 import app from '../../src/app';
-import { User, UserChat, Message } from '../../src/models/prisma';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+
 
 describe('Auth Controller', () => {
-  beforeEach(async () => {
-    // Clear database before each test
-    await UserChat.deleteMany();
-    await Message.deleteMany();
-    await User.deleteMany();
-  });
 
   describe('POST /api/register', () => {
-    const validUser = {
-      name: 'Test User',
-      email: 'test@example.com',
-      password: 'Password123!',
-    };
-
     it('should register a new user successfully', async () => {
+      const validUser = {
+        name: 'Test User Register',
+        email: 'test-register@example.com',
+        password: 'Password123!',
+      };
+
       const response = await request(app)
         .post('/api/register')
         .send(validUser)
@@ -46,23 +39,24 @@ describe('Auth Controller', () => {
   });
 
   describe('POST /api/login', () => {
+    const loginUser = {
+      name: 'Test User Login',
+      email: 'test-login@example.com', 
+      password: 'Password123!'
+    };
+
     beforeEach(async () => {
-      // Create a test user before login tests
       await request(app)
         .post('/api/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'Password123!',
-        });
+        .send(loginUser);
     });
 
     it('should login successfully with valid credentials', async () => {
       const response = await request(app)
         .post('/api/login')
         .send({
-          email: 'test@example.com',
-          password: 'Password123!',
+          email: loginUser.email,
+          password: loginUser.password,
         })
         .expect(200);
 
@@ -74,7 +68,7 @@ describe('Auth Controller', () => {
       await request(app)
         .post('/api/login')
         .send({
-          email: 'test@example.com',
+          email: loginUser.email,
           password: 'wrongpassword',
         })
         .expect(400);
@@ -86,28 +80,27 @@ describe('Auth Controller', () => {
     let testUser: any;
 
     beforeEach(async () => {
-      // Create user and get token
-
       const registerResponse = await request(app)
-      .post('/api/register')
-      .send({
-        name: 'Test User',
-        email: 'test-refresh@example.com',
-        password: 'Password123!'
-      });
+        .post('/api/register')
+        .send({
+          name: 'Test User Refresh',
+          email: `test-refresh-${Date.now()}@example.com`, // Unique email
+          password: 'Password123!'
+        });
       testUser = registerResponse.body;
 
       const loginResponse = await request(app)
         .post('/api/login')
         .send({
-          email: 'test-refresh@example.com',
+          email: testUser.email,
           password: 'Password123!',
         });
       validToken = loginResponse.body.token;
     });
 
     it('should refresh token successfully', async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Use a shorter timeout or consider redesigning the test to avoid timing dependencies
+      await new Promise(resolve => setTimeout(resolve, 1000)); 
 
       const response = await request(app)
         .post('/api/refresh-token')
@@ -120,11 +113,9 @@ describe('Auth Controller', () => {
       const decodedToken = jwt.verify(
         response.body.token, 
         process.env.JWT_SECRET || 'your_jwt_secret'
-      );
+      ) as any;
       expect(decodedToken).toHaveProperty('id', testUser.id);
     });
-
-
 
     it('should fail with invalid token', async () => {
       await request(app)
