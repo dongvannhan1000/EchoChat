@@ -1,7 +1,6 @@
 // tests/integration/chatController.test.ts
 import request from 'supertest';
 import app from '../../src/app';
-import { prisma } from '../setup/jest.setup';
 import { User } from '../../src/types/user';
 
 describe('Chat Controller', () => {
