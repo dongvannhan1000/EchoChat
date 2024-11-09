@@ -69,11 +69,13 @@ async function cleanupDatabase() {
 
 // Connect to database before all tests
 beforeAll(async () => {
+  let currentTestFile;
   try {
     await prisma.$connect();
-    console.log('Successfully connected to test database');
+    currentTestFile = expect.getState().testPath;
+    console.log(`[${currentTestFile}] Successfully connected to test database`);
   } catch (error) {
-    console.error('Failed to connect to test database:', error);
+    console.error(`[${currentTestFile}] Failed to connect to test database:`, error);
     throw error;
   }
 });
