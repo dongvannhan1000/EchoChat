@@ -1,45 +1,74 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Message } from '@/types/message'
+// src/stores/useWebSocket.ts
 
-// Mock WebSocket (in a real app, you'd use a real WebSocket connection)
-const mockWebSocket = {
-  send: (message: string) => {
-    console.log('Sending message:', message)
-    // Simulate receiving a message after a short delay
-    setTimeout(() => {
-      const response: Message = {
-        id: Date.now(),
-        sender: 'Alice Johnson',
-        content: 'Thanks for your message!',
-        time: new Date().toLocaleTimeString(),
-        isMine: false
-      }
-      mockWebSocket.onmessage({ data: JSON.stringify(response) })
-    }, 1000)
+import { create } from 'zustand';
+import io, { Socket } from 'socket.io-client';
+import { Message } from '@/types/chat';
+
+interface WebSocketStore {
+  socket: Socket | null;
+  isConnected: boolean;
+  connect: (token: string) => void;
+  disconnect: () => void;
+  sendMessage: (message: Partial<Message>) => void;
+  joinRoom: (chatId: number) => void;
+  leaveRoom: (chatId: number) => void;
+}
+
+const SOCKET_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
+export const useWebSocket = create<WebSocketStore>((set, get) => ({
+  socket: null,
+  isConnected: false,
+
+  connect: (token: string) => {
+    const socket = io(SOCKET_URL, {
+      auth: { token },
+      transports: ['websocket'],
+    });
+
+    socket.on('connect', () => {
+      set({ isConnected: true });
+      console.log('WebSocket connected');
+    });
+
+    socket.on('disconnect', () => {
+      set({ isConnected: false });
+      console.log('WebSocket disconnected');
+    });
+
+    socket.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+
+    set({ socket });
   },
-  onmessage: (event: { data: string }) => {
-    console.log('Received message:', event.data);
-  }
-}
 
-export const useWebSocket = () => {
-  const [messages, setMessages] = useState<Message[]>([])
-
-  useEffect(() => {
-    mockWebSocket.onmessage = (event) => {
-      const message = JSON.parse(event.data)
-      setMessages((prevMessages) => [...prevMessages, message])
+  disconnect: () => {
+    const { socket } = get();
+    if (socket) {
+      socket.disconnect();
+      set({ socket: null, isConnected: false });
     }
+  },
 
-    return () => {
-      mockWebSocket.onmessage = () => {}
+  sendMessage: (message: Partial<Message>) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('message', message);
     }
-  }, [])
+  },
 
-  const sendMessage = useCallback((message: Message) => {
-    setMessages((prevMessages) => [...prevMessages, message])
-    mockWebSocket.send(JSON.stringify(message))
-  }, [])
+  joinRoom: (chatId: number) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('join-room', chatId);
+    }
+  },
 
-  return { messages, sendMessage }
-}
+  leaveRoom: (chatId: number) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('leave-room', chatId);
+    }
+  },
+}));

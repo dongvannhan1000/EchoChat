@@ -24,7 +24,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
         <Input
           type="text"
           value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
+          onChange={(e) => { setNewMessage(e.target.value); }}
           placeholder="Type a message..."
           className="flex-1"
         />

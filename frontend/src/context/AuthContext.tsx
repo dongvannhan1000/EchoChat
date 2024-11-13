@@ -1,5 +1,5 @@
 import React, { createContext, useState} from 'react'
-import { User } from '@/types/user'
+import { User } from '@/types/chat'
 
 interface AuthContextType {
   user: User | null
@@ -23,7 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (!response.ok) throw new Error('Login failed');
-      const data = await response.json() as { user: User };
+      const data = await response.json() as { user: User, token: string };
+      localStorage.setItem('token', data.token);
       setUser(data.user); // Assuming backend returns `user` object
     } catch (error) {
       console.error('Error logging in:', error);

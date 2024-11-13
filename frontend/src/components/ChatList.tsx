@@ -17,7 +17,7 @@ export const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, onSelec
           className={`p-4 hover:bg-gray-100 cursor-pointer ${
             selectedChat.id === chat.id ? 'bg-gray-100' : ''
           }`}
-          onClick={() => onSelectChat(chat)}
+          onClick={() => { onSelectChat(chat); }}
         >
           <div className="flex items-center space-x-3">
             <Avatar>

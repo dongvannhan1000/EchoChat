@@ -6,6 +6,8 @@ import { ChatList } from '@/components/ChatList'
 import { ChatWindow } from '@/components/ChatWindow'
 import { MessageInput } from '@/components/MessageInput'
 import { useAuth } from '@/hooks/useAuth'
+import { useChat } from '@/stores/useChat'
+import { useUser } from '@/hooks/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { chats } from '@/constants/mockData'
 import { Chat } from '@/types/chat'
@@ -24,8 +26,10 @@ const mockUsers = [
 ]
 
 export const ChatPage: React.FC = () => {
-  const { user, logout } = useAuth()
-  const { messages, sendMessage } = useWebSocket()
+  const { user } = useAuth()
+  const { currentChat, messages, sendMessage } = useChat();
+  const { connect, disconnect, isConnected } = useWebSocket();
+  const { users } = useUser();
   const [selectedChat, setSelectedChat] = useState<Chat>(chats[0])
 
   // New state for Create New Message feature
@@ -33,6 +37,24 @@ export const ChatPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredUsers, setFilteredUsers] = useState(mockUsers)
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    // Assuming you have the token stored somewhere
+    const token = localStorage.getItem('token'); // or from your auth store
+    if (token) {
+      console.log('Initializing WebSocket connection...');
+      connect(token);
+    }
+
+    return () => {
+      console.log('Cleaning up WebSocket connection...');
+      disconnect();
+    };
+  }, [connect, disconnect]);
+
+  useEffect(() => {
+    console.log('WebSocket connection status:', isConnected);
+  }, [isConnected]);
 
   useEffect(() => {
     if (isNewMessageOpen && searchInputRef.current) {
@@ -47,7 +69,7 @@ export const ChatPage: React.FC = () => {
       user.email.toLowerCase().includes(lowercasedFilter)
     )
     setFilteredUsers(filtered)
-  }, [searchTerm])
+  }, [searchTerm, users])
 
   const handleSendMessage = (content: string) => {
     if (user) {
@@ -58,7 +80,7 @@ export const ChatPage: React.FC = () => {
         time: new Date().toLocaleTimeString(),
         isMine: true
       }
-      sendMessage(newMessage)
+      sendMessage(selectedChat.id, newMessage)
     }
   }
 

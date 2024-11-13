@@ -59,7 +59,7 @@ export default function AppLayout() {
               <Avatar>
                 <AvatarImage src={user?.avatar} />
                 <AvatarFallback>
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  {user?.name.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
             </Button>
