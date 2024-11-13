@@ -23,8 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (!response.ok) throw new Error('Login failed');
-      const user = await response.json() as { user: User };
-      setUser(user); // Assuming backend returns `user` object
+      const data = await response.json() as { user: User };
+      setUser(data.user); // Assuming backend returns `user` object
     } catch (error) {
       console.error('Error logging in:', error);
     }

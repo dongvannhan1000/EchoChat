@@ -2,8 +2,9 @@ import { Chat } from '@/types/chat'
 import { User } from '@/types/user'
 
 export const currentUser: User = {
-  id: 'user1',
+  id: 1,
   name: 'John Doe',
+  email: 'joindoe@gmail.com',
   avatar: '/placeholder.svg?height=40&width=40'
 }
 

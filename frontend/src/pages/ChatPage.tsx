@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Search, LogOut, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,7 +27,6 @@ export const ChatPage: React.FC = () => {
   const { user, logout } = useAuth()
   const { messages, sendMessage } = useWebSocket()
   const [selectedChat, setSelectedChat] = useState<Chat>(chats[0])
-  const navigate = useNavigate()
 
   // New state for Create New Message feature
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
@@ -64,11 +62,6 @@ export const ChatPage: React.FC = () => {
     }
   }
 
-  const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
-
   const handleNewChat = (newUser: { id: string; name: string; email: string }) => {
     console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
@@ -92,7 +85,7 @@ export const ChatPage: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-full bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -118,7 +111,7 @@ export const ChatPage: React.FC = () => {
                         type="text"
                         placeholder="Search user..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {setSearchTerm(e.target.value)}}
                         className="w-full"
                       />
                     </div>
@@ -130,7 +123,7 @@ export const ChatPage: React.FC = () => {
                           <button
                             key={user.id}
                             className="w-full text-left px-2 py-1 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            onClick={() => handleNewChat(user)}
+                            onClick={() => {handleNewChat(user)}}
                           >
                             <div>{user.name}</div>
                             <div className="text-sm text-gray-500">{user.email}</div>
@@ -141,9 +134,6 @@ export const ChatPage: React.FC = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-4 w-4" />
-              </Button>
             </div>
           </div>
           <div className="relative">
