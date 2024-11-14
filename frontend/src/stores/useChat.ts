@@ -5,9 +5,10 @@
 
 
 import { create } from 'zustand';
-import axios from 'axios';
 import { Chat, Message, UserChat } from '../types/chat';
 import { useWebSocket } from '../hooks/useWebSocket';
+import api from '../utils/axios'
+
 
 interface ChatStore {
   chats: UserChat[];
@@ -31,6 +32,8 @@ interface ChatStore {
 }
 
 export const useChat = create<ChatStore>((set, get) => ({
+
+  
   chats: [],
   currentChat: null,
   messages: [],
@@ -40,7 +43,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   fetchUserChats: async () => {
     try {
       set({ isLoading: true });
-      const response = await axios.get('/api/user-chats');
+      const response = await api.get(`/api/user-chats`);
       set({ chats: response.data, isLoading: false });
     } catch (error) {
       set({ error: 'Failed to fetch chats', isLoading: false });
@@ -50,7 +53,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   fetchChatDetails: async (chatId: number) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/api/chats/${chatId.toString()}`);
+      const response = await api.get(`/api/chats/${chatId.toString()}`);
       set({ currentChat: response.data, isLoading: false });
       useWebSocket.getState().joinRoom(chatId);
     } catch (error) {
@@ -61,7 +64,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   fetchMessages: async (chatId: number) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/api/chats/${chatId.toString()}/messages`);
+      const response = await api.get(`/api/chats/${chatId.toString()}/messages`);
       set({ messages: response.data, isLoading: false });
     } catch (error) {
       set({ error: 'Failed to fetch messages', isLoading: false });
@@ -71,7 +74,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   sendMessage: async (chatId: number, content: string, image?: string) => {
     try {
       set({ isLoading: true });
-      const response = await axios.post(`/api/chats/${chatId.toString()}/messages`, {
+      const response = await api.post(`/api/chats/${chatId.toString()}/messages`, {
         content,
         image,
       });
@@ -88,7 +91,7 @@ export const useChat = create<ChatStore>((set, get) => ({
 
   deleteMessage: async (messageId: number) => {
     try {
-      await axios.delete(`/api/messages/${messageId.toString()}`);
+      await api.delete(`/api/messages/${messageId.toString()}`);
       set((state) => ({
         messages: state.messages.filter((msg) => msg.id !== messageId),
       }));
@@ -100,7 +103,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   createChat: async (userIds: number[]) => {
     try {
       set({ isLoading: true });
-      const response = await axios.post('/api/chats', { userIds });
+      const response = await api.post('/api/chats', { userIds });
       set((state) => ({
         chats: [...state.chats, response.data],
         isLoading: false,
@@ -112,7 +115,7 @@ export const useChat = create<ChatStore>((set, get) => ({
 
   leaveChat: async (chatId: number) => {
     try {
-      await axios.delete(`/api/chats/${chatId.toString()}/leave`);
+      await api.delete(`/api/chats/${chatId.toString()}/leave`);
       set((state) => ({
         chats: state.chats.filter((chat) => chat.chatId !== chatId),
         currentChat: null,

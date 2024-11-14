@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, LogOut, Plus, X } from 'lucide-react'
+import { Search, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ChatList } from '@/components/ChatList'
+import ChatList from '@/components/ChatList'
 import { ChatWindow } from '@/components/ChatWindow'
 import { MessageInput } from '@/components/MessageInput'
 import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
 import { useUser } from '@/hooks/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { chats } from '@/constants/mockData'
-import { Chat } from '@/types/chat'
+import { User } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
@@ -28,9 +27,20 @@ const mockUsers = [
 export const ChatPage: React.FC = () => {
   const { user } = useAuth();
   const webSocketStore = useWebSocket();
-  const { currentChat, messages, sendMessage } = useChat();
+  const { 
+    chats, 
+    currentChat, 
+    messages, 
+    sendMessage, 
+    fetchUserChats, 
+    fetchChatDetails, 
+    fetchMessages,
+    createChat
+  } = useChat();
   const { users } = useUser();
-  const [selectedChat, setSelectedChat] = useState<Chat>(chats[0])
+
+  console.log('Number of chats:', chats.length);
+  console.log('Chats:', chats);
 
   // New state for Create New Message feature
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
@@ -53,6 +63,7 @@ export const ChatPage: React.FC = () => {
     };
 
     void initializeWebSocket();
+    void fetchUserChats();
 
     return () => {
       mounted = false;
@@ -85,33 +96,24 @@ export const ChatPage: React.FC = () => {
   }, [searchTerm, users])
 
   const handleSendMessage = (content: string) => {
-    if (user) {
-      const newMessage = {
-        id: Date.now(),
-        sender: user.name,
-        content,
-        time: new Date().toLocaleTimeString(),
-        isMine: true
-      }
-      sendMessage(selectedChat.id, newMessage)
+    if (user && currentChat) {
+      void sendMessage(currentChat.id, content)
     }
   }
 
-  const handleNewChat = (newUser: { id: string; name: string; email: string }) => {
+  const handleSelectChat = (chatId: number) => {
+    void (async () => {
+      await fetchChatDetails(chatId);
+      await fetchMessages(chatId);
+    })();
+  };
+
+  const handleNewChat = async (newUser: User) => {
     console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
     setSearchTerm('')
-    // Here you would typically start a new chat or navigate to a new chat page
-    // For now, let's create a new chat and set it as selected
-    const newChat: Chat = {
-      id: Date.now(),
-      name: newUser.name,
-      lastMessage: '',
-      time: 'Now',
-      unread: 0,
-      avatar: '/placeholder.svg?height=40&width=40'
-    }
-    setSelectedChat(newChat)
+    await createChat([newUser.id]);
+    await fetchUserChats();
   }
 
   const closeNewMessagePopover = () => {
@@ -158,7 +160,7 @@ export const ChatPage: React.FC = () => {
                           <button
                             key={user.id}
                             className="w-full text-left px-2 py-1 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            onClick={() => {handleNewChat(user)}}
+                            onClick={() => {void handleNewChat({...user, id: Number(user.id) })}}
                           >
                             <div>{user.name}</div>
                             <div className="text-sm text-gray-500">{user.email}</div>
@@ -182,13 +184,13 @@ export const ChatPage: React.FC = () => {
         </div>
         <ChatList
           chats={chats}
-          selectedChat={selectedChat}
-          onSelectChat={setSelectedChat}
+          selectedChatId={currentChat?.id ?? null}
+          onSelectChat={handleSelectChat}
         />
       </div>
       <div className="flex-1 flex flex-col">
         <ChatWindow
-          selectedChat={selectedChat}
+          currentChat={currentChat}
           messages={messages}
         />
         <MessageInput onSendMessage={handleSendMessage} />
