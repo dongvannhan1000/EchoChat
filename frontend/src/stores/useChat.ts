@@ -147,20 +147,3 @@ export const useChat = create<ChatStore>((set, get) => ({
     }));
   },
 }));
-
-// Thiết lập WebSocket listeners
-useWebSocket.subscribe((state) => {
-  if (state.socket) {
-    state.socket.on('new-message', (message: Message) => {
-      useChat.getState().addMessage(message);
-    });
-
-    state.socket.on('message-updated', (message: Message) => {
-      useChat.getState().updateMessage(message);
-    });
-
-    state.socket.on('message-deleted', (messageId: number) => {
-      useChat.getState().removeMessage(messageId);
-    });
-  }
-});

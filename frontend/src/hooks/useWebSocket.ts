@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
 import { Message } from '@/types/chat';
+import { useChat } from '@/stores/useChat';
 
 interface WebSocketStore {
   socket: Socket | null;
@@ -62,6 +63,18 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
 
       newSocket.on('error', (error) => {
         console.error('WebSocket error:', error);
+      });
+
+      newSocket.on('new-message', (message: Message) => {
+        useChat.getState().addMessage(message);
+      });
+  
+      newSocket.on('message-updated', (message: Message) => {
+        useChat.getState().updateMessage(message);
+      });
+  
+      newSocket.on('message-deleted', (messageId: number) => {
+        useChat.getState().removeMessage(messageId);
       });
 
       set({ 
