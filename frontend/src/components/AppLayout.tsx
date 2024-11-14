@@ -81,7 +81,7 @@ export default function AppLayout() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={handleLogout}
+              onClick={() => {void handleLogout()}}
               className="text-red-600 focus:text-red-600"
             >
               <User className="mr-2 h-4 w-4" />

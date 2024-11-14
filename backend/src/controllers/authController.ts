@@ -25,15 +25,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    req.session.destroy((err) => {
-      if (err) {
-        return next(err);
-      }
-      res.status(200).json({ message: 'Logout successful' });
-    });
-  });
+  res.status(200).json({ message: 'Logout successful' });
 };
 
 export const refreshToken = (req: Request, res: Response) => {

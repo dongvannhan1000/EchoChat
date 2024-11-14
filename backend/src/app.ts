@@ -19,6 +19,23 @@ const server = http.createServer(app);
 
 const io = new Server(server);
 
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  console.log('Connection attempt with token:', token);
+  
+  if (!token) {
+    return next(new Error('Authentication error'));
+  }
+  
+  // Verify token here
+  try {
+    // Verify token logic
+    next();
+  } catch (err) {
+    return next(new Error('Authentication error'));
+  }
+});
+
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 

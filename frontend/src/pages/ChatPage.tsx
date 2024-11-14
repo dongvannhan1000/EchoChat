@@ -26,9 +26,9 @@ const mockUsers = [
 ]
 
 export const ChatPage: React.FC = () => {
-  const { user } = useAuth()
+  const { user } = useAuth();
+  const webSocketStore = useWebSocket();
   const { currentChat, messages, sendMessage } = useChat();
-  const { connect, disconnect, isConnected } = useWebSocket();
   const { users } = useUser();
   const [selectedChat, setSelectedChat] = useState<Chat>(chats[0])
 
@@ -38,19 +38,32 @@ export const ChatPage: React.FC = () => {
   const [filteredUsers, setFilteredUsers] = useState(mockUsers)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  
+
   useEffect(() => {
     // Assuming you have the token stored somewhere
-    const token = localStorage.getItem('token'); // or from your auth store
-    if (token) {
-      console.log('Initializing WebSocket connection...');
-      connect(token);
-    }
+    let mounted = true;
+
+    const initializeWebSocket = async () => {
+      const token = localStorage.getItem('token');
+      if (token && mounted) {
+        console.log('Initializing WebSocket connection...');
+        await webSocketStore.connect(token);
+      }
+    };
+
+    void initializeWebSocket();
 
     return () => {
+      mounted = false;
       console.log('Cleaning up WebSocket connection...');
-      disconnect();
+      if (webSocketStore.socket) {
+        void webSocketStore.disconnect();
+      }
     };
-  }, [connect, disconnect]);
+  }, []);
+
+  const isConnected = useWebSocket(state => state.isConnected);
 
   useEffect(() => {
     console.log('WebSocket connection status:', isConnected);

@@ -7,8 +7,9 @@ import { Message } from '@/types/chat';
 interface WebSocketStore {
   socket: Socket | null;
   isConnected: boolean;
-  connect: (token: string) => void;
-  disconnect: () => void;
+  isInitialized: boolean;
+  connect: (token: string) => Promise<void>;
+  disconnect: () => Promise<void>;
   sendMessage: (message: Partial<Message>) => void;
   joinRoom: (chatId: number) => void;
   leaveRoom: (chatId: number) => void;
@@ -16,39 +17,75 @@ interface WebSocketStore {
 
 const SOCKET_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
+const connectWebSocket = async (token: string): Promise<Socket> => {
+  const socket = io(SOCKET_URL, {
+    auth: { token },
+    transports: ['websocket'],
+  });
+
+  return new Promise((resolve, reject) => {
+    // Set timeout for connection
+    const timeout = setTimeout(() => {
+      socket.close();
+      reject(new Error('Connection timeout'));
+    }, 10000); // 10 seconds timeout
+
+    socket.on('connect', () => {
+      clearTimeout(timeout);
+      resolve(socket);
+    });
+
+    socket.on('connect_error', (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+  });
+};
+
 export const useWebSocket = create<WebSocketStore>((set, get) => ({
   socket: null,
   isConnected: false,
+  isInitialized: false,
 
-  connect: (token: string) => {
-    const socket = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket'],
-    });
+  connect: async (token: string): Promise<void> => {
+    const { socket, isInitialized } = get();
+    
+    if (socket || isInitialized) return;
 
-    socket.on('connect', () => {
-      set({ isConnected: true });
-      console.log('WebSocket connected');
-    });
+    try {
+      const newSocket = await connectWebSocket(token);
 
-    socket.on('disconnect', () => {
-      set({ isConnected: false });
-      console.log('WebSocket disconnected');
-    });
+      newSocket.on('disconnect', () => {
+        set({ isConnected: false });
+        console.log('WebSocket disconnected');
+      });
 
-    socket.on('error', (error) => {
-      console.error('WebSocket error:', error);
-    });
+      newSocket.on('error', (error) => {
+        console.error('WebSocket error:', error);
+      });
 
-    set({ socket });
+      set({ 
+        socket: newSocket, 
+        isConnected: true,
+        isInitialized: true 
+      });
+    } catch (error) {
+      console.error('Failed to initialize socket:', error);
+      throw error; // Re-throw để caller có thể handle
+    }
   },
 
-  disconnect: () => {
+  disconnect: async (): Promise<void> => {
     const { socket } = get();
-    if (socket) {
+    if (!socket) return;
+
+    return new Promise<void>((resolve) => {
+      socket.on('disconnect', () => {
+        set({ socket: null, isConnected: false, isInitialized: false });
+        resolve();
+      });
       socket.disconnect();
-      set({ socket: null, isConnected: false });
-    }
+    });
   },
 
   sendMessage: (message: Partial<Message>) => {

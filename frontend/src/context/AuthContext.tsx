@@ -52,7 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       credentials: 'include',
     })
       .then(() => {
-        setUser(null)
+        setUser(null);
+        localStorage.removeItem('token');
     })
       .catch((error: unknown) => {
         console.error('Error logging out:', error)
