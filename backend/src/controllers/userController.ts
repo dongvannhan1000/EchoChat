@@ -19,12 +19,12 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, profilePic } = req.body;
+  const { name, avatar } = req.body;
 
   try {
     const updatedUser = await User.update({
       where: { id: Number(id) },
-      data: { name, profilePic }
+      data: { name, avatar }
     });
     res.status(200).json(updatedUser);
   } catch (error) {

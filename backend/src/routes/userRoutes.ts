@@ -1,12 +1,11 @@
 import express from 'express';
 import * as userController from '../controllers/userController';
-import { isAuth } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.get('/users/:id', userController.getUser);
-router.put('/users/:id', userController.updateUser);
-router.delete('/users/:id', isAuth, userController.deleteUser);
-router.get('/users', userController.getUsers);
+router.get('/api/users/:id', userController.getUser);
+router.put('/api/users/:id', userController.updateUser);
+router.delete('/api/users/:id', userController.deleteUser);
+router.get('/api/users', userController.getUsers);
 
 export default router;
