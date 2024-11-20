@@ -35,7 +35,8 @@ export const ChatPage: React.FC = () => {
     fetchUserChats, 
     fetchChatDetails, 
     fetchMessages,
-    createChat
+    createChat,
+    isLoading
   } = useChat();
   const { users } = useUser();
 
@@ -104,7 +105,7 @@ export const ChatPage: React.FC = () => {
   const handleSelectChat = (chatId: number) => {
     void (async () => {
       await fetchChatDetails(chatId);
-      await fetchMessages(chatId);
+      await fetchMessages(chatId, true);
     })();
   };
 
@@ -192,6 +193,7 @@ export const ChatPage: React.FC = () => {
         <ChatWindow
           currentChat={currentChat}
           messages={messages}
+          isLoading={isLoading['fetchMessages']}
         />
         <MessageInput onSendMessage={handleSendMessage} />
       </div>

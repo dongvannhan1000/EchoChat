@@ -2,13 +2,15 @@ import React, { useRef, useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
+import { Loader2 } from 'lucide-react'
 
 interface ChatWindowProps {
   currentChat: Chat | null
   messages: Message[]
+  isLoading: boolean
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
 
@@ -51,7 +53,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages })
         </Avatar>
         <h2 className="text-xl font-semibold text-gray-800">{getChatName()}</h2>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        )}
         {messages.map((message) => {
           const isCurrentUserMessage = message.senderId === user?.id
           return (

@@ -12,6 +12,7 @@ interface WebSocketStore {
   connect: (token: string) => Promise<void>;
   disconnect: () => Promise<void>;
   sendMessage: (message: Partial<Message>) => void;
+  sendStatusUpdate: (message: string) => void;
   joinRoom: (chatId: number) => void;
   leaveRoom: (chatId: number) => void;
 }
@@ -105,6 +106,13 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
     const { socket } = get();
     if (socket) {
       socket.emit('message', message);
+    }
+  },
+
+  sendStatusUpdate: (message: string) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('status_update', { message });
     }
   },
 
