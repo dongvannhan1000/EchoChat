@@ -43,13 +43,30 @@ export const ChatPage: React.FC = () => {
   console.log('Number of chats:', chats.length);
   console.log('Chats:', chats);
 
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+
   // New state for Create New Message feature
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredUsers, setFilteredUsers] = useState(mockUsers)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  
+  useEffect(() => {
+    if (selectedChatId) {
+      void (async () => {
+        try {
+          await fetchChatDetails(selectedChatId);
+          await fetchMessages(selectedChatId, true);
+        } catch (error) {
+          console.error('Error loading chat:', error);
+        }
+      })();
+    }
+  }, [selectedChatId, fetchChatDetails, fetchMessages]);
+
+  const handleSelectChat = (chatId: number) => {
+    setSelectedChatId(chatId);
+  };
 
   useEffect(() => {
     // Assuming you have the token stored somewhere
@@ -101,26 +118,6 @@ export const ChatPage: React.FC = () => {
       void sendMessage(currentChat.id, content)
     }
   }
-
-  const handleSelectChat = (chatId: number) => {
-    console.log('Selecting chat with ID:', chatId);
-    void (async () => {
-      try {
-        console.log('Fetching chat details...'); 
-        await fetchChatDetails(chatId);
-
-        await new Promise(resolve => setTimeout(resolve, 0));
-
-        const currentState = useChat.getState();
-
-        console.log('Fetching messages...'); 
-        await fetchMessages(chatId, true);
-        console.log('Current chat after fetch:', currentState.currentChat);
-      } catch (error) {
-        console.error('Error selecting chat:', error); 
-      }
-    })();
-  };
 
   const handleNewChat = async (newUser: User) => {
     console.log('Starting new chat with:', newUser)

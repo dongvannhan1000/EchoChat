@@ -85,21 +85,19 @@ export const useChat = create<ChatStore>((set, get) => ({
   fetchChatDetails: async (chatId: number) => {
     const action = 'fetchChatDetails';
     try {
-      set((state) => ({
-        isLoading: { ...state.isLoading, [action]: true },
-        error: { ...state.error, [action]: null },
-      }));
+      set({
+        isLoading: { ...get().isLoading, [action]: true },
+        error: { ...get().error, [action]: null },
+        messages: [], 
+        messagePage: 1,
+        hasMoreMessages: true
+      });
 
       console.log('Fetching details for chat ID:', chatId);
       const response = await api.get(`/api/chats/${chatId.toString()}`);
-      await new Promise<void>((resolve) => {
-        set({ 
-          currentChat: response.data,
-          messages: [],
-          messagePage: 1,
-          hasMoreMessages: true 
-        }, false);
-        resolve();
+      set({
+        currentChat: response.data,
+        isLoading: { ...get().isLoading, [action]: false }
       });
 
       const updatedState = get();
