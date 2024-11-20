@@ -40,8 +40,7 @@ export const ChatPage: React.FC = () => {
   } = useChat();
   const { users } = useUser();
 
-  console.log('Number of chats:', chats.length);
-  console.log('Chats:', chats);
+  
 
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
 
@@ -62,7 +61,7 @@ export const ChatPage: React.FC = () => {
         }
       })();
     }
-  }, [selectedChatId, fetchChatDetails, fetchMessages]);
+  }, [selectedChatId]);
 
   const handleSelectChat = (chatId: number) => {
     setSelectedChatId(chatId);

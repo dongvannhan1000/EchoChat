@@ -44,6 +44,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, i
     const otherUser = currentChat.participants.find(p => p.userId !== user?.id)
     return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40'
   }
+  console.log('ChatWindow render')
   return (
     <>
       <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3">

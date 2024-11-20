@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { UserChat } from '@/types/chat'
+import { memo } from "react"
 
 interface ChatListProps {
   chats: UserChat[]
@@ -7,7 +8,8 @@ interface ChatListProps {
   onSelectChat: (chatId: number) => void
 }
 
-export default function ChatList({ chats, selectedChatId, onSelectChat }: ChatListProps) {
+export default memo(function ChatList({ chats, selectedChatId, onSelectChat }: ChatListProps) {
+  console.log('ChatList render')
   return (
     <ul className="overflow-y-auto h-[calc(100vh-120px)]">
       {chats.map((chat, index) => {
@@ -47,4 +49,4 @@ export default function ChatList({ chats, selectedChatId, onSelectChat }: ChatLi
       })}
     </ul>
   )
-}
+})
