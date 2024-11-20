@@ -103,9 +103,17 @@ export const ChatPage: React.FC = () => {
   }
 
   const handleSelectChat = (chatId: number) => {
+    console.log('Selecting chat with ID:', chatId);
     void (async () => {
-      await fetchChatDetails(chatId);
-      await fetchMessages(chatId, true);
+      try {
+        console.log('Fetching chat details...'); 
+        await fetchChatDetails(chatId);
+        console.log('Fetching messages...'); 
+        await fetchMessages(chatId, true);
+        console.log('Current chat after fetch:', currentChat);
+      } catch (error) {
+        console.error('Error selecting chat:', error); 
+      }
     })();
   };
 

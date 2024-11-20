@@ -8,6 +8,7 @@ export class ChatService {
     return await UserChat.findMany({
       where: { userId }, 
       select: {
+        chatId: true,
         chat: {
           include: {
             participants: {

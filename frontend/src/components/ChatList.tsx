@@ -10,8 +10,10 @@ interface ChatListProps {
 export default function ChatList({ chats, selectedChatId, onSelectChat }: ChatListProps) {
   return (
     <ul className="overflow-y-auto h-[calc(100vh-120px)]">
-      {chats.map((chat, index) => (
-        <li
+      {chats.map((chat, index) => {
+        console.log('Chat ID:', chat.chatId);
+        return (
+          <li
           key={`${String(chat.chatId)}-${String(index)}`}
           className={`p-4 hover:bg-gray-100 cursor-pointer ${
             selectedChatId === chat.chatId ? 'bg-gray-100' : ''
@@ -41,7 +43,8 @@ export default function ChatList({ chats, selectedChatId, onSelectChat }: ChatLi
             )}
           </div>
         </li>
-      ))}
+        )
+      })}
     </ul>
   )
 }
