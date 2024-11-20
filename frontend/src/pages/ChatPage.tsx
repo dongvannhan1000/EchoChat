@@ -108,9 +108,14 @@ export const ChatPage: React.FC = () => {
       try {
         console.log('Fetching chat details...'); 
         await fetchChatDetails(chatId);
+
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const currentState = useChat.getState();
+
         console.log('Fetching messages...'); 
         await fetchMessages(chatId, true);
-        console.log('Current chat after fetch:', currentChat);
+        console.log('Current chat after fetch:', currentState.currentChat);
       } catch (error) {
         console.error('Error selecting chat:', error); 
       }

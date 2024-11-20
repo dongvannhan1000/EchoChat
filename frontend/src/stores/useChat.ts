@@ -90,13 +90,20 @@ export const useChat = create<ChatStore>((set, get) => ({
         error: { ...state.error, [action]: null },
       }));
 
+      console.log('Fetching details for chat ID:', chatId);
       const response = await api.get(`/api/chats/${chatId.toString()}`);
-      set({ 
-        currentChat: response.data,
-        messages: [],
-        messagePage: 1,
-        hasMoreMessages: true 
+      await new Promise<void>((resolve) => {
+        set({ 
+          currentChat: response.data,
+          messages: [],
+          messagePage: 1,
+          hasMoreMessages: true 
+        }, false);
+        resolve();
       });
+
+      const updatedState = get();
+      console.log('Updated current chat:', updatedState.currentChat);
       useWebSocket.getState().joinRoom(chatId);
     } catch (error) {
       set((state) => ({
