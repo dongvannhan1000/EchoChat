@@ -36,7 +36,8 @@ export const ChatPage: React.FC = () => {
     fetchChatDetails, 
     fetchMessages,
     createChat,
-    isLoading
+    isLoading,
+    hasMoreMessages
   } = useChat();
   const { users } = useUser();
 
@@ -118,6 +119,12 @@ export const ChatPage: React.FC = () => {
     }
   }
 
+  const handleLoadMore = async () => {
+    if (currentChat) {
+      await fetchMessages(currentChat.id, false);
+    }
+  };
+
   const handleNewChat = async (newUser: User) => {
     console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
@@ -130,6 +137,8 @@ export const ChatPage: React.FC = () => {
     setIsNewMessageOpen(false)
     setSearchTerm('')
   }
+
+  console.log('ChatPage render')
 
   return (
     <div className="flex h-full bg-gray-100">
@@ -203,6 +212,8 @@ export const ChatPage: React.FC = () => {
           currentChat={currentChat}
           messages={messages}
           isLoading={isLoading['fetchMessages']}
+          hasMore={hasMoreMessages} 
+          onLoadMore={() => void handleLoadMore()}
         />
         <MessageInput onSendMessage={handleSendMessage} />
       </div>

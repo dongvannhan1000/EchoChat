@@ -129,14 +129,22 @@ export const useChat = create<ChatStore>((set, get) => ({
       const page = reset ? 1 : messagePage;
       const response = await api.get(`/api/chats/${chatId.toString()}/messages?page=${page.toString()}`);
 
+      const sortedMessages = response.data.sort((a: Message, b: Message) => 
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+
+      const PAGE_SIZE = 20;
+      const hasMore = response.data.length === PAGE_SIZE;
+
       set((state) => ({
-        messages: reset ? response.data : [...state.messages, ...response.data],
+        messages: reset ? sortedMessages : [...sortedMessages, ...state.messages], 
         messagePage: page + 1,
-        hasMoreMessages: response.data.length > 0,
+        hasMoreMessages: hasMore,
       }));
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to fetch messages' },
+        hasMoreMessages: false,
       }));
     } finally {
       set((state) => ({
@@ -161,7 +169,9 @@ export const useChat = create<ChatStore>((set, get) => ({
 
       const newMessage = response.data as Message;
       set((state) => ({
-        messages: [...state.messages, newMessage],
+        messages: [...state.messages, newMessage].sort((a, b) => 
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        ),
       }));
 
       useWebSocket.getState().sendMessage(newMessage);

@@ -66,14 +66,17 @@ async function seedDatabase() {
 
       // Generate Messages for Private Chat
       await Promise.all(
-        Array.from({ length: faker.number.int({ min: 5, max: 20 }) }).map(async () => {
+        Array.from({ length: faker.number.int({ min: 50, max: 100 }) }).map(async (_, index) => {
           const sender = Math.random() > 0.5 ? user1 : user2
+
+
           await prisma.message.create({
             data: {
               chatId: chat.id,
               senderId: sender.id,
               content: faker.lorem.sentence(),
               image: Math.random() > 0.8 ? faker.image.urlLoremFlickr() : null,
+              createdAt: new Date(Date.now() - index * 60 * 1000)
             }
           })
         })
@@ -117,7 +120,7 @@ async function seedDatabase() {
 
       // Generate Messages for Group Chat
       await Promise.all(
-        Array.from({ length: faker.number.int({ min: 10, max: 50 }) }).map(async () => {
+        Array.from({ length: faker.number.int({ min: 50, max: 100 }) }).map(async (_, index) => {
           const sender = users[Math.floor(Math.random() * users.length)]
           await prisma.message.create({
             data: {
@@ -125,6 +128,7 @@ async function seedDatabase() {
               senderId: sender.id,
               content: faker.lorem.sentence(),
               image: Math.random() > 0.9 ? faker.image.urlLoremFlickr() : null,
+              createdAt: new Date(Date.now() - index * 60 * 1000)
             }
           })
         })

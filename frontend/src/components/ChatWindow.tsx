@@ -3,14 +3,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
+import { formatMessageTime } from '@/utils/formatTime'
+import { Button } from './ui/button'
 
 interface ChatWindowProps {
   currentChat: Chat | null
   messages: Message[]
   isLoading: boolean
+  hasMore: boolean
+  onLoadMore: () => void
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, isLoading }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, isLoading, hasMore, onLoadMore }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
 
@@ -61,6 +65,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, i
             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         )}
+        {/* Thêm nút Load More */}
+        {hasMore && (
+          <div className="flex justify-center">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onLoadMore}
+              disabled={isLoading}
+            >
+              See more messages
+            </Button>
+          </div>
+        )}
         {messages.map((message) => {
           const isCurrentUserMessage = message.senderId === user?.id
           return (
@@ -84,7 +101,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, i
                 )}
                 <p>{message.content}</p>
                 <span className="text-xs mt-1 block">
-                  {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {formatMessageTime(new Date(message.createdAt).toISOString())}
                 </span>
               </div>
             </div>
