@@ -17,7 +17,6 @@ interface ChatStore {
   isLoading: { [key: string]: boolean }; // Action-specific loading states
   error: { [key: string]: string | null }; // Action-specific error states
   hasMoreMessages: boolean; // For pagination
-  messagePage: number; // Current page for message pagination
   
   // Existing actions
   fetchUserChats: () => Promise<void>;
@@ -56,7 +55,6 @@ export const useChat = create<ChatStore>((set, get) => ({
   isLoading: {},
   error: {},
   hasMoreMessages: true,
-  messagePage: 1,
 
   // Fetch all user chats
 
@@ -89,7 +87,6 @@ export const useChat = create<ChatStore>((set, get) => ({
         isLoading: { ...get().isLoading, [action]: true },
         error: { ...get().error, [action]: null },
         messages: [], 
-        messagePage: 1,
         hasMoreMessages: true
       });
 
@@ -118,7 +115,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   fetchMessages: async (chatId: number, reset = false) => {
     const action = 'fetchMessages';
     try {
-      const { messagePage, hasMoreMessages, messages } = get();
+      const { messages, hasMoreMessages } = get();
       if (!hasMoreMessages && !reset) return;
 
       set((state) => ({
@@ -126,19 +123,23 @@ export const useChat = create<ChatStore>((set, get) => ({
         error: { ...state.error, [action]: null },
       }));
 
-      const page = reset ? 1 : messagePage;
-      const response = await api.get(`/api/chats/${chatId.toString()}/messages?page=${page.toString()}`);
+      const cursor = reset ? undefined : messages.length > 0 ? messages[0].id : undefined;
+      
+      const response = await api.get(`/api/chats/${chatId.toString()}/messages`, {
+        params: {
+          cursor,
+          limit: 20
+        }
+      });
 
-      const sortedMessages = response.data.sort((a: Message, b: Message) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-
-      const PAGE_SIZE = 20;
-      const hasMore = response.data.length === PAGE_SIZE;
+      const { messages: newMessages, hasMore } = response.data;
 
       set((state) => ({
-        messages: reset ? sortedMessages : [...sortedMessages, ...state.messages], 
-        messagePage: page + 1,
+        messages: reset 
+          ? newMessages 
+          : Array.from(
+              new Map([...newMessages, ...state.messages].map(msg => [msg.id, msg])).values()
+            ).sort((a, b) => new Date(a.createdAt as string).getTime() - new Date(b.createdAt as string).getTime()),
         hasMoreMessages: hasMore,
       }));
     } catch (error) {

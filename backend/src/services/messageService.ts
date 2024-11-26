@@ -18,7 +18,12 @@ export class MessageService {
     const messages = await Message.findMany({
       where: {
         chatId,
-        deletedAt: null
+        deletedAt: null,
+        ...(cursor ? {
+          id: {
+            lt: cursor 
+          }
+        } : {})
       },
       include: {
         sender: {
@@ -32,14 +37,11 @@ export class MessageService {
       orderBy: {
         createdAt: 'desc'
       },
-      take: limit,
-      ...(cursor ? {
-        skip: 1,
-        cursor: {
-          id: cursor
-        }
-      } : {})
+      take: limit + 1
     });
+
+    const hasMore = messages.length > limit;
+    const resultMessages = messages.slice(0, limit).reverse();
 
     await UserChat.update({
       where: {
@@ -53,7 +55,10 @@ export class MessageService {
       }
     });
 
-    return messages;
+    return {
+      messages: resultMessages,
+      hasMore
+    }
   }
 
   async sendMessage(data: {
