@@ -11,6 +11,7 @@ import methodOverride from 'method-override';
 import messageRoutes from './routes/messageRoutes';
 import { Server } from 'socket.io';
 import http from 'http';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -29,7 +30,8 @@ io.use((socket, next) => {
   
   // Verify token here
   try {
-    // Verify token logic
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret'); 
+    socket.data.user = decoded;
     next();
   } catch (err) {
     return next(new Error('Authentication error'));
@@ -42,11 +44,34 @@ io.on('connection', (socket) => {
 
   socket.on('message', (data) => {
     console.log('Message received:', data);
+    if (data.chatId) {
+      socket.to(data.chatId).emit('new-message', data);
+    }
   });
 
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
+  });
+
+  socket.on('join-room', (chatId) => {
+    console.log(`Socket ${socket.id} joining room: ${chatId}`);
+    socket.join(chatId.toString()); 
+  });
+
+  socket.on('leave-room', (chatId) => {
+    console.log(`Socket ${socket.id} leaving room: ${chatId}`);
+    socket.leave(chatId.toString()); 
+  });
+
+  socket.on('update-message', (updatedMessage) => {
+    console.log('Message updated:', updatedMessage);
+    socket.to(updatedMessage.chatId).emit('message-updated', updatedMessage);
+  });
+  
+  socket.on('delete-message', (messageId) => {
+    console.log('Message deleted:', messageId);
+    socket.broadcast.emit('message-deleted', messageId); 
   });
 });
 
