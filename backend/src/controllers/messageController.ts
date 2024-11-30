@@ -46,8 +46,8 @@ export const deleteMessage = async (req: AuthenticatedRequest, res: Response) =>
   try {
     const userId = req.user!.id;
     const messageId = parseInt(req.params.messageId);
-    await messageService.deleteMessage(messageId, userId);
-    res.json({ message: 'Message deleted' });
+    const updatedMessage = await messageService.deleteMessage(messageId, userId);
+    res.status(200).json(updatedMessage);
   }  catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });

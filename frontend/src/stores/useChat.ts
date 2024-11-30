@@ -66,7 +66,7 @@ export const useChat = create<ChatStore>((set, get) => ({
         error: { ...state.error, [action]: null },
       }));
 
-      const response = await api.get(`/api/user-chats`);
+      const response = await api.get(`/api/chats`);
       set({ chats: response.data });
     } catch (error) {
       set((state) => ({
@@ -190,11 +190,17 @@ export const useChat = create<ChatStore>((set, get) => ({
   // Delete a message
   deleteMessage: async (messageId: number) => {
     const action = 'deleteMessage';
+    console.log('Delete message')
     try {
-      await api.delete(`/api/messages/${messageId.toString()}`);
-      set((state) => ({
-        messages: state.messages.filter((msg) => msg.id !== messageId),
-      }));
+      const { data: updatedMessage } = await api.delete(`/api/messages/${messageId.toString()}`);
+
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, content: updatedMessage.content, deletedAt: updatedMessage.deletedAt }
+          : msg
+      ),
+    }));
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to delete message' },
@@ -276,7 +282,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   markMessageAsRead: async (chatId: number) => {
     const action = 'markMessageAsRead';
     try {
-      await api.post(`/api/chats/${chatId}/read`);
+      await api.post(`/api/chats/${chatId.toString()}/read`);
       set(state => ({
         chats: state.chats.map(chat =>
           chat.chatId === chatId ? { ...chat, isSeen: true } : chat

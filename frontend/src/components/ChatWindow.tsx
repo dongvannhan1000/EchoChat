@@ -1,10 +1,18 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
 import { formatMessageTime } from '@/utils/formatTime'
 import { Button } from './ui/button'
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { MoreVertical, Edit, Trash, Pin } from 'lucide-react'
 
 interface ChatWindowProps {
   currentChat: Chat | null
@@ -12,11 +20,23 @@ interface ChatWindowProps {
   isLoading: boolean
   hasMore: boolean
   onLoadMore: () => void
+  onEditMessage: (messageId: number, newContent: string) => void
+  onDeleteMessage: (messageId: number) => void
+  // onPinMessage: (messageId: number) => void
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, isLoading, hasMore, onLoadMore }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ 
+  currentChat, 
+  messages, 
+  isLoading, 
+  hasMore, 
+  onLoadMore,
+  onEditMessage, 
+  onDeleteMessage }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null)
+  const [editContent, setEditContent] = useState('')
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -48,6 +68,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, i
     const otherUser = currentChat.participants.find(p => p.userId !== user?.id)
     return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40'
   }
+
+  const handleEditClick = (message: Message) => {
+    setEditingMessageId(message.id)
+    setEditContent(message.content ?? '')
+  }
+
+  const handleEditSubmit = () => {
+    if (editingMessageId !== null) {
+      onEditMessage(editingMessageId, editContent)
+      setEditingMessageId(null)
+      setEditContent('')
+    }
+  }
+
+  
+
   console.log('ChatWindow render')
   return (
     <>
@@ -80,6 +116,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, i
         )}
         {messages.map((message) => {
           const isCurrentUserMessage = message.senderId === user?.id
+          const isDeleted = !!message.deletedAt;
           return (
             <div
               key={message.id}
@@ -93,17 +130,59 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentChat, messages, i
               )}
               <div
                 className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-2 rounded-lg ${
-                  isCurrentUserMessage ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
-                }`}
+                  isCurrentUserMessage
+                    ? isDeleted
+                      ? 'bg-blue-200 text-blue-800'
+                      : 'bg-blue-500 text-white'
+                    : isDeleted
+                      ? 'bg-gray-100 text-gray-500'
+                      : 'bg-gray-200 text-gray-800'
+                } ${isDeleted ? 'italic' : ''}`}
               >
                 {!isCurrentUserMessage && isGroupChat && (
                   <p className="text-xs font-semibold mb-1">{message.sender.name}</p>
                 )}
-                <p>{message.content}</p>
+                {editingMessageId === message.id ? (
+                  <div className="flex items-center">
+                    <Input
+                      value={editContent}
+                      onChange={(e) => {setEditContent(e.target.value)}}
+                      className="mr-2"
+                    />
+                    <Button onClick={handleEditSubmit}>Save</Button>
+                  </div>
+                ) : (
+                  <p>{message.content}</p>
+                )}
                 <span className="text-xs mt-1 block">
                   {formatMessageTime(new Date(message.createdAt).toISOString())}
                 </span>
               </div>
+              {isCurrentUserMessage && !isDeleted && (
+                  <div className="self-end mt-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => {handleEditClick(message)}}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {onDeleteMessage(message.id)}}>
+                          <Trash className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {onPinMessage(message.id)}}>
+                          <Pin className="mr-2 h-4 w-4" />
+                          <span>Pin</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
             </div>
           )
         })}

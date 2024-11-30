@@ -18,7 +18,6 @@ export class MessageService {
     const messages = await Message.findMany({
       where: {
         chatId,
-        deletedAt: null,
         ...(cursor ? {
           id: {
             lt: cursor 
@@ -137,6 +136,7 @@ export class MessageService {
     return await Message.update({
       where: { id: messageId },
       data: {
+        content: 'This message has been deleted.',
         deletedAt: new Date()
       }
     });

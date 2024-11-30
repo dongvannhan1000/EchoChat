@@ -138,6 +138,33 @@ export const ChatPage: React.FC = () => {
     setSearchTerm('')
   }
 
+  const handleEditMessage = async (messageId: number, newContent: string) => {
+    try {
+      await useChat.getState().editMessage(messageId, newContent);
+    } catch (error) {
+      console.error('Failed to edit message:', error);
+    }
+  };
+
+  const handleDeleteMessage = (messageId: number) => {
+    void (async () => {
+      try {
+        await useChat.getState().deleteMessage(messageId);
+      } catch (error) {
+        console.error('Failed to delete message:', error);
+      }
+    })();
+  };
+
+  // const handlePinMessage = async (messageId: number) => {
+  //   try {
+  //     // Implement pinMessage function in useChat store
+  //     await useChat.getState().pinMessage(messageId);
+  //   } catch (error) {
+  //     console.error('Failed to pin message:', error);
+  //   }
+  // };
+
   console.log('ChatPage render')
 
   return (
@@ -214,6 +241,9 @@ export const ChatPage: React.FC = () => {
           isLoading={isLoading['fetchMessages']}
           hasMore={hasMoreMessages} 
           onLoadMore={() => void handleLoadMore()}
+          onEditMessage={void handleEditMessage}
+          onDeleteMessage={handleDeleteMessage}
+          // onPinMessage={() => handlePinMessage}
         />
         <MessageInput onSendMessage={handleSendMessage} />
       </div>
