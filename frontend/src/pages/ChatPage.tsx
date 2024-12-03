@@ -149,7 +149,7 @@ export const ChatPage: React.FC = () => {
   const handleDeleteMessage = (messageId: number) => {
     void (async () => {
       try {
-        await useChat.getState().deleteMessage(messageId);
+        await useChat.getState().removeMessage(messageId);
       } catch (error) {
         console.error('Failed to delete message:', error);
       }

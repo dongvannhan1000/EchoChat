@@ -23,7 +23,7 @@ interface ChatStore {
   fetchChatDetails: (chatId: number) => Promise<void>;
   fetchMessages: (chatId: number, reset?: boolean) => Promise<void>;
   sendMessage: (chatId: number, content: string, image?: string, replyToId?: number) => Promise<void>;
-  deleteMessage: (messageId: number) => Promise<void>;
+  removeMessage: (messageId: number) => Promise<void>;
   createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
   leaveChat: (chatId: number) => Promise<void>;
   
@@ -188,7 +188,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   },
   
   // Delete a message
-  deleteMessage: async (messageId: number) => {
+  removeMessage: async (messageId: number) => {
     const action = 'deleteMessage';
     console.log('Delete message')
     try {
@@ -201,6 +201,8 @@ export const useChat = create<ChatStore>((set, get) => ({
           : msg
       ),
     }));
+
+    useWebSocket.getState().deleteMessage(messageId);
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to delete message' },
@@ -514,10 +516,4 @@ export const useChat = create<ChatStore>((set, get) => ({
     }));
   },
 
-  // Remove a message
-  removeMessage: (messageId: number) => {
-    set((state) => ({
-      messages: state.messages.filter((msg) => msg.id !== messageId),
-    }));
-  },
 }));

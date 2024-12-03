@@ -12,6 +12,7 @@ interface WebSocketStore {
   connect: (token: string) => Promise<void>;
   disconnect: () => Promise<void>;
   sendMessage: (message: Partial<Message>) => void;
+  deleteMessage: (messageId:number) => void;
   sendStatusUpdate: (message: string) => void;
   joinRoom: (chatId: number) => void;
   leaveRoom: (chatId: number) => void;
@@ -66,17 +67,11 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
         console.error('WebSocket error:', error);
       });
 
-      newSocket.on('new-message', (message: Message) => {
-        useChat.getState().addMessage(message);
-      });
   
       newSocket.on('message-updated', (message: Message) => {
         useChat.getState().updateMessage(message);
       });
   
-      newSocket.on('message-deleted', (messageId: number) => {
-        useChat.getState().removeMessage(messageId);
-      });
 
       set({ 
         socket: newSocket, 
@@ -106,6 +101,13 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
     const { socket } = get();
     if (socket) {
       socket.emit('message', message);
+    }
+  },
+
+  deleteMessage: (messageId: number) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('delete-message', messageId);
     }
   },
 
