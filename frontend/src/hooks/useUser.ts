@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { create } from 'zustand';
-import axios from 'axios';
+import api from '../utils/axios'
 import { User } from '../types/chat';
 
 interface UserStore {
@@ -12,7 +12,7 @@ interface UserStore {
   error: string | null;
 
   // Actions
-  fetchUsers: () => Promise<void>;
+  fetchUsers: (searchTerm: string) => Promise<void>;
   fetchUser: (userId: number) => Promise<void>;
   updateUser: (userId: number, data: Partial<User>) => Promise<void>;
   setSelectedUser: (user: User | null) => void;
@@ -24,10 +24,11 @@ export const useUser = create<UserStore>((set) => ({
   isLoading: false,
   error: null,
 
-  fetchUsers: async () => {
+  fetchUsers: async (searchTerm) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get('/api/users');
+      const response = await api.get('/api/users', { params: { search: searchTerm || '' } });
+      console.log('API Response:', response.data);
       set({ users: response.data, isLoading: false });
     } catch (error) {
       set({ error: 'Failed to fetch users', isLoading: false });
@@ -37,7 +38,7 @@ export const useUser = create<UserStore>((set) => ({
   fetchUser: async (userId: number) => {
     try {
       set({ isLoading: true });
-      const response = await axios.get(`/api/users/${userId.toString()}`);
+      const response = await api.get(`/api/users/${userId.toString()}`);
       set({ selectedUser: response.data, isLoading: false });
     } catch (error) {
       set({ error: 'Failed to fetch user', isLoading: false });
@@ -47,7 +48,7 @@ export const useUser = create<UserStore>((set) => ({
   updateUser: async (userId: number, data: Partial<User>) => {
     try {
       set({ isLoading: true });
-      const response = await axios.put(`/api/users/${userId.toString()}`, data);
+      const response = await api.put(`/api/users/${userId.toString()}`, data);
       set((state) => ({
         users: state.users.map((user) =>
           user.id === userId ? { ...user, ...response.data } : user

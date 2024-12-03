@@ -43,7 +43,6 @@ interface ChatStore {
   setCurrentChat: (chat: Chat | null) => void;
   addMessage: (message: Message) => void;
   updateMessage: (message: Message) => void;
-  removeMessage: (messageId: number) => void;
 }
 
 export const useChat = create<ChatStore>((set, get) => ({
@@ -219,7 +218,10 @@ export const useChat = create<ChatStore>((set, get) => ({
         error: { ...state.error, [action]: null },
       }));
 
-      const response = await api.post('/api/chats', { userIds });
+      const response = await api.post('/api/chats', { 
+        chatType: 'private', 
+        participantIds: userIds 
+      });
       set((state) => ({
         chats: [...state.chats, response.data],
       }));

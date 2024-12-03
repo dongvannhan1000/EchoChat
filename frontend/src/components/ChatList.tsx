@@ -14,6 +14,14 @@ export default memo(function ChatList({ chats, selectedChatId, onSelectChat }: C
   console.log('ChatList render')
 
   const getOtherUser = (chat: UserChat) => {
+    if (!chat.chat) {
+      console.error("Chat object is undefined:", chat);
+      return {
+        name: 'Unknown Chat',
+        avatar: '/placeholder.svg?height=40&width=40',
+      };
+    }
+    
     if (chat.chat.chatType === 'group') {
       return {
         name: chat.chat.groupName || 'Group Chat',

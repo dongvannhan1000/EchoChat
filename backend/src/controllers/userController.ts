@@ -59,7 +59,11 @@ export const getUsers = async (req: Request, res: Response) => {
             { email: { contains: search as string, mode: 'insensitive' } }
           ]
         }
-        : {} 
+        : {},
+      take: 10, 
+      orderBy: {
+        createdAt: 'desc' 
+      } 
     });
 
     res.status(200).json(users);

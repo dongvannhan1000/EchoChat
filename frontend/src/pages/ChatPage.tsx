@@ -16,13 +16,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-// Mock user data for new message feature
-const mockUsers = [
-  { id: 'user1', name: 'Alice Johnson', email: 'alice@example.com' },
-  { id: 'user2', name: 'Bob Smith', email: 'bob@example.com' },
-  { id: 'user3', name: 'Carol Williams', email: 'carol@example.com' },
-  { id: 'user4', name: 'Nhan Dong', email: 'david@example.com' },
-]
+import { debounce } from 'lodash';
+
+
 
 export const ChatPage: React.FC = () => {
   const { user } = useAuth();
@@ -39,7 +35,7 @@ export const ChatPage: React.FC = () => {
     isLoading,
     hasMoreMessages
   } = useChat();
-  const { users } = useUser();
+  const { users, fetchUsers } = useUser();
 
   
 
@@ -48,7 +44,6 @@ export const ChatPage: React.FC = () => {
   // New state for Create New Message feature
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filteredUsers, setFilteredUsers] = useState(mockUsers)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -105,13 +100,20 @@ export const ChatPage: React.FC = () => {
   }, [isNewMessageOpen])
 
   useEffect(() => {
-    const lowercasedFilter = searchTerm.toLowerCase()
-    const filtered = mockUsers.filter(user => 
-      user.name.toLowerCase().includes(lowercasedFilter) ||
-      user.email.toLowerCase().includes(lowercasedFilter)
-    )
-    setFilteredUsers(filtered)
-  }, [searchTerm, users])
+    if (isNewMessageOpen) {
+      void fetchUsers('');
+    }
+    if (searchTerm) {
+      const debouncedSearch = debounce(() => {
+        void fetchUsers(searchTerm);
+      }, 300);
+
+      console.log(users)
+      
+      debouncedSearch();
+      return () => debouncedSearch.cancel();
+    }
+  }, [searchTerm]);
 
   const handleSendMessage = (content: string) => {
     if (user && currentChat) {
@@ -199,14 +201,16 @@ export const ChatPage: React.FC = () => {
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
-                      {filteredUsers.length === 0 ? (
-                        <div className="p-2 text-sm text-gray-500">No user found.</div>
+                      {users.length === 0 ? (
+                        <div className="p-2 text-sm text-gray-500">
+                          {searchTerm ? 'No user found.' : 'Start typing to search'}
+                        </div>
                       ) : (
-                        filteredUsers.map(user => (
+                        users.map(user => (
                           <button
                             key={user.id}
                             className="w-full text-left px-2 py-1 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            onClick={() => {void handleNewChat({...user, id: Number(user.id) })}}
+                            onClick={() => void handleNewChat({...user, id: Number(user.id)})}
                           >
                             <div>{user.name}</div>
                             <div className="text-sm text-gray-500">{user.email}</div>
