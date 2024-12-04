@@ -125,6 +125,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
         {messages.map((message) => {
           const isCurrentUserMessage = message.senderId === user?.id
           const isDeleted = !!message.deletedAt;
+          const isEdited = message.isEdited
           return (
             <div
               key={message.id}
@@ -161,6 +162,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
                   </div>
                 ) : (
                   <p>{message.content}</p>
+                )}
+                {isEdited && !isDeleted && (
+                  <span className="text-xs text-yellow-400 mt-1 italic">Edited</span>
                 )}
                 <span className="text-xs mt-1 block">
                   {formatMessageTime(new Date(message.createdAt).toISOString())}

@@ -17,6 +17,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
       setNewMessage('')
     }
   }
+  console.log('MessageInput render')
 
   return (
     <form onSubmit={handleSubmit} className="bg-white border-t border-gray-200 p-4">
