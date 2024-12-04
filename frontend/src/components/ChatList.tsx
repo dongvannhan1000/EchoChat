@@ -15,9 +15,6 @@ interface ChatListProps {
   chats: UserChat[]
   selectedChatId: number | null
   onSelectChat: (chatId: number) => void
-  onPinChat: (chatId: number, pinned: boolean) => Promise<void>
-  onMuteChat: (chatId: number, mutedUntil: Date) => void
-  onUpdateStatusMessage: (message: string) => void
   onLeaveChat: (chatId: number) => Promise<void>
 }
 
@@ -25,9 +22,6 @@ export default memo(function ChatList({
   chats, 
   selectedChatId, 
   onSelectChat,
-  onPinChat,
-  onMuteChat,
-  onUpdateStatusMessage,
   onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
   console.log('ChatList render')

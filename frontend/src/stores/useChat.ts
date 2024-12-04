@@ -254,7 +254,7 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
-  editMessage: async (messageId: number, content: string) => {
+  editMessage: async (messageId: number, content: string, image?: string) => {
     const action = 'editMessage';
     try {
       set(state => ({
@@ -262,20 +262,34 @@ export const useChat = create<ChatStore>((set, get) => ({
         error: { ...state.error, [action]: null },
       }));
 
-      const response = await api.put(`/api/messages/${messageId}`, { content });
+      const payload: { newContent?: string; newImage?: string } = {};
+      if (content) payload.newContent = content;
+      if (image) payload.newImage = image;
+
+      const response = await api.put(`/api/messages/${(messageId).toString()}`, payload);
       const updatedMessage = response.data;
       
       set(state => ({
         messages: state.messages.map(msg => 
-          msg.id === messageId ? { ...msg, content, isEdited: true } : msg
+          msg.id === messageId 
+            ? { 
+                ...msg, 
+                content: updatedMessage.content, 
+                image: updatedMessage.image, 
+                isEdited: true 
+              } 
+            : msg
         ),
       }));
 
-      useWebSocket.getState().sendMessageUpdate(updatedMessage);
+      useWebSocket.getState().sendMessageUpdate(updatedMessage as Message);
+
+      return updatedMessage;
     } catch (error) {
       set(state => ({
         error: { ...state.error, [action]: 'Failed to edit message' },
       }));
+      throw error;
     } finally {
       set(state => ({
         isLoading: { ...state.isLoading, [action]: false },

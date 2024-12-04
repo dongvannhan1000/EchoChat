@@ -140,5 +140,47 @@ export class MessageService {
         deletedAt: new Date()
       }
     });
+  };
+
+  async editMessage(data: { messageId: number; userId: number; newContent?: string; newImage?: string }) {
+    const { messageId, userId, newContent, newImage } = data;
+  
+    const message = await Message.findFirst({
+      where: {
+        id: messageId,
+        senderId: userId,
+        deletedAt: null
+      }
+    });
+  
+    if (!message) {
+      throw new Error('Message not found or not editable by this user');
+    }
+  
+    if (!newContent && !newImage) {
+      throw new Error('No new content or image provided for editing');
+    }
+  
+    const updatedMessage = await Message.update({
+      where: { id: messageId },
+      data: {
+        content: newContent || message.content,
+        image: newImage || message.image,
+        isEdited: true 
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        }
+      }
+    });
+  
+    return updatedMessage;
   }
 }
+
+

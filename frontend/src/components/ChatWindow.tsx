@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
@@ -20,12 +20,12 @@ interface ChatWindowProps {
   isLoading: boolean
   hasMore: boolean
   onLoadMore: () => void
-  onEditMessage: (messageId: number, newContent: string) => void
+  onEditMessage: (messageId: number, content: string, image?: string | null) => Promise<void>
   onDeleteMessage: (messageId: number) => void
   // onPinMessage: (messageId: number) => void
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ 
+export const ChatWindow: React.FC<ChatWindowProps> = (({ 
   currentChat, 
   messages, 
   isLoading, 
@@ -36,7 +36,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null)
-  const [editContent, setEditContent] = useState('')
+  const [editContent, setEditContent] = useState('');
+  const [editImage, setEditImage] = useState<string | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -53,34 +54,42 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const isGroupChat = currentChat.chatType === 'group'
 
-  const getChatName = () => {
-    if (isGroupChat) {
+  
+
+  const getChatName = useCallback(() => {
+    if (currentChat?.chatType === 'group') {
       return currentChat.groupName || 'Group Chat'
     }
-    const otherUser = currentChat.participants.find(p => p.userId !== user?.id)
+    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id)
     return otherUser?.user.name || 'Chat'
-  }
+  }, [currentChat, user]);
 
-  const getChatAvatar = () => {
-    if (isGroupChat) {
+  const getChatAvatar = useCallback(() => {
+    if (currentChat?.chatType === 'group') {
       return currentChat.groupAvatar || '/placeholder.svg?height=40&width=40'
     }
-    const otherUser = currentChat.participants.find(p => p.userId !== user?.id)
+    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id)
     return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40'
-  }
+  }, [currentChat]);
 
-  const handleEditClick = (message: Message) => {
+  const handleEditClick = useCallback((message: Message) => {
     setEditingMessageId(message.id)
     setEditContent(message.content ?? '')
-  }
+  }, []);
 
-  const handleEditSubmit = () => {
+  const handleEditSubmit = useCallback(() => {
     if (editingMessageId !== null) {
-      onEditMessage(editingMessageId, editContent)
+      const imageToEdit = editImage || undefined;
+      void onEditMessage(
+        editingMessageId, 
+        editContent, 
+        imageToEdit 
+      );
       setEditingMessageId(null)
       setEditContent('')
+      setEditImage(null)
     }
-  }
+  }, [editingMessageId, editContent, editImage, onEditMessage]);
 
 
   console.log('ChatWindow render')
@@ -146,7 +155,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     <Input
                       value={editContent}
                       onChange={(e) => {setEditContent(e.target.value)}}
-                      className="mr-2"
+                      className="mr-2 text-black bg-white"
                     />
                     <Button onClick={handleEditSubmit}>Save</Button>
                   </div>
@@ -189,4 +198,4 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
     </>
   )
-}
+})

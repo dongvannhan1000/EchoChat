@@ -56,3 +56,29 @@ export const deleteMessage = async (req: AuthenticatedRequest, res: Response) =>
     }
   }
 };
+
+export const editMessage = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const messageId = Number(req.params.messageId);
+    const { newContent, newImage } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!newContent && !newImage) {
+      return res.status(400).json({ error: 'No new content or image provided' });
+    }
+    const updatedMessage = await messageService.editMessage({
+      messageId,
+      userId,
+      newContent,
+      newImage
+    });
+    return res.status(200).json(updatedMessage);
+  } catch (error: any) {
+    console.error('Error editing message:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};

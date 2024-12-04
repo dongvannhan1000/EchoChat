@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
 import { useUser } from '@/hooks/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { User, UserChat } from '@/types/chat'
+import { User } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
@@ -145,9 +145,9 @@ export const ChatPage: React.FC = () => {
     setSearchTerm('')
   }
 
-  const handleEditMessage = async (messageId: number, newContent: string) => {
+  const handleEditMessage = async (messageId: number, content: string, image: string) => {
     try {
-      await useChat.getState().editMessage(messageId, newContent);
+      await useChat.getState().editMessage(messageId, content, image);
     } catch (error) {
       console.error('Failed to edit message:', error);
     }
@@ -257,9 +257,6 @@ export const ChatPage: React.FC = () => {
           chats={chats}
           selectedChatId={currentChat?.id ?? null}
           onSelectChat={handleSelectChat}
-          onPinChat={handlePinChat}
-          // onMuteChat={handleMuteChat}
-          // onUpdateStatusMessage={handleUpdateStatusMessage}
           onLeaveChat={handleLeaveChat}
         />
       </div>
@@ -270,7 +267,7 @@ export const ChatPage: React.FC = () => {
           isLoading={isLoading['fetchMessages']}
           hasMore={hasMoreMessages} 
           onLoadMore={() => void handleLoadMore()}
-          onEditMessage={void handleEditMessage}
+          onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
           // onPinMessage={() => handlePinMessage}
         />
