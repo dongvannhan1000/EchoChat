@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
 import { useUser } from '@/hooks/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { User } from '@/types/chat'
+import { User, UserChat } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
@@ -33,7 +33,9 @@ export const ChatPage: React.FC = () => {
     fetchMessages,
     createChat,
     isLoading,
-    hasMoreMessages
+    hasMoreMessages,
+    leaveChat,
+    setCurrentChat
   } = useChat();
   const { users, fetchUsers } = useUser();
 
@@ -46,8 +48,14 @@ export const ChatPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  const handleSelectChat = useCallback((chatId: number) => {
+    if (chatId !== selectedChatId) {
+      setSelectedChatId(chatId);
+    }
+  }, [selectedChatId]);
+  
   useEffect(() => {
-    if (selectedChatId) {
+    if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId)) {
       void (async () => {
         try {
           await fetchChatDetails(selectedChatId);
@@ -57,11 +65,8 @@ export const ChatPage: React.FC = () => {
         }
       })();
     }
-  }, [selectedChatId]);
+  }, [selectedChatId, currentChat]);
 
-  const handleSelectChat = (chatId: number) => {
-    setSelectedChatId(chatId);
-  };
 
   useEffect(() => {
     // Assuming you have the token stored somewhere
@@ -111,7 +116,7 @@ export const ChatPage: React.FC = () => {
       console.log(users)
       
       debouncedSearch();
-      return () => debouncedSearch.cancel();
+      return () => {debouncedSearch.cancel()};
     }
   }, [searchTerm]);
 
@@ -158,20 +163,36 @@ export const ChatPage: React.FC = () => {
     })();
   };
 
-  // const handlePinMessage = async (messageId: number) => {
-  //   try {
-  //     // Implement pinMessage function in useChat store
-  //     await useChat.getState().pinMessage(messageId);
-  //   } catch (error) {
-  //     console.error('Failed to pin message:', error);
-  //   }
-  // };
+  const handleLeaveChat = async (chatId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to leave this chat?"
+    );
+    if (confirmed) {
+      await leaveChat(chatId); 
+    }
+  };
+
+  useEffect(() => {
+    if (!currentChat && chats.length > 0) {
+      setCurrentChat(chats[0].chat); 
+    }
+  }, [currentChat, chats, setCurrentChat]);
+  
+
+  const handlePinChat = async (chatId: number, pinned: boolean) => {
+    try {
+      // Implement pinMessage function in useChat store
+      await useChat.getState().pinChat(chatId, pinned);
+    } catch (error) {
+      console.error('Failed to pin message:', error);
+    }
+  };
 
   console.log('ChatPage render')
 
   return (
     <div className="flex h-full bg-gray-100">
-      <div className="w-1/4 bg-white border-r border-gray-200">
+      <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-800">Chats</h1>
@@ -236,6 +257,10 @@ export const ChatPage: React.FC = () => {
           chats={chats}
           selectedChatId={currentChat?.id ?? null}
           onSelectChat={handleSelectChat}
+          onPinChat={handlePinChat}
+          // onMuteChat={handleMuteChat}
+          // onUpdateStatusMessage={handleUpdateStatusMessage}
+          onLeaveChat={handleLeaveChat}
         />
       </div>
       <div className="flex-1 flex flex-col">

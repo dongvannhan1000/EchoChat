@@ -1,15 +1,34 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { UserChat } from '@/types/chat'
-import { memo } from "react"
+import { memo, useState } from "react"
 import { useAuth } from '@/hooks/useAuth'
+import { MoreVertical, LogOut } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "./ui/button"
 
 interface ChatListProps {
   chats: UserChat[]
   selectedChatId: number | null
   onSelectChat: (chatId: number) => void
+  onPinChat: (chatId: number, pinned: boolean) => Promise<void>
+  onMuteChat: (chatId: number, mutedUntil: Date) => void
+  onUpdateStatusMessage: (message: string) => void
+  onLeaveChat: (chatId: number) => Promise<void>
 }
 
-export default memo(function ChatList({ chats, selectedChatId, onSelectChat }: ChatListProps) {
+export default memo(function ChatList({ 
+  chats, 
+  selectedChatId, 
+  onSelectChat,
+  onPinChat,
+  onMuteChat,
+  onUpdateStatusMessage,
+  onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
   console.log('ChatList render')
 
@@ -38,9 +57,27 @@ export default memo(function ChatList({ chats, selectedChatId, onSelectChat }: C
       avatar: otherParticipant?.user.avatar
     }
   }
+  
+  const [statusMessage, setStatusMessage] = useState('')
 
   return (
-    <ul className="overflow-y-auto h-[calc(100vh-120px)]">
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b">
+        <input
+          type="text"
+          value={statusMessage}
+          onChange={(e) => {setStatusMessage(e.target.value)}}
+          placeholder="Update your status..."
+          className="w-full p-2 border rounded"
+        />
+        <button 
+          onClick={() => {onUpdateStatusMessage(statusMessage)}}
+          className="mt-2 p-2 bg-blue-500 text-white rounded"
+        >
+          Update Status
+        </button>
+      </div>
+      <ul className="flex-1 overflow-y-auto">
       {chats.map((chat, index) => {
         const otherUser = getOtherUser(chat);
         return (
@@ -72,15 +109,33 @@ export default memo(function ChatList({ chats, selectedChatId, onSelectChat }: C
                 </div>
                 <p className="text-sm text-gray-600 mt-1">{chat.lastMessage}</p>
               </div>
-              {!chat.isSeen && (
-                <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
-                  New
-                </span>
-              )}
+              <div className="flex items-center space-x-2">
+                  {!chat.isSeen && (
+                    <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
+                      New
+                    </span>
+                  )}
+                  {chat.chat?.chatType === 'group' && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => void onLeaveChat(chat.chatId)}>
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Leave Group</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
             </div>
           </li>
         )
       })}
-    </ul>
+      </ul>
+    </div> 
   )
 })

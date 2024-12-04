@@ -68,3 +68,11 @@ export const leaveChat = async (req: AuthenticatedRequest, res: Response, next: 
     }
   }
 };
+
+// export const pinChat = async (req:AuthenticatedRequest, res: Response, next: NextFunction) => {
+//   try {
+//     if (!req.user) {
+//       return res.status(401).json({ message: 'Unauthorized' });
+//     }
+//   }
+// };

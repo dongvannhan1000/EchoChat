@@ -82,7 +82,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   }
 
-  
 
   console.log('ChatWindow render')
   return (
