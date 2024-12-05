@@ -12,5 +12,6 @@ router.get('/api/chats', chatController.getUserChats as express.RequestHandler);
 router.post('/api/chats', chatController.createChat as express.RequestHandler);
 router.get('/api/chats/:chatId', chatController.getChatDetails as express.RequestHandler);
 router.delete('/api/chats/:chatId/leave', chatController.leaveChat as express.RequestHandler);
+router.post('/api/chats/:id/toggle-read', chatController.markChatStatus as express.RequestHandler);
 
 export default router;

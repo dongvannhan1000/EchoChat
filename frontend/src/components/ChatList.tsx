@@ -1,15 +1,9 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { UserChat } from '@/types/chat'
 import { memo, useState } from "react"
 import { useAuth } from '@/hooks/useAuth'
-import { MoreVertical, LogOut } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "./ui/button"
+import { ChatListItem } from './ChatListItem'
+import { useChat } from '@/stores/useChat'
+
 
 interface ChatListProps {
   chats: UserChat[]
@@ -24,7 +18,18 @@ export default memo(function ChatList({
   onSelectChat,
   onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
+  const { markChatStatus } = useChat();
   console.log('ChatList render')
+  console.log('Chats in ChatList', chats);
+
+  const handleMarkChatStatus = async (id: number) => {
+    try {
+      await markChatStatus(id);
+      console.log('markChatStatus called successfully');
+    } catch (error) {
+      console.error('Failed to change chat status:', error);
+    }
+  }
 
   const getOtherUser = (chat: UserChat) => {
     if (!chat.chat) {
@@ -72,64 +77,19 @@ export default memo(function ChatList({
         </button>
       </div>
       <ul className="flex-1 overflow-y-auto">
-      {chats.map((chat, index) => {
-        const otherUser = getOtherUser(chat);
-        return (
-          <li
+      {chats.map((chat, index) => (
+          <ChatListItem
             key={`${String(chat.chatId)}-${String(index)}`}
-            className={`p-4 hover:bg-gray-100 cursor-pointer ${
-              selectedChatId === chat.chatId ? 'bg-gray-100' : ''
-            }`}
-            onClick={() => {onSelectChat(chat.chatId)}}
-          >
-            <div className="flex items-center space-x-3">
-              <Avatar>
-                <AvatarImage 
-                  src={otherUser.avatar || '/placeholder.svg?height=40&width=40'} 
-                  alt={otherUser.name} 
-                />
-                <AvatarFallback>
-                  {otherUser.name.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-semibold text-gray-800">
-                    {otherUser.name}
-                  </h2>
-                  <span className="text-sm text-gray-500">
-                    {new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">{chat.lastMessage}</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                {!chat.isSeen && (
-                  <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
-                    New
-                  </span>
-                )}
-                {chat.chat?.chatType === 'group' && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => void onLeaveChat(chat.chatId)}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Leave Group</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-            </div>
-          </li>
-        )
-      })}
+            chat={chat}
+            isSelected={selectedChatId === chat.chatId}
+            onSelectChat={onSelectChat}
+            onLeaveChat={onLeaveChat}
+            onMarkChatStatus={handleMarkChatStatus}
+            otherUser={getOtherUser(chat)}
+          />
+        ))}
       </ul>
+      
     </div> 
   )
 })

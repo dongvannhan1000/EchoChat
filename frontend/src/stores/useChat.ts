@@ -28,7 +28,7 @@ interface ChatStore {
   leaveChat: (chatId: number) => Promise<void>;
   
   editMessage: (messageId: number, content: string) => Promise<void>;
-  markChatAsRead: (chatId: number) => Promise<void>;
+  markChatStatus: (id: number) => Promise<void>;
   pinChat: (chatId: number, pinned: boolean) => Promise<void>;
   muteChat: (chatId: number, mutedUntil: Date) => Promise<void>;
   blockUser: (userId: number) => Promise<void>;
@@ -67,6 +67,7 @@ export const useChat = create<ChatStore>((set, get) => ({
 
       const response = await api.get(`/api/chats`);
       set({ chats: response.data });
+      console.log('API Response chats', response.data);
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to fetch chats' },
@@ -297,16 +298,26 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
-  markChatAsRead: async (chatId: number) => {
+  markChatStatus: async (id: number) => {
     const action = 'markMessageAsRead';
     try {
-      await api.post(`/api/chats/${chatId.toString()}/read`);
-      set(state => ({
-        chats: state.chats.map(chat =>
-          chat.chatId === chatId ? { ...chat, isSeen: true } : chat
-        ),
-      }));
+      console.log('Sending API request');
+      const response = await api.post(`/api/chats/${id.toString()}/toggle-read`);
+      console.log('API Response:', response);
+      set(state => {
+        console.log('Current state:', state);
+        const updatedChats = state.chats.map(chat => {
+          if (chat.id === id) {
+            console.log('Matching chat found:', chat);
+            return { ...chat, isSeen: !chat.isSeen };
+          }
+          return chat;
+        });
+        console.log('Updated chats:', updatedChats);
+        return { chats: updatedChats };
+      });
     } catch (error) {
+      console.error('API Error:', error);
       set(state => ({
         error: { ...state.error, [action]: 'Failed to mark as read' },
       }));

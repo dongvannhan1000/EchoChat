@@ -8,6 +8,7 @@ export class ChatService {
     return await UserChat.findMany({
       where: { userId }, 
       select: {
+        id: true,
         chatId: true,
         chat: {
           include: {
@@ -184,5 +185,26 @@ export class ChatService {
         where: { id: chatId }
       });
     }
+  }
+
+  async markChatStatus(id: number, userId: number) {
+    const userChat = await UserChat.findUnique({
+      where: { 
+        id: id,
+        userId: userId 
+      },
+      include: { chat: true }
+    });
+  
+    if (!userChat) {
+      throw new Error('Chat not found');
+    }
+  
+    return UserChat.update({
+      where: { id: id },
+      data: { 
+        isSeen: !userChat.isSeen 
+      }
+    });
   }
 }
