@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
-import { Loader2 } from 'lucide-react'
+import { Loader2, User } from 'lucide-react'
 import { formatMessageTime } from '@/utils/formatTime'
 import { Button } from './ui/button'
 import { 
@@ -56,40 +56,41 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
 
   
 
-  const getChatName = useCallback(() => {
+  const getChatName = () => {
     if (currentChat?.chatType === 'group') {
-      return currentChat.groupName || 'Group Chat'
+      return currentChat.groupName || 'Group Chat';
     }
-    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id)
-    return otherUser?.user.name || 'Chat'
-  }, [currentChat, user]);
-
-  const getChatAvatar = useCallback(() => {
+    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id);
+    return otherUser?.user.name || 'Chat';
+  };
+  
+  const getChatAvatar = () => {
     if (currentChat?.chatType === 'group') {
-      return currentChat.groupAvatar || '/placeholder.svg?height=40&width=40'
+      return currentChat.groupAvatar || '/placeholder.svg?height=40&width=40';
     }
-    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id)
-    return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40'
-  }, [currentChat]);
-
-  const handleEditClick = useCallback((message: Message) => {
-    setEditingMessageId(message.id)
-    setEditContent(message.content ?? '')
-  }, []);
-
-  const handleEditSubmit = useCallback(() => {
+    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id);
+    return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40';
+  };
+  
+  const handleEditClick = (message: Message) => {
+    setEditingMessageId(message.id);
+    setEditContent(message.content ?? '');
+  };
+  
+  const handleEditSubmit = () => {
     if (editingMessageId !== null) {
       const imageToEdit = editImage || undefined;
       void onEditMessage(
         editingMessageId, 
         editContent, 
-        imageToEdit 
+        imageToEdit
       );
-      setEditingMessageId(null)
-      setEditContent('')
-      setEditImage(null)
+      setEditingMessageId(null);
+      setEditContent('');
+      setEditImage(null);
     }
-  }, [editingMessageId, editContent, editImage, onEditMessage]);
+  };
+  
 
 
   console.log('ChatWindow render')
@@ -109,95 +110,110 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         )}
-        {/* Thêm nút Load More */}
-        {hasMore && (
-          <div className="flex justify-center">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onLoadMore}
-              disabled={isLoading}
-            >
-              See more messages
-            </Button>
-          </div>
-        )}
-        {messages.map((message) => {
-          const isCurrentUserMessage = message.senderId === user?.id
-          const isDeleted = !!message.deletedAt;
-          const isEdited = message.isEdited
-          return (
-            <div
-              key={message.id}
-              className={`flex ${isCurrentUserMessage ? 'justify-end' : 'justify-start'}`}
-            >
-              {!isCurrentUserMessage && (
-                <Avatar className="mr-2">
-                  <AvatarImage src={message.sender.avatar || '/placeholder.svg?height=40&width=40'} alt={message.sender.name} />
-                  <AvatarFallback>{message.sender.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                </Avatar>
-              )}
-              <div
-                className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-2 rounded-lg ${
-                  isCurrentUserMessage
-                    ? isDeleted
-                      ? 'bg-blue-200 text-blue-800'
-                      : 'bg-blue-500 text-white'
-                    : isDeleted
-                      ? 'bg-gray-100 text-gray-500'
-                      : 'bg-gray-200 text-gray-800'
-                } ${isDeleted ? 'italic' : ''}`}
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center p-4">
+          <User className="w-16 h-16 text-gray-400 mb-4" />
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+            {user?.id === currentChat.createdBy ? "Welcome to your new chat!" : "No messages yet"}
+          </h2>
+          <p className="text-gray-500 max-w-md">
+            {user?.id === currentChat.createdBy
+              ? "Start the conversation by sending the first message. Your ideas and thoughts matter!"
+              : "Be the first to break the ice! Share your thoughts or ask a question to get the conversation rolling."}
+          </p>
+        </div>
+        ) : (
+          <>
+          {hasMore && (
+            <div className="flex justify-center">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={onLoadMore}
+                disabled={isLoading}
               >
-                {!isCurrentUserMessage && isGroupChat && (
-                  <p className="text-xs font-semibold mb-1">{message.sender.name}</p>
-                )}
-                {editingMessageId === message.id ? (
-                  <div className="flex items-center">
-                    <Input
-                      value={editContent}
-                      onChange={(e) => {setEditContent(e.target.value)}}
-                      className="mr-2 text-black bg-white"
-                    />
-                    <Button onClick={handleEditSubmit}>Save</Button>
-                  </div>
-                ) : (
-                  <p>{message.content}</p>
-                )}
-                {isEdited && !isDeleted && (
-                  <span className="text-xs text-yellow-400 mt-1 italic">Edited</span>
-                )}
-                <span className="text-xs mt-1 block">
-                  {formatMessageTime(new Date(message.createdAt).toISOString())}
-                </span>
-              </div>
-              {isCurrentUserMessage && !isDeleted && (
-                  <div className="self-end mt-1">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => {handleEditClick(message)}}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {onDeleteMessage(message.id)}}>
-                          <Trash className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {onPinMessage(message.id)}}>
-                          <Pin className="mr-2 h-4 w-4" />
-                          <span>Pin</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
+                See more messages
+              </Button>
             </div>
-          )
-        })}
+          )}
+          {messages.map((message) => {
+            const isCurrentUserMessage = message.senderId === user?.id
+            const isDeleted = !!message.deletedAt;
+            const isEdited = message.isEdited
+            return (
+              <div
+                key={message.id}
+                className={`flex ${isCurrentUserMessage ? 'justify-end' : 'justify-start'}`}
+              >
+                {!isCurrentUserMessage && (
+                  <Avatar className="mr-2">
+                    <AvatarImage src={message.sender.avatar || '/placeholder.svg?height=40&width=40'} alt={message.sender.name} />
+                    <AvatarFallback>{message.sender.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                )}
+                <div
+                  className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-2 rounded-lg ${
+                    isCurrentUserMessage
+                      ? isDeleted
+                        ? 'bg-blue-200 text-blue-800'
+                        : 'bg-blue-500 text-white'
+                      : isDeleted
+                        ? 'bg-gray-100 text-gray-500'
+                        : 'bg-gray-200 text-gray-800'
+                  } ${isDeleted ? 'italic' : ''}`}
+                >
+                  {!isCurrentUserMessage && isGroupChat && (
+                    <p className="text-xs font-semibold mb-1">{message.sender.name}</p>
+                  )}
+                  {editingMessageId === message.id ? (
+                    <div className="flex items-center">
+                      <Input
+                        value={editContent}
+                        onChange={(e) => {setEditContent(e.target.value)}}
+                        className="mr-2 text-black bg-white"
+                      />
+                      <Button onClick={handleEditSubmit}>Save</Button>
+                    </div>
+                  ) : (
+                    <p>{message.content}</p>
+                  )}
+                  {isEdited && !isDeleted && (
+                    <span className="text-xs text-yellow-400 mt-1 italic">Edited</span>
+                  )}
+                  <span className="text-xs mt-1 block">
+                    {formatMessageTime(new Date(message.createdAt).toISOString())}
+                  </span>
+                </div>
+                {isCurrentUserMessage && !isDeleted && (
+                    <div className="self-end mt-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => {handleEditClick(message)}}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            <span>Edit</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {onDeleteMessage(message.id)}}>
+                            <Trash className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {onPinMessage(message.id)}}>
+                            <Pin className="mr-2 h-4 w-4" />
+                            <span>Pin</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+              </div>
+            )
+          })}
+          </>
+        )}
         <div ref={messagesEndRef} />
       </div>
     </>

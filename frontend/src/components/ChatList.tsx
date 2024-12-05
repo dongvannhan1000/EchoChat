@@ -104,27 +104,27 @@ export default memo(function ChatList({
                 <p className="text-sm text-gray-600 mt-1">{chat.lastMessage}</p>
               </div>
               <div className="flex items-center space-x-2">
-                  {!chat.isSeen && (
-                    <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
-                      New
-                    </span>
-                  )}
-                  {chat.chat?.chatType === 'group' && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => void onLeaveChat(chat.chatId)}>
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Leave Group</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
+                {!chat.isSeen && (
+                  <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
+                    New
+                  </span>
+                )}
+                {chat.chat?.chatType === 'group' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => void onLeaveChat(chat.chatId)}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Leave Group</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
           </li>
         )

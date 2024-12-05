@@ -28,7 +28,7 @@ interface ChatStore {
   leaveChat: (chatId: number) => Promise<void>;
   
   editMessage: (messageId: number, content: string) => Promise<void>;
-  markMessageAsRead: (chatId: number) => Promise<void>;
+  markChatAsRead: (chatId: number) => Promise<void>;
   pinChat: (chatId: number, pinned: boolean) => Promise<void>;
   muteChat: (chatId: number, mutedUntil: Date) => Promise<void>;
   blockUser: (userId: number) => Promise<void>;
@@ -297,7 +297,7 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
-  markMessageAsRead: async (chatId: number) => {
+  markChatAsRead: async (chatId: number) => {
     const action = 'markMessageAsRead';
     try {
       await api.post(`/api/chats/${chatId.toString()}/read`);
