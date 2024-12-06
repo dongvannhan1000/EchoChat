@@ -27,10 +27,12 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const chatId = parseInt(req.params.chatId);
+    const type = req.body.type;
     const message = await messageService.sendMessage({
       ...req.body,
       chatId,
-      senderId: userId
+      senderId: userId,
+      type
     });
     res.status(201).json(message);
   } catch (error: unknown) {

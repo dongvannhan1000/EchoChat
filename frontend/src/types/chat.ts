@@ -2,6 +2,7 @@
 
 export type ChatType = 'private' | 'group';
 export type ChatRole = 'admin' | 'member';
+export type MessageType = 'normal' | 'system';
 
 export interface User {
   id: number;
@@ -17,6 +18,7 @@ export interface Message {
   id: number;
   chatId: number;
   senderId: number;
+  type: MessageType;
   content?: string;
   image?: string;
   isEdited: boolean;

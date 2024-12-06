@@ -1,4 +1,5 @@
 import { Message, prisma, UserChat } from '../models/prisma';
+import { MessageType } from '@prisma/client';
 
 export class MessageService {
   async getChatMessages(chatId: number, userId: number, cursor?: number, limit: number = 20) {
@@ -63,11 +64,12 @@ export class MessageService {
   async sendMessage(data: {
     chatId: number;
     senderId: number;
+    type: MessageType;
     content?: string;
     image?: string;
     replyToId?: number;
   }) {
-    const { chatId, senderId, content, image, replyToId } = data;
+    const { chatId, senderId, type, content, image, replyToId } = data;
 
     const userChat = await UserChat.findUnique({
       where: {
@@ -87,6 +89,7 @@ export class MessageService {
         data: {
           chatId,
           senderId,
+          type,
           content,
           image,
           replyToId
