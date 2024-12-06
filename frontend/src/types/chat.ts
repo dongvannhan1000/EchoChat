@@ -19,7 +19,7 @@ export interface Message {
   chatId: number;
   senderId: number;
   type: MessageType;
-  content?: string;
+  content: string;
   image?: string;
   isEdited: boolean;
   replyToId?: number;

@@ -5,7 +5,7 @@
 
 
 import { create } from 'zustand';
-import { Chat, ChatRole, ChatType, Message, UserChat } from '../types/chat';
+import { Chat, ChatRole, ChatType, Message, MessageType, UserChat } from '../types/chat';
 import { useWebSocket } from '../hooks/useWebSocket';
 import api from '../utils/axios'
 
@@ -23,6 +23,7 @@ interface ChatStore {
   fetchChatDetails: (chatId: number) => Promise<void>;
   fetchMessages: (chatId: number, reset?: boolean) => Promise<void>;
   sendMessage: (chatId: number, content: string, image?: string, replyToId?: number) => Promise<void>;
+  sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
   removeMessage: (messageId: number) => Promise<void>;
   createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
   leaveChat: (chatId: number) => Promise<void>;
@@ -180,6 +181,44 @@ export const useChat = create<ChatStore>((set, get) => ({
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to send message' },
       }));
+    } finally {
+      set((state) => ({
+        isLoading: { ...state.isLoading, [action]: false },
+      }));
+    }
+  },
+
+  sendSystemMessage: async (
+    chatId: number,
+    type: MessageType,  
+    content: string
+  ) => {
+    const action = 'sendSystemMessage';
+    try {
+      set((state) => ({
+        isLoading: { ...state.isLoading, [action]: true },
+        error: { ...state.error, [action]: null },
+      }));
+  
+      const response = await api.post(`/api/chats/${chatId.toString()}/messages`, {
+        content,
+        type: 'system',
+      });
+  
+      const newSystemMessage = response.data as Message;
+      set((state) => ({
+        messages: [...state.messages, newSystemMessage].sort((a, b) => 
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        ),
+      }));
+  
+      useWebSocket.getState().sendMessage(newSystemMessage);
+    } catch (error) {
+      set((state) => ({
+        error: { ...state.error, [action]: 'Failed to send system message' },
+      }));
+      
+      throw error;
     } finally {
       set((state) => ({
         isLoading: { ...state.isLoading, [action]: false },

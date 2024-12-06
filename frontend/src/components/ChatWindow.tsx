@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
-import { Loader2, User } from 'lucide-react'
+import { Loader2, User, UserMinus, UserPlus, Users } from 'lucide-react'
 import { formatMessageTime } from '@/utils/formatTime'
 import { Button } from './ui/button'
 import { 
@@ -140,6 +140,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
             const isCurrentUserMessage = message.senderId === user?.id
             const isDeleted = !!message.deletedAt;
             const isEdited = message.isEdited
+            const isSystemMessage = message.type === 'system'
+
+            if (isSystemMessage) {
+              return (
+                <div key={message.id} className="flex justify-center">
+                  <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-full flex items-center space-x-2">
+                    {message.content.includes('left the group') && <UserMinus className="h-4 w-4" />}
+                    {message.content.includes('joined the group') && <UserPlus className="h-4 w-4" />}
+                    {message.content.includes('created the group') && <Users className="h-4 w-4" />}
+                    <span className="text-sm">{message.content}</span>
+                  </div>
+                </div>
+              )
+            }
             return (
               <div
                 key={message.id}
