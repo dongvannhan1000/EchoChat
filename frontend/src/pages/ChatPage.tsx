@@ -35,6 +35,7 @@ export const ChatPage: React.FC = () => {
     isLoading,
     hasMoreMessages,
     leaveChat,
+    sendSystemMessage,
     setCurrentChat
   } = useChat();
   const { users, fetchUsers } = useUser();
@@ -168,7 +169,8 @@ export const ChatPage: React.FC = () => {
       "Are you sure you want to leave this chat?"
     );
     if (confirmed) {
-      await leaveChat(chatId); 
+      await sendSystemMessage(chatId, 'system', `${user.name} left group`);
+      await leaveChat(chatId);
     }
   };
 

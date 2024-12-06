@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState} from 'react'
 import { User } from '@/types/chat'
 
 interface AuthContextType {
-  user: User | null
+  user: User
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>

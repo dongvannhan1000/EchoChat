@@ -82,9 +82,6 @@ export const ChatListItem = memo(function ChatListItem({
                 Mute
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
-                console.log('Clicked chat:', chat);
-                console.log('Chat ID:', chat.chatId);
-                console.log('ID:', chat.id);
                 void onMarkChatStatus(chat.id)}
                 }>
                 {chat.isSeen ? (
