@@ -39,7 +39,7 @@ async function seedDatabase() {
 
   // Generate Private Chats
   const privateChats = await Promise.all(
-    Array.from({ length: 5 }).map(async () => {
+    Array.from({ length: 20 }).map(async () => {
       const user1 = users[Math.floor(Math.random() * users.length)]
       const user2 = users.find(u => u.id !== user1.id) || users[0]
 
@@ -88,7 +88,7 @@ async function seedDatabase() {
 
   // Generate Group Chats
   const groupChats = await Promise.all(
-    Array.from({ length: 3 }).map(async () => {
+    Array.from({ length: 10 }).map(async () => {
       const groupAdminIndex = Math.floor(Math.random() * users.length)
       const groupAdmin = users[groupAdminIndex]
 

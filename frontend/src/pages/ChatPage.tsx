@@ -35,8 +35,7 @@ export const ChatPage: React.FC = () => {
     isLoading,
     hasMoreMessages,
     leaveChat,
-    sendSystemMessage,
-    setCurrentChat
+    sendSystemMessage
   } = useChat();
   const { users, fetchUsers } = useUser();
 
@@ -174,11 +173,11 @@ export const ChatPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (!currentChat && chats.length > 0) {
-      setCurrentChat(chats[0].chat); 
-    }
-  }, [currentChat, chats, setCurrentChat]);
+  // useEffect(() => {
+  //   if (!currentChat && chats.length > 0) {
+  //     setCurrentChat(chats[0].chat); 
+  //   }
+  // }, [currentChat, chats, setCurrentChat]);
   
 
   const handlePinChat = async (chatId: number, pinned: boolean) => {

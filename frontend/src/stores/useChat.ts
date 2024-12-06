@@ -281,10 +281,14 @@ export const useChat = create<ChatStore>((set, get) => ({
     const action = 'leaveChat';
     try {
       await api.delete(`/api/chats/${chatId.toString()}/leave`);
-      set((state) => ({
-        chats: state.chats.filter((chat) => chat.chatId !== chatId),
-        currentChat: null,
-      }));
+      set((state) => {
+        const updatedChats = state.chats.filter((chat) => chat.chatId !== chatId);
+        
+        return {
+          chats: updatedChats,
+          currentChat: null, // Always set to null when leaving a chat
+        };
+      });
 
       useWebSocket.getState().leaveRoom(chatId);
     } catch (error) {
