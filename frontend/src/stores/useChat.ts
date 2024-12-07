@@ -352,7 +352,6 @@ export const useChat = create<ChatStore>((set, get) => ({
           }
           return chat;
         });
-        console.log('Updated chats:', updatedChats);
         return { chats: updatedChats };
       });
     } catch (error) {

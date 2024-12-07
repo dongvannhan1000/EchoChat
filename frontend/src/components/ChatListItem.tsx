@@ -31,7 +31,6 @@ export const ChatListItem = memo(function ChatListItem({
   otherUser
 }: ChatListItemProps) {
 
-  console.log('Chat data in ChatListItem:', chat);
   return (
     <li
       className={`p-4 hover:bg-gray-100 cursor-pointer ${

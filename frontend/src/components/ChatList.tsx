@@ -20,7 +20,8 @@ export default memo(function ChatList({
   const { user } = useAuth();
   const { markChatStatus } = useChat();
   console.log('ChatList render')
-  console.log('Chats in ChatList', chats);
+
+  
 
   const handleMarkChatStatus = async (id: number) => {
     try {
