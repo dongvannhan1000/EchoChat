@@ -36,7 +36,7 @@ export const ChatListItem = memo(function ChatListItem({
       className={`p-4 hover:bg-gray-100 cursor-pointer ${
         isSelected ? 'bg-gray-100' : ''
       }`}
-      onClick={() => {onSelectChat(chat.chatId)}}
+      onClick={() => {onSelectChat(chat.chatId, chat.id)}}
     >
       <div className="flex items-center space-x-3">
         <Avatar>

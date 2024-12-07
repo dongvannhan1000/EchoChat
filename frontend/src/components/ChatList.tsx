@@ -8,7 +8,7 @@ import { useChat } from '@/stores/useChat'
 interface ChatListProps {
   chats: UserChat[]
   selectedChatId: number | null
-  onSelectChat: (chatId: number) => void
+  onSelectChat: (chatId: number, id: number) => void
   onLeaveChat: (chatId: number) => Promise<void>
 }
 

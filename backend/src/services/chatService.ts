@@ -187,7 +187,7 @@ export class ChatService {
     }
   }
 
-  async markChatStatus(id: number) {
+  async markChatStatus(id: number, forceMarkAsSeen?: boolean) {
     const userChat = await UserChat.findUnique({
       where: { 
         id: id
@@ -198,11 +198,15 @@ export class ChatService {
     if (!userChat) {
       throw new Error('Chat not found');
     }
+
+    const newSeenStatus = forceMarkAsSeen !== undefined 
+      ? forceMarkAsSeen 
+      : !userChat.isSeen;
   
     return UserChat.update({
       where: { id: id },
       data: { 
-        isSeen: !userChat.isSeen 
+        isSeen: newSeenStatus 
       }
     });
   }

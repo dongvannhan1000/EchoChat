@@ -29,7 +29,7 @@ interface ChatStore {
   leaveChat: (chatId: number) => Promise<void>;
   
   editMessage: (messageId: number, content: string) => Promise<void>;
-  markChatStatus: (id: number) => Promise<void>;
+  markChatStatus: (id: number, forceMarkAsSeen?: boolean) => Promise<void>;
   pinChat: (chatId: number, pinned: boolean) => Promise<void>;
   muteChat: (chatId: number, mutedUntil: Date) => Promise<void>;
   blockUser: (userId: number) => Promise<void>;
@@ -337,18 +337,23 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
-  markChatStatus: async (id: number) => {
+  markChatStatus: async (id: number, forceMarkAsSeen?: boolean) => {
     const action = 'markMessageAsRead';
     try {
-      console.log('Sending API request');
-      const response = await api.post(`/api/chats/${id.toString()}/toggle-read`);
+      console.log('Sending API request', id, forceMarkAsSeen);
+      const response = await api.post(`/api/chats/${id.toString()}/toggle-read`, {
+        forceMarkAsSeen 
+      });
       console.log('API Response:', response);
       set(state => {
         console.log('Current state:', state);
         const updatedChats = state.chats.map(chat => {
           if (chat.id === id) {
-            console.log('Matching chat found:', chat);
-            return { ...chat, isSeen: !chat.isSeen };
+            const newSeenStatus = forceMarkAsSeen !== undefined 
+              ? forceMarkAsSeen 
+              : !chat.isSeen;
+            
+            return { ...chat, isSeen: newSeenStatus };
           }
           return chat;
         });

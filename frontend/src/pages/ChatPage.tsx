@@ -35,7 +35,8 @@ export const ChatPage: React.FC = () => {
     isLoading,
     hasMoreMessages,
     leaveChat,
-    sendSystemMessage
+    sendSystemMessage,
+    markChatStatus
   } = useChat();
   const { users, fetchUsers } = useUser();
 
@@ -48,9 +49,10 @@ export const ChatPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const handleSelectChat = useCallback((chatId: number) => {
+  const handleSelectChat = useCallback((chatId: number, id: number) => {
     if (chatId !== selectedChatId) {
       setSelectedChatId(chatId);
+      void markChatStatus(id, true);
     }
   }, [selectedChatId]);
   
@@ -268,7 +270,7 @@ export const ChatPage: React.FC = () => {
         <ChatList
           chats={chats}
           selectedChatId={currentChat?.id ?? null}
-          onSelectChat={handleSelectChat}
+          onSelectChat={(chatId: number, id: number) => {handleSelectChat(chatId, id)}}
           onLeaveChat={handleLeaveChat}
         />
       </div>

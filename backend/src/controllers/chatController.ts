@@ -72,13 +72,15 @@ export const leaveChat = async (req: AuthenticatedRequest, res: Response, next: 
 export const markChatStatus = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const { forceMarkAsSeen } = req.body;
     console.log('Request Params:', req.params);
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const updatedUserChat = await chatService.markChatStatus(
-      parseInt(id)
+      parseInt(id),
+      forceMarkAsSeen
     );
 
     res.json(updatedUserChat);
