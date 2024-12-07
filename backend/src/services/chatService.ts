@@ -187,11 +187,10 @@ export class ChatService {
     }
   }
 
-  async markChatStatus(id: number, userId: number) {
+  async markChatStatus(id: number) {
     const userChat = await UserChat.findUnique({
       where: { 
-        id: id,
-        userId: userId 
+        id: id
       },
       include: { chat: true }
     });

@@ -76,11 +76,9 @@ export const markChatStatus = async (req: AuthenticatedRequest, res: Response, n
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-    const userId = req.user.id;
 
     const updatedUserChat = await chatService.markChatStatus(
-      parseInt(id), 
-      userId
+      parseInt(id)
     );
 
     res.json(updatedUserChat);
