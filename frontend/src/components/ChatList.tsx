@@ -57,39 +57,20 @@ export default memo(function ChatList({
     }
   }
   
-  const [statusMessage, setStatusMessage] = useState('')
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
-        <input
-          type="text"
-          value={statusMessage}
-          onChange={(e) => {setStatusMessage(e.target.value)}}
-          placeholder="Update your status..."
-          className="w-full p-2 border rounded"
-        />
-        <button 
-          onClick={() => {onUpdateStatusMessage(statusMessage)}}
-          className="mt-2 p-2 bg-blue-500 text-white rounded"
-        >
-          Update Status
-        </button>
-      </div>
       <ul className="flex-1 overflow-y-auto">
       {chats.map((chat, index) => (
           <ChatListItem
-            key={`${String(chat.chatId)}-${String(index)}`}
-            chat={chat}
-            isSelected={selectedChatId === chat.chatId}
-            onSelectChat={onSelectChat}
-            onLeaveChat={onLeaveChat}
-            onMarkChatStatus={handleMarkChatStatus}
-            otherUser={getOtherUser(chat)}
-          />
-        ))}
+              key={`${String(chat.chatId)}-${String(index)}`}
+              chat={chat}
+              isSelected={selectedChatId === chat.chatId}
+              onSelectChat={onSelectChat}
+              onLeaveChat={onLeaveChat}
+              onMarkChatStatus={handleMarkChatStatus}
+              otherUser={getOtherUser(chat)}
+            />
+          ))}
       </ul>
-      
-    </div> 
   )
 })

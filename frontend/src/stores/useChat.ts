@@ -40,10 +40,6 @@ interface ChatStore {
   changeUserRole: (chatId: number, userId: number, newRole: ChatRole) => Promise<void>;
   updateStatusMessage: (message: string) => Promise<void>;
 
-  // Utility actions
-  setCurrentChat: (chat: Chat | null) => void;
-  addMessage: (message: Message) => void;
-  updateMessage: (message: Message) => void;
 }
 
 export const useChat = create<ChatStore>((set, get) => ({
@@ -565,25 +561,6 @@ export const useChat = create<ChatStore>((set, get) => ({
         isLoading: { ...state.isLoading, [action]: false },
       }));
     }
-  },
-
-  // Set the current chat
-  setCurrentChat: (chat: Chat | null) => {
-    set({ currentChat: chat });
-  },
-
-  // Add a new message
-  addMessage: (message: Message) => {
-    set((state) => ({
-      messages: [...state.messages, message],
-    }));
-  },
-
-  // Update an existing message
-  updateMessage: (message: Message) => {
-    set((state) => ({
-      messages: state.messages.map((msg) => (msg.id === message.id ? message : msg)),
-    }));
   },
 
 }));

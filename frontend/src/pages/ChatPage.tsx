@@ -172,12 +172,6 @@ export const ChatPage: React.FC = () => {
       await leaveChat(chatId);
     }
   };
-
-  // useEffect(() => {
-  //   if (!currentChat && chats.length > 0) {
-  //     setCurrentChat(chats[0].chat); 
-  //   }
-  // }, [currentChat, chats, setCurrentChat]);
   
 
   const handlePinChat = async (chatId: number, pinned: boolean) => {
@@ -188,6 +182,8 @@ export const ChatPage: React.FC = () => {
       console.error('Failed to pin message:', error);
     }
   };
+
+  const [statusMessage, setStatusMessage] = useState('')
 
   console.log('ChatPage render')
 
@@ -254,6 +250,21 @@ export const ChatPage: React.FC = () => {
             <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
           </div>
         </div>
+        <div className="p-4 border-b">
+        <input
+          type="text"
+          value={statusMessage}
+          onChange={(e) => {setStatusMessage(e.target.value)}}
+          placeholder="Update your status..."
+          className="w-full p-2 border rounded"
+        />
+        <button 
+          onClick={() => {onUpdateStatusMessage(statusMessage)}}
+          className="mt-2 p-2 bg-blue-500 text-white rounded"
+        >
+          Update Status
+        </button>
+      </div>
         <ChatList
           chats={chats}
           selectedChatId={currentChat?.id ?? null}
