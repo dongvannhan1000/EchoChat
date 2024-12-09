@@ -7,7 +7,7 @@ import { ChatWindow } from '@/components/ChatWindow'
 import { MessageInput } from '@/components/MessageInput'
 import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
-import { useUser } from '@/hooks/useUser'
+import { useUser } from '@/stores/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { User } from '@/types/chat'
 import {
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/popover"
 
 import { debounce } from 'lodash';
+import { useChatStore } from '@/stores/useChatV2'
+import { useUserChatInteractionsStore } from '@/stores/useInteraction'
 
 
 
@@ -24,20 +26,25 @@ export const ChatPage: React.FC = () => {
   const { user } = useAuth();
   const webSocketStore = useWebSocket();
   const { 
-    chats, 
-    currentChat, 
     messages, 
-    sendMessage, 
-    fetchUserChats, 
-    fetchChatDetails, 
+    sendMessage,
     fetchMessages,
-    createChat,
     isLoading,
     hasMoreMessages,
-    leaveChat,
-    sendSystemMessage,
-    markChatStatus
+    sendSystemMessage
   } = useChat();
+  const {
+    chats,
+    currentChat,
+    fetchUserChats, 
+    fetchChatDetails,
+    createChat,
+    leaveChat
+  } = useChatStore()
+
+  const {
+    markChatStatus
+  } = useUserChatInteractionsStore()
   const { users, fetchUsers } = useUser();
 
   
@@ -123,7 +130,7 @@ export const ChatPage: React.FC = () => {
   }, [searchTerm]);
 
   const handleSendMessage = (content: string) => {
-    if (user && currentChat) {
+    if (currentChat) {
       void sendMessage(currentChat.id, content)
     }
   }

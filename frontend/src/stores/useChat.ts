@@ -450,7 +450,7 @@ export const useChat = create<ChatStore>((set, get) => ({
           : state.currentChat,
         chats: state.chats.map(chat =>
           chat.chatId === chatId
-            ? { ...chat, chat: { ...chat.chat!, groupName, groupAvatar } }
+            ? { ...chat, chat: { ...chat.chat, groupName, groupAvatar } }
             : chat
         ),
       }));

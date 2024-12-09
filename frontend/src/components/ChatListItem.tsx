@@ -13,7 +13,7 @@ import { memo } from "react"
 interface ChatListItemProps {
   chat: UserChat
   isSelected: boolean
-  onSelectChat: (chatId: number) => void
+  onSelectChat: (chatId: number, id: number) => void
   onLeaveChat: (chatId: number) => Promise<void>
   onMarkChatStatus: (id: number) => Promise<void>
   otherUser: {

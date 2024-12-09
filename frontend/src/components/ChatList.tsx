@@ -1,8 +1,9 @@
 import { UserChat } from '@/types/chat'
-import { memo, useState } from "react"
+import { memo } from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { ChatListItem } from './ChatListItem'
 import { useChat } from '@/stores/useChat'
+import { useUserChatInteractionsStore } from '@/stores/useInteraction'
 
 
 interface ChatListProps {
@@ -18,7 +19,7 @@ export default memo(function ChatList({
   onSelectChat,
   onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
-  const { markChatStatus } = useChat();
+  const { markChatStatus } = useUserChatInteractionsStore();
   console.log('ChatList render')
 
   
