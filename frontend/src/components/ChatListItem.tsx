@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserChat } from '@/types/chat'
-import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye } from 'lucide-react'
+import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing } from 'lucide-react'
 import { memo } from "react"
 
 interface ChatListItemProps {
@@ -20,6 +20,7 @@ interface ChatListItemProps {
     name: string
     avatar: string | undefined
   }
+  onPinChat: (id: number) => Promise<void>
 }
 
 export const ChatListItem = memo(function ChatListItem({ 
@@ -28,6 +29,7 @@ export const ChatListItem = memo(function ChatListItem({
   onSelectChat, 
   onLeaveChat,
   onMarkChatStatus,
+  onPinChat,
   otherUser
 }: ChatListItemProps) {
 
@@ -72,13 +74,31 @@ export const ChatListItem = memo(function ChatListItem({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onPinChat(chat.id)}>
-                <Pin className="h-4 w-4 mr-2" />
-                Pin
+              <DropdownMenuItem onClick={() => void onPinChat(chat.id)}>
+                {chat.pinned ? (
+                  <>
+                    <Pin className="h-4 w-4 mr-2 rotate-45" />
+                    Unpin
+                  </>
+                ) : (
+                  <>
+                    <Pin className="h-4 w-4 mr-2" />
+                    Pin
+                  </>
+                )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onMuteChat(chat.id)}>
-                <BellOff className="h-4 w-4 mr-2" />
-                Mute
+              <DropdownMenuItem onClick={() => void onMuteChat(chat.id)}>
+                {chat.mutedUntil ? (
+                  <>
+                    <BellRing className="h-4 w-4 mr-2" />
+                    Unmute
+                  </>
+                ) : (
+                  <>
+                    <BellOff className="h-4 w-4 mr-2" />
+                    Mute
+                  </>
+                )}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
                 void onMarkChatStatus(chat.id)}
@@ -95,7 +115,7 @@ export const ChatListItem = memo(function ChatListItem({
                   </>
                 )}
               </DropdownMenuItem>
-              {chat.chat?.chatType === 'group' && (
+              {chat.chat.chatType === 'group' && (
                 <DropdownMenuItem onClick={() => void onLeaveChat(chat.chatId)}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Leave Group</span>

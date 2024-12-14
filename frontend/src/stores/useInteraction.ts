@@ -7,7 +7,7 @@ interface UserChatInteractions {
   error: { [key: string]: string | null };
 
   markChatStatus: (id: number, forceMarkAsSeen?: boolean) => Promise<void>;
-  pinChat: (chatId: number, pinned: boolean) => Promise<void>;
+  pinChat: (id: number) => Promise<void>;
   muteChat: (chatId: number, mutedUntil: Date) => Promise<void>;
   blockUser: (userId: number) => Promise<void>;
   unblockUser: (userId: number) => Promise<void>;
@@ -21,7 +21,7 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
     const action = 'markMessageAsRead';
     try {
       console.log('Sending API request', id, forceMarkAsSeen);
-      const response = await api.post(`/api/chats/${id.toString()}/toggle-read`, {
+      const response = await api.put(`/api/chats/${id.toString()}/toggle-read`, {
         forceMarkAsSeen 
       });
       console.log('API Response:', response);
@@ -49,21 +49,28 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
     }
   },
 
-  pinChat: async (chatId: number, pinned: boolean) => {
+  pinChat: async (id: number) => {
     const action = 'pinChat';
     try {
-      await api.put(`/api/user-chats/${chatId.toString()}/pin`, { pinned });
+      console.log('Sending API request to pin chat', id);
+      const response = await api.put(`/api/chats/${id.toString()}/pin`);
+      console.log('API Response:', response);
       
       // Update the chats in the chatStore
-      const chatStore = useChatStore.getState();
-      const updatedChats = chatStore.chats.map(chat =>
-        chat.chatId === chatId ? { ...chat, pinned } : chat
-      );
-      chatStore.chats = updatedChats;
+      useChatStore.setState(state => {
+        const updatedChats = state.chats.map(chat => {
+          if (chat.id === id) {
+            return { ...chat, pinned: !chat.pinned };
+          }
+          return chat;
+        });
+        
+        return { chats: updatedChats };
+      });
     } catch (error) {
       console.error('API Error:', error);
       set(state => ({
-        error: { ...state.error, [action]: 'Failed to pin/unpin chat' },
+        error: { ...state.error, [action]: 'Failed to pin chat' },
       }));
     }
   },

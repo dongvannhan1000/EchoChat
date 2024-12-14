@@ -210,4 +210,24 @@ export class ChatService {
       }
     });
   }
+
+  async pinChat(id: number) {
+    const userChat = await UserChat.findUnique({
+      where: { 
+        id: id
+      },
+      include: { chat: true }
+    });
+  
+    if (!userChat) {
+      throw new Error('Chat not found');
+    }
+
+    return UserChat.update({
+      where: { id: id },
+      data: { 
+        pinned: !userChat.pinned 
+      }
+    });
+  }
 }

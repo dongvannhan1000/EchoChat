@@ -93,10 +93,23 @@ export const markChatStatus = async (req: AuthenticatedRequest, res: Response, n
   }
 };
 
-// export const pinChat = async (req:AuthenticatedRequest, res: Response, next: NextFunction) => {
-//   try {
-//     if (!req.user) {
-//       return res.status(401).json({ message: 'Unauthorized' });
-//     }
-//   }
-// };
+export const pinChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const updatedUserChat = await chatService.pinChat(
+      parseInt(id)
+    );
+
+    res.json(updatedUserChat);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Failed to change status chat' });
+    }
+  }
+};

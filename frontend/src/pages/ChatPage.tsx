@@ -64,7 +64,8 @@ export const ChatPage: React.FC = () => {
   }, [selectedChatId]);
   
   useEffect(() => {
-    if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId)) {
+    if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId) && chats.some(chat => chat.chatId === selectedChatId)
+    ) {
       void (async () => {
         try {
           await fetchChatDetails(selectedChatId);
@@ -101,11 +102,11 @@ export const ChatPage: React.FC = () => {
     };
   }, []);
 
-  const isConnected = useWebSocket(state => state.isConnected);
+  // const isConnected = useWebSocket(state => state.isConnected);
 
-  useEffect(() => {
-    console.log('WebSocket connection status:', isConnected);
-  }, [isConnected]);
+  // useEffect(() => {
+  //   console.log('WebSocket connection status:', isConnected);
+  // }, [isConnected]);
 
   useEffect(() => {
     if (isNewMessageOpen && searchInputRef.current) {

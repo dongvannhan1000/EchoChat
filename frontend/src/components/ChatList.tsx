@@ -2,7 +2,6 @@ import { UserChat } from '@/types/chat'
 import { memo } from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { ChatListItem } from './ChatListItem'
-import { useChat } from '@/stores/useChat'
 import { useUserChatInteractionsStore } from '@/stores/useInteraction'
 
 
@@ -11,6 +10,7 @@ interface ChatListProps {
   selectedChatId: number | null
   onSelectChat: (chatId: number, id: number) => void
   onLeaveChat: (chatId: number) => Promise<void>
+  onPinChat: (id: number) => Promise<void>
 }
 
 export default memo(function ChatList({ 
@@ -19,7 +19,7 @@ export default memo(function ChatList({
   onSelectChat,
   onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
-  const { markChatStatus } = useUserChatInteractionsStore();
+  const { markChatStatus, pinChat } = useUserChatInteractionsStore();
   console.log('ChatList render')
 
   
@@ -30,6 +30,15 @@ export default memo(function ChatList({
       console.log('markChatStatus called successfully');
     } catch (error) {
       console.error('Failed to change chat status:', error);
+    }
+  }
+
+  const handlePinChat = async (id: number) => {
+    try {
+      await pinChat(id);
+      console.log('pinChat called successfully');
+    } catch (error) {
+      console.error('Failed to change pin status:', error);
     }
   }
 
@@ -70,6 +79,7 @@ export default memo(function ChatList({
               onSelectChat={onSelectChat}
               onLeaveChat={onLeaveChat}
               onMarkChatStatus={handleMarkChatStatus}
+              onPinChat={handlePinChat}
               otherUser={getOtherUser(chat)}
             />
           ))}
