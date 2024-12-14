@@ -71,18 +71,28 @@ export default memo(function ChatList({
 
   return (
       <ul className="flex-1 overflow-y-auto">
-      {chats.map((chat, index) => (
+      {chats
+        .sort((a, b) => {
+          const timeA = new Date(a.updatedAt).getTime();
+          const timeB = new Date(b.updatedAt).getTime();
+          
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          
+          return timeB - timeA;
+        })
+        .map((chat, index) => (
           <ChatListItem
-              key={`${String(chat.chatId)}-${String(index)}`}
-              chat={chat}
-              isSelected={selectedChatId === chat.chatId}
-              onSelectChat={onSelectChat}
-              onLeaveChat={onLeaveChat}
-              onMarkChatStatus={handleMarkChatStatus}
-              onPinChat={handlePinChat}
-              otherUser={getOtherUser(chat)}
-            />
-          ))}
+            key={`${String(chat.chatId)}-${String(index)}`}
+            chat={chat}
+            isSelected={selectedChatId === chat.chatId}
+            onSelectChat={onSelectChat}
+            onLeaveChat={onLeaveChat}
+            onMarkChatStatus={handleMarkChatStatus}
+            onPinChat={handlePinChat}
+            otherUser={getOtherUser(chat)}
+          />
+        ))}
       </ul>
   )
 })

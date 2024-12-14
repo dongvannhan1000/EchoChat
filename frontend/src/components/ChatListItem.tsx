@@ -54,7 +54,11 @@ export const ChatListItem = memo(function ChatListItem({
           <div className="flex justify-between items-center">
             <h2 className="font-semibold text-gray-800">
               {otherUser.name}
+              {chat.pinned && (
+              <Pin className="h-4 w-4 text-gray-500" />
+              )}
             </h2>
+            
             <span className="text-sm text-gray-500">
               {new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>

@@ -206,7 +206,7 @@ export class ChatService {
     return UserChat.update({
       where: { id: id },
       data: { 
-        isSeen: newSeenStatus 
+        isSeen: newSeenStatus
       }
     });
   }
