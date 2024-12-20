@@ -4,6 +4,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserChat } from '@/types/chat'
@@ -21,6 +25,7 @@ interface ChatListItemProps {
     avatar: string | undefined
   }
   onPinChat: (id: number) => Promise<void>
+  onMuteChat: (id: number, muteDuration?: number) => Promise<void>
 }
 
 export const ChatListItem = memo(function ChatListItem({ 
@@ -30,6 +35,7 @@ export const ChatListItem = memo(function ChatListItem({
   onLeaveChat,
   onMarkChatStatus,
   onPinChat,
+  onMuteChat,
   otherUser
 }: ChatListItemProps) {
 
@@ -50,20 +56,20 @@ export const ChatListItem = memo(function ChatListItem({
             {otherUser.name.split(' ').map(n => n[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800">
+            <h2 className="font-semibold text-gray-800 truncate">
               {otherUser.name}
-              {chat.pinned && (
-              <Pin className="h-4 w-4 text-gray-500" />
-              )}
             </h2>
-            
-            <span className="text-sm text-gray-500">
-              {new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
+            <div className="flex items-center space-x-2">
+              {chat.pinned && <Pin className="h-4 w-4 text-blue-500" />}
+              {chat.mutedUntil &&<BellOff className="h-4 w-4 text-gray-500" />}
+              <span className="text-xs text-gray-500">
+                {new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
-          <p className="text-sm text-gray-600 mt-1">{chat.lastMessage}</p>
+          <p className="text-sm text-gray-600 truncate mt-1">{chat.lastMessage}</p>
         </div>
         <div className="flex items-center space-x-2">
           {!chat.isSeen && (
@@ -91,19 +97,38 @@ export const ChatListItem = memo(function ChatListItem({
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void onMuteChat(chat.id)}>
-                {chat.mutedUntil ? (
-                  <>
-                    <BellRing className="h-4 w-4 mr-2" />
-                    Unmute
-                  </>
-                ) : (
-                  <>
+              {chat.mutedUntil ? (
+                <DropdownMenuItem onClick={() => void onMuteChat(chat.id, 0)}>
+                  <BellRing className="h-4 w-4 mr-2" />
+                  Unmute
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
                     <BellOff className="h-4 w-4 mr-2" />
-                    Mute
-                  </>
-                )}
-              </DropdownMenuItem>
+                    <span>Mute</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id, 30 * 60)}>
+                        30 minutes
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id, 60 * 60)}>
+                        1 hour
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id, 8 * 60 * 60)}>
+                        8 hours
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id, 24 * 60 * 60)}>
+                        24 hours
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id)}>
+                        Forever
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              )}
               <DropdownMenuItem onClick={() => {
                 void onMarkChatStatus(chat.id)}
                 }>

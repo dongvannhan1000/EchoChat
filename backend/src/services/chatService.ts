@@ -244,9 +244,18 @@ export class ChatService {
     }
 
     // Calculate mutedUntil date if duration is provided
-    const mutedUntil = muteDuration 
-      ? new Date(Date.now() + muteDuration * 1000) 
-      : null;
+    let mutedUntil;
+
+    if (muteDuration === 0) {
+      // Unmute: set mutedUntil to null
+      mutedUntil = null;
+    } else if (muteDuration === undefined) {
+
+      mutedUntil = new Date('9999-01-01T00:00:00Z');
+    } else {
+      // Mute for a specific duration
+      mutedUntil = new Date(Date.now() + muteDuration * 1000);
+    }
 
     return UserChat.update({
       where: { id: id },

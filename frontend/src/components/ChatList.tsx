@@ -10,7 +10,6 @@ interface ChatListProps {
   selectedChatId: number | null
   onSelectChat: (chatId: number, id: number) => void
   onLeaveChat: (chatId: number) => Promise<void>
-  onPinChat: (id: number) => Promise<void>
 }
 
 export default memo(function ChatList({ 
@@ -19,7 +18,7 @@ export default memo(function ChatList({
   onSelectChat,
   onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
-  const { markChatStatus, pinChat } = useUserChatInteractionsStore();
+  const { markChatStatus, pinChat, muteChat } = useUserChatInteractionsStore();
   console.log('ChatList render')
 
   
@@ -39,6 +38,15 @@ export default memo(function ChatList({
       console.log('pinChat called successfully');
     } catch (error) {
       console.error('Failed to change pin status:', error);
+    }
+  }
+
+  const handleMuteChat = async (id: number, muteDuration?: number) => {
+    try {
+      await muteChat(id, muteDuration);
+      console.log('muteChat called successfully');
+    } catch (error) {
+      console.error('Failed to mute chat:', error);
     }
   }
 
@@ -90,6 +98,7 @@ export default memo(function ChatList({
             onLeaveChat={onLeaveChat}
             onMarkChatStatus={handleMarkChatStatus}
             onPinChat={handlePinChat}
+            onMuteChat={handleMuteChat}
             otherUser={getOtherUser(chat)}
           />
         ))}
