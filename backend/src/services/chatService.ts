@@ -251,11 +251,13 @@ export class ChatService {
       mutedUntil = null;
     } else if (muteDuration === undefined) {
 
-      mutedUntil = new Date('9999-01-01T00:00:00Z');
+      mutedUntil = new Date('2030-12-31T23:59:59Z');
     } else {
       // Mute for a specific duration
       mutedUntil = new Date(Date.now() + muteDuration * 1000);
     }
+
+    console.log('Updating mutedUntil to:', mutedUntil);
 
     return UserChat.update({
       where: { id: id },

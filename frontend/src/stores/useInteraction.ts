@@ -84,17 +84,14 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
       });
       console.log('API Response:', response);
       
-      useChatStore.setState(state => {
-        const updatedChats = state.chats.map(chat => {
+      useChatStore.setState((state) => {
+        const updatedChats = state.chats.map((chat) => {
           if (chat.id === id) {
-            const mutedUntil = muteDuration 
-              ? new Date(Date.now() + muteDuration * 1000)
-              : null;
-            return { ...chat, mutedUntil };
+            return { ...chat, mutedUntil: response.data.mutedUntil }; 
           }
           return chat;
         });
-        
+  
         return { chats: updatedChats };
       });
     } catch (error) {

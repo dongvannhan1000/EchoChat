@@ -117,14 +117,15 @@ export const pinChat = async (req: AuthenticatedRequest, res: Response, next: Ne
 export const muteChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { muteDuration } = req.body;
+    const { duration } = req.body;
+    console.log({ id, duration });
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const updatedUserChat = await chatService.muteChat(
       parseInt(id),
-      muteDuration
+      duration
     );
 
     res.json(updatedUserChat);

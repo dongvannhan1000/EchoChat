@@ -63,7 +63,9 @@ export const ChatListItem = memo(function ChatListItem({
             </h2>
             <div className="flex items-center space-x-2">
               {chat.pinned && <Pin className="h-4 w-4 text-blue-500" />}
-              {chat.mutedUntil &&<BellOff className="h-4 w-4 text-gray-500" />}
+              {(chat.mutedUntil && new Date(chat.mutedUntil) > new Date()) && 
+                <BellOff className="h-4 w-4 text-gray-500" />
+              }
               <span className="text-xs text-gray-500">
                 {new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
@@ -122,8 +124,8 @@ export const ChatListItem = memo(function ChatListItem({
                       <DropdownMenuItem onClick={() => void onMuteChat(chat.id, 24 * 60 * 60)}>
                         24 hours
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id)}>
-                        Forever
+                      <DropdownMenuItem onClick={() => void onMuteChat(chat.id, undefined)}>
+                        Until I turn on
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
