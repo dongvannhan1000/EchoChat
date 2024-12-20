@@ -230,4 +230,29 @@ export class ChatService {
       }
     });
   }
+
+  async muteChat(id: number, muteDuration?: number) {
+    const userChat = await UserChat.findUnique({
+      where: { 
+        id: id
+      },
+      include: { chat: true }
+    });
+  
+    if (!userChat) {
+      throw new Error('Chat not found');
+    }
+
+    // Calculate mutedUntil date if duration is provided
+    const mutedUntil = muteDuration 
+      ? new Date(Date.now() + muteDuration * 1000) 
+      : null;
+
+    return UserChat.update({
+      where: { id: id },
+      data: { 
+        mutedUntil: mutedUntil
+      }
+    });
+  }
 }

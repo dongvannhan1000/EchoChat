@@ -49,7 +49,7 @@ export interface UserChat {
   lastMessage?: string;
   isSeen: boolean;
   role: ChatRole;
-  mutedUntil?: Date;
+  mutedUntil: Date | null;
   pinned: boolean;
   updatedAt: Date;
 }

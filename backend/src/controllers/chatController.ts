@@ -109,7 +109,30 @@ export const pinChat = async (req: AuthenticatedRequest, res: Response, next: Ne
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });
     } else {
-      res.status(500).json({ message: 'Failed to change status chat' });
+      res.status(500).json({ message: 'Failed to pin chat' });
+    }
+  }
+};
+
+export const muteChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { muteDuration } = req.body;
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const updatedUserChat = await chatService.muteChat(
+      parseInt(id),
+      muteDuration
+    );
+
+    res.json(updatedUserChat);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Failed to mute chat' });
     }
   }
 };
