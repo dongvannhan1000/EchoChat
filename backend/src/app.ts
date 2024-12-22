@@ -73,6 +73,34 @@ io.on('connection', (socket) => {
     console.log('Message deleted:', messageId);
     socket.broadcast.emit('message-deleted', messageId); 
   });
+
+  socket.on('block-user', async (data: { blockedId: number }) => {
+    try {
+      const userId = (socket.data.user as any).id;
+      
+      // Broadcast to all relevant users
+      io.emit('user-blocked', {
+        blockerId: userId,
+        blockedId: data.blockedId
+      });
+    } catch (error) {
+      console.error('Error blocking user:', error);
+    }
+  });
+   
+  socket.on('unblock-user', async (data: { blockedId: number }) => {
+    try {
+      const userId = (socket.data.user as any).id;
+      
+      // Broadcast to all relevant users
+      io.emit('user-unblocked', {
+        blockerId: userId,
+        blockedId: data.blockedId
+      });
+    } catch (error) {
+      console.error('Error unblocking user:', error);
+    }
+  });
 });
 
 app.use(express.json());

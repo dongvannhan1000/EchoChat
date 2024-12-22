@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import api from '../utils/axios';
 import { useChatStore } from './useChatV2';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface UserChatInteractions {
   isLoading: { [key: string]: boolean };
@@ -109,9 +110,10 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
         isLoading: { ...state.isLoading, [action]: true },
         error: { ...state.error, [action]: null },
       }));
-       await api.post(`/api/users/block`, { userId });
+      await api.post(`/api/users/block`, { userId });
+
+      useWebSocket.getState().sendBlockUser(userId);
       
-      // Cập nhật local state nếu cần
       await useChatStore.getState().fetchUserChats();
     } catch (error) {
       console.error('API Error:', error);
@@ -134,6 +136,8 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
       }));
 
       await api.post(`/api/users/unblock`, { userId });
+
+      useWebSocket.getState().sendUnblockUser(userId);
       
       // Update local state if needed
       // You might want to refresh user data or chat list after unblocking
