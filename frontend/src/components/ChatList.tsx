@@ -51,13 +51,6 @@ export default memo(function ChatList({
   }
 
   const getOtherUser = (chat: UserChat) => {
-    if (!chat.chat) {
-      console.error("Chat object is undefined:", chat);
-      return {
-        name: 'Unknown Chat',
-        avatar: '/placeholder.svg?height=40&width=40',
-      };
-    }
     
     if (chat.chat.chatType === 'group') {
       return {
@@ -67,7 +60,7 @@ export default memo(function ChatList({
     }
     
     const otherParticipant = chat.chat.participants.find(
-      p => p.userId !== user?.id
+      p => p.userId !== user.id
     );
 
     return {

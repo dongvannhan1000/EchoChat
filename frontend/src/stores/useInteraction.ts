@@ -105,12 +105,22 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
   blockUser: async (userId: number) => {
     const action = 'blockUser';
     try {
-      await api.post(`/api/users/block`, { userId });
-      // Update local state if needed
+      set(state => ({
+        isLoading: { ...state.isLoading, [action]: true },
+        error: { ...state.error, [action]: null },
+      }));
+       await api.post(`/api/users/block`, { userId });
+      
+      // Cập nhật local state nếu cần
+      await useChatStore.getState().fetchUserChats();
     } catch (error) {
       console.error('API Error:', error);
       set(state => ({
         error: { ...state.error, [action]: 'Failed to block user' },
+      }));
+    } finally {
+      set(state => ({
+        isLoading: { ...state.isLoading, [action]: false },
       }));
     }
   },

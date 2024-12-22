@@ -11,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserChat } from '@/types/chat'
-import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing } from 'lucide-react'
+import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing, UserX, UserCheck } from 'lucide-react'
 import { memo } from "react"
+import { useAuth } from '@/hooks/useAuth'
 
 interface ChatListItemProps {
   chat: UserChat
@@ -26,6 +27,8 @@ interface ChatListItemProps {
   }
   onPinChat: (id: number) => Promise<void>
   onMuteChat: (id: number, muteDuration?: number) => Promise<void>
+  onBlockUser: (userId: number) => Promise<void>
+  onUnblockUser: (userId: number) => Promise<void>
 }
 
 export const ChatListItem = memo(function ChatListItem({ 
@@ -36,8 +39,22 @@ export const ChatListItem = memo(function ChatListItem({
   onMarkChatStatus,
   onPinChat,
   onMuteChat,
-  otherUser
+  otherUser, 
+  onBlockUser,
+  onUnblockUser
 }: ChatListItemProps) {
+
+  const { user } = useAuth();
+
+  const getOtherUserId = () => {
+    if (chat.chat.chatType === 'private') {
+      const otherParticipant = chat.chat.participants.find(
+        p => p.userId !== user.id
+      );
+      return otherParticipant?.userId;
+    }
+    return null;
+  };
 
   return (
     <li
@@ -86,6 +103,7 @@ export const ChatListItem = memo(function ChatListItem({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              
               <DropdownMenuItem onClick={() => void onPinChat(chat.id)}>
                 {chat.pinned ? (
                   <>
