@@ -5,6 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -56,11 +57,16 @@ export const ChatListItem = memo(function ChatListItem({
     return null;
   };
 
+  const otherUserId = getOtherUserId();
+  const isBlocked = otherUserId ? chat.chat.participants.some(participant => 
+    participant.user.block.includes(otherUserId)
+  ) : false;
+
   return (
     <li
       className={`p-4 hover:bg-gray-100 cursor-pointer ${
         isSelected ? 'bg-gray-100' : ''
-      }`}
+      } ${isBlocked ? 'opacity-50' : ''}`}
       onClick={() => {onSelectChat(chat.chatId, chat.id)}}
     >
       <div className="flex items-center space-x-3">
@@ -103,7 +109,33 @@ export const ChatListItem = memo(function ChatListItem({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              
+              {chat.chat.chatType === 'private' && (
+                <>
+                  <DropdownMenuSeparator />
+                  {isBlocked ? (
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        const otherUserId = getOtherUserId();
+                        if (otherUserId) void onUnblockUser(otherUserId);
+                      }}
+                    >
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Unblock
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        const otherUserId = getOtherUserId();
+                        if (otherUserId) void onBlockUser(otherUserId);
+                      }}
+                      className="text-red-600"
+                    >
+                      <UserX className="h-4 w-4 mr-2" />
+                      Block
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
               <DropdownMenuItem onClick={() => void onPinChat(chat.id)}>
                 {chat.pinned ? (
                   <>

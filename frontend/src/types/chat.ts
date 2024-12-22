@@ -9,7 +9,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-  block?: number[];
+  block: number[];
   statusMessage?: string;
   lastSeen?: Date;
 }

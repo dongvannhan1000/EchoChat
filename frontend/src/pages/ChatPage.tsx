@@ -183,13 +183,28 @@ export const ChatPage: React.FC = () => {
     }
   };
   
+  const handleBlockUser = async (userId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to block this user?"
+    );
+    if (confirmed) {
+      try {
+        await useUserChatInteractionsStore.getState().blockUser(userId);
+        // Nếu đang chat với user bị block, clear selected chat
+        if (currentChat?.participants.some(p => p.userId === userId)) {
+          setSelectedChatId(null);
+        }
+      } catch (error) {
+        console.error('Failed to block user:', error);
+      }
+    }
+  };
 
-  const handlePinChat = async (chatId: number, pinned: boolean) => {
+  const handleUnblockUser = async (userId: number) => {
     try {
-      // Implement pinMessage function in useChat store
-      await useChat.getState().pinChat(chatId, pinned);
+      await useUserChatInteractionsStore.getState().unblockUser(userId);
     } catch (error) {
-      console.error('Failed to pin message:', error);
+      console.error('Failed to unblock user:', error);
     }
   };
 
@@ -291,7 +306,6 @@ export const ChatPage: React.FC = () => {
           onLoadMore={() => void handleLoadMore()}
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
-          // onPinMessage={() => handlePinMessage}
         />
         <MessageInput onSendMessage={handleSendMessage} />
       </div>
