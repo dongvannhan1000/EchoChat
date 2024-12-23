@@ -1,27 +1,49 @@
 import { UserChat } from '@/types/chat'
-import { memo } from "react"
+import { memo, useCallback, useEffect, useState } from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { ChatListItem } from './ChatListItem'
 import { useUserChatInteractionsStore } from '@/stores/useInteraction'
+import { useChatStore } from '@/stores/useChatV2'
+import { useChat } from '@/stores/useChat'
 
 
 interface ChatListProps {
   chats: UserChat[]
-  selectedChatId: number | null
-  onSelectChat: (chatId: number, id: number) => void
   onLeaveChat: (chatId: number) => Promise<void>
 }
 
 export default memo(function ChatList({ 
   chats, 
-  selectedChatId, 
-  onSelectChat,
   onLeaveChat}: ChatListProps) {
   const { user } = useAuth();
-  const { markChatStatus, pinChat, muteChat, blockUser, unblockUser } = useUserChatInteractionsStore();
+  const { markChatStatus, pinChat, muteChat } = useUserChatInteractionsStore();
   console.log('ChatList render')
 
+  const { currentChat, fetchChatDetails } = useChatStore()
+  const { fetchMessages } = useChat();
+
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+
+  const handleSelectChat = useCallback((chatId: number, id: number) => {
+    if (chatId !== selectedChatId) {
+      setSelectedChatId(chatId);
+      void markChatStatus(id, true);
+    }
+  }, [selectedChatId]);
   
+  useEffect(() => {
+    if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId) && chats.some(chat => chat.chatId === selectedChatId)
+    ) {
+      void (async () => {
+        try {
+          await fetchChatDetails(selectedChatId);
+          await fetchMessages(selectedChatId, true);
+        } catch (error) {
+          console.error('Error loading chat:', error);
+        }
+      })();
+    }
+  }, [selectedChatId, currentChat]);
 
   const handleMarkChatStatus = async (id: number) => {
     try {
@@ -60,7 +82,7 @@ export default memo(function ChatList({
     }
     
     const otherParticipant = chat.chat.participants.find(
-      p => p.userId !== user.id
+      p => p.userId !== user?.id
     );
 
     return {
@@ -89,7 +111,7 @@ export default memo(function ChatList({
             key={`${String(chat.chatId)}-${String(index)}`}
             chat={chat}
             isSelected={selectedChatId === chat.chatId}
-            onSelectChat={onSelectChat}
+            onSelectChat={handleSelectChat}
             onLeaveChat={onLeaveChat}
             onMarkChatStatus={handleMarkChatStatus}
             onPinChat={handlePinChat}

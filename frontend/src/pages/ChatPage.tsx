@@ -42,65 +42,41 @@ export const ChatPage: React.FC = () => {
     leaveChat
   } = useChatStore()
 
-  const {
-    markChatStatus
-  } = useUserChatInteractionsStore()
   const { users, fetchUsers } = useUser();
 
   
 
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
 
   // New state for Create New Message feature
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const handleSelectChat = useCallback((chatId: number, id: number) => {
-    if (chatId !== selectedChatId) {
-      setSelectedChatId(chatId);
-      void markChatStatus(id, true);
-    }
-  }, [selectedChatId]);
   
-  useEffect(() => {
-    if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId) && chats.some(chat => chat.chatId === selectedChatId)
-    ) {
-      void (async () => {
-        try {
-          await fetchChatDetails(selectedChatId);
-          await fetchMessages(selectedChatId, true);
-        } catch (error) {
-          console.error('Error loading chat:', error);
-        }
-      })();
-    }
-  }, [selectedChatId, currentChat]);
 
 
-  useEffect(() => {
-    // Assuming you have the token stored somewhere
-    let mounted = true;
+  // useEffect(() => {
+  //   // Assuming you have the token stored somewhere
+  //   let mounted = true;
 
-    const initializeWebSocket = async () => {
-      const token = localStorage.getItem('token');
-      if (token && mounted) {
-        console.log('Initializing WebSocket connection...');
-        await webSocketStore.connect(token);
-      }
-    };
+  //   const initializeWebSocket = async () => {
+  //     const token = localStorage.getItem('token');
+  //     if (token && mounted) {
+  //       console.log('Initializing WebSocket connection...');
+  //       await webSocketStore.connect(token);
+  //     }
+  //   };
 
-    void initializeWebSocket();
-    void fetchUserChats();
+  //   void initializeWebSocket();
 
-    return () => {
-      mounted = false;
-      console.log('Cleaning up WebSocket connection...');
-      if (webSocketStore.socket) {
-        void webSocketStore.disconnect();
-      }
-    };
-  }, []);
+  //   return () => {
+  //     mounted = false;
+  //     console.log('Cleaning up WebSocket connection...');
+  //     if (webSocketStore.socket) {
+  //       void webSocketStore.disconnect();
+  //     }
+  //   };
+  // }, []);
 
   // const isConnected = useWebSocket(state => state.isConnected);
 
@@ -267,8 +243,6 @@ export const ChatPage: React.FC = () => {
       </div>
         <ChatList
           chats={chats}
-          selectedChatId={currentChat?.id ?? null}
-          onSelectChat={(chatId: number, id: number) => {handleSelectChat(chatId, id)}}
           onLeaveChat={handleLeaveChat}
         />
       </div>

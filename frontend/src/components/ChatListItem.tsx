@@ -24,7 +24,7 @@ interface ChatListItemProps {
   onLeaveChat: (chatId: number) => Promise<void>
   onMarkChatStatus: (id: number) => Promise<void>
   otherUser: {
-    id: number,
+    id?: number,
     name: string
     avatar: string | undefined
   }
@@ -48,15 +48,19 @@ export const ChatListItem = memo(function ChatListItem({
   const handleBlock = async () => {
    console.log('Handling block for user:', otherUser.id);
    if (otherUser.id) {
-     await blockUser(otherUser.id);
-     updateUser({ block: [...user.block, otherUser.id] });
+    await blockUser(otherUser.id);
+    if (user) {
+      updateUser({ block: [...user.block, otherUser.id] });
+    }  
    }
  };
   const handleUnblock = async () => {
    console.log('Handling unblock for user:', otherUser.id);
    if (otherUser.id) {
      await unblockUser(otherUser.id);
-     updateUser({ block: user.block.filter(id => id !== otherUser.id) });
+    if (user) {
+      updateUser({ block: user.block.filter(id => id !== otherUser.id) });
+    }
    }
  };
 
