@@ -126,15 +126,7 @@ export class ChatService {
       include: {
         participants: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-                lastSeen: true,
-                statusMessage: true
-              }
-            }
+            user: true
           }
         }
       }

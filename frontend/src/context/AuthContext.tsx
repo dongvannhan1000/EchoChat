@@ -2,12 +2,13 @@ import React, { createContext, useEffect, useState} from 'react'
 import { User } from '@/types/chat'
 
 interface AuthContextType {
-  user: User
+  user: User | null
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshToken: () => Promise<void>;
   isAuthenticated: () => boolean;
+  updateUser: (userData: Partial<User>) => void
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -24,6 +25,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeToken = () => {
     localStorage.removeItem('token');
   };
+
+  const updateUser = (userData: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...userData } : null)
+  }
 
   const fetchUser = async () => {
     const token = getStoredToken();
@@ -128,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = () => !!getStoredToken();
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

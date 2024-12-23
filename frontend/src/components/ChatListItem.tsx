@@ -15,6 +15,7 @@ import { UserChat } from '@/types/chat'
 import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing, UserX, UserCheck } from 'lucide-react'
 import { memo } from "react"
 import { useAuth } from '@/hooks/useAuth'
+import { useUserChatInteractionsStore } from "@/stores/useInteraction"
 
 interface ChatListItemProps {
   chat: UserChat
@@ -23,13 +24,12 @@ interface ChatListItemProps {
   onLeaveChat: (chatId: number) => Promise<void>
   onMarkChatStatus: (id: number) => Promise<void>
   otherUser: {
+    id: number,
     name: string
     avatar: string | undefined
   }
   onPinChat: (id: number) => Promise<void>
   onMuteChat: (id: number, muteDuration?: number) => Promise<void>
-  onBlockUser: (userId: number) => Promise<void>
-  onUnblockUser: (userId: number) => Promise<void>
 }
 
 export const ChatListItem = memo(function ChatListItem({ 
@@ -40,26 +40,29 @@ export const ChatListItem = memo(function ChatListItem({
   onMarkChatStatus,
   onPinChat,
   onMuteChat,
-  otherUser, 
-  onBlockUser,
-  onUnblockUser
+  otherUser
 }: ChatListItemProps) {
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+  const { blockUser, unblockUser } = useUserChatInteractionsStore();
+  const handleBlock = async () => {
+   console.log('Handling block for user:', otherUser.id);
+   if (otherUser.id) {
+     await blockUser(otherUser.id);
+     updateUser({ block: [...user.block, otherUser.id] });
+   }
+ };
+  const handleUnblock = async () => {
+   console.log('Handling unblock for user:', otherUser.id);
+   if (otherUser.id) {
+     await unblockUser(otherUser.id);
+     updateUser({ block: user.block.filter(id => id !== otherUser.id) });
+   }
+ };
 
-  const getOtherUserId = () => {
-    if (chat.chat.chatType === 'private') {
-      const otherParticipant = chat.chat.participants.find(
-        p => p.userId !== user.id
-      );
-      return otherParticipant?.userId;
-    }
-    return null;
-  };
 
-  const otherUserId = getOtherUserId();
-  const isBlocked = otherUserId ? chat.chat.participants.some(participant => 
-    participant.user.block.includes(otherUserId)
+  const isBlocked = otherUser.id ? chat.chat.participants.some(participant => 
+    participant.user.block.includes(otherUser.id)
   ) : false;
 
   return (
@@ -114,20 +117,14 @@ export const ChatListItem = memo(function ChatListItem({
                   <DropdownMenuSeparator />
                   {isBlocked ? (
                     <DropdownMenuItem 
-                      onClick={() => {
-                        const otherUserId = getOtherUserId();
-                        if (otherUserId) void onUnblockUser(otherUserId);
-                      }}
+                      onClick={() => void handleUnblock()}
                     >
                       <UserCheck className="h-4 w-4 mr-2" />
                       Unblock
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem 
-                      onClick={() => {
-                        const otherUserId = getOtherUserId();
-                        if (otherUserId) void onBlockUser(otherUserId);
-                      }}
+                      onClick={() => void handleBlock()}
                       className="text-red-600"
                     >
                       <UserX className="h-4 w-4 mr-2" />

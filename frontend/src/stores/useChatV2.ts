@@ -31,7 +31,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
       const response = await api.get(`/api/chats`);
       set({ chats: response.data });
-      console.log('API Response chats', response.data);
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to fetch chats' },

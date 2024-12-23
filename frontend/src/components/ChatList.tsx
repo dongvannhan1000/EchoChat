@@ -64,30 +64,12 @@ export default memo(function ChatList({
     );
 
     return {
+      id: otherParticipant?.userId,
       name: otherParticipant?.user.name || 'Unknown User',
       avatar: otherParticipant?.user.avatar
     }
   }
 
-  const handleBlockUser = async (userId: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to block this user?"
-    );
-    if (confirmed) {
-      try {
-        await useUserChatInteractionsStore.getState().blockUser(userId);
-      } catch (error) {
-        console.error('Failed to block user:', error);
-      }
-    }
-  };
-   const handleUnblockUser = async (userId: number) => {
-    try {
-      await useUserChatInteractionsStore.getState().unblockUser(userId);
-    } catch (error) {
-      console.error('Failed to unblock user:', error);
-    }
-  };
   
 
   return (
@@ -112,8 +94,6 @@ export default memo(function ChatList({
             onMarkChatStatus={handleMarkChatStatus}
             onPinChat={handlePinChat}
             onMuteChat={handleMuteChat}
-            onBlockUser={handleBlockUser}
-            onUnblockUser={handleUnblockUser}
             otherUser={getOtherUser(chat)}
           />
         ))}

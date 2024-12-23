@@ -182,31 +182,6 @@ export const ChatPage: React.FC = () => {
       await leaveChat(chatId);
     }
   };
-  
-  const handleBlockUser = async (userId: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to block this user?"
-    );
-    if (confirmed) {
-      try {
-        await useUserChatInteractionsStore.getState().blockUser(userId);
-        // Nếu đang chat với user bị block, clear selected chat
-        if (currentChat?.participants.some(p => p.userId === userId)) {
-          setSelectedChatId(null);
-        }
-      } catch (error) {
-        console.error('Failed to block user:', error);
-      }
-    }
-  };
-
-  const handleUnblockUser = async (userId: number) => {
-    try {
-      await useUserChatInteractionsStore.getState().unblockUser(userId);
-    } catch (error) {
-      console.error('Failed to unblock user:', error);
-    }
-  };
 
   const [statusMessage, setStatusMessage] = useState('')
 
@@ -307,7 +282,11 @@ export const ChatPage: React.FC = () => {
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
         />
-        <MessageInput onSendMessage={handleSendMessage} />
+        <MessageInput 
+          onSendMessage={handleSendMessage}
+          currentChat={currentChat} 
+          user={user}
+        />
       </div>
     </div>
   )

@@ -21,11 +21,9 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
   markChatStatus: async (id: number, forceMarkAsSeen?: boolean) => {
     const action = 'markMessageAsRead';
     try {
-      console.log('Sending API request', id, forceMarkAsSeen);
       const response = await api.put(`/api/chats/${id.toString()}/toggle-read`, {
         forceMarkAsSeen 
       });
-      console.log('API Response:', response);
       
       // Update the chats in the chatStore
       useChatStore.setState(state => {
@@ -110,7 +108,11 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set, g
         isLoading: { ...state.isLoading, [action]: true },
         error: { ...state.error, [action]: null },
       }));
-      await api.post(`/api/users/block`, { userId });
+
+
+      const response = await api.post(`/api/users/block`, { userId });
+
+      console.log('Block response', response.data)
 
       useWebSocket.getState().sendBlockUser(userId);
       
