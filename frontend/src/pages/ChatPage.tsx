@@ -36,8 +36,7 @@ export const ChatPage: React.FC = () => {
   const {
     chats,
     currentChat,
-    fetchUserChats, 
-    fetchChatDetails,
+    fetchUserChats,
     createChat,
     leaveChat
   } = useChatStore()
@@ -55,28 +54,29 @@ export const ChatPage: React.FC = () => {
   
 
 
-  // useEffect(() => {
-  //   // Assuming you have the token stored somewhere
-  //   let mounted = true;
+  useEffect(() => {
+    // Assuming you have the token stored somewhere
+    let mounted = true;
 
-  //   const initializeWebSocket = async () => {
-  //     const token = localStorage.getItem('token');
-  //     if (token && mounted) {
-  //       console.log('Initializing WebSocket connection...');
-  //       await webSocketStore.connect(token);
-  //     }
-  //   };
+    const initializeWebSocket = async () => {
+      const token = localStorage.getItem('token');
+      if (token && mounted) {
+        console.log('Initializing WebSocket connection...');
+        await webSocketStore.connect(token);
+      }
+    };
 
-  //   void initializeWebSocket();
+    void initializeWebSocket();
+    void fetchUserChats();
 
-  //   return () => {
-  //     mounted = false;
-  //     console.log('Cleaning up WebSocket connection...');
-  //     if (webSocketStore.socket) {
-  //       void webSocketStore.disconnect();
-  //     }
-  //   };
-  // }, []);
+    return () => {
+      mounted = false;
+      console.log('Cleaning up WebSocket connection...');
+      if (webSocketStore.socket) {
+        void webSocketStore.disconnect();
+      }
+    };
+  }, []);
 
   // const isConnected = useWebSocket(state => state.isConnected);
 

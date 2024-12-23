@@ -6,8 +6,8 @@ import { Chat, User } from '@/types/chat'
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void
-  currentChat?: Chat
-  user: User
+  currentChat: Chat | null
+  user: User | null
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, currentChat, user }) => {
