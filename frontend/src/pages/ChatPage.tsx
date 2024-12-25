@@ -58,6 +58,7 @@ export const ChatPage: React.FC = () => {
     // Assuming you have the token stored somewhere
     let mounted = true;
 
+
     const initializeWebSocket = async () => {
       const token = localStorage.getItem('token');
       if (token && mounted) {

@@ -23,6 +23,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   fetchUserChats: async () => {
     const action = 'fetchUserChats';
+    console.log('API fetchUserChats')
     try {
       set((state) => ({
         isLoading: { ...state.isLoading, [action]: true },
@@ -30,7 +31,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }));
 
       const response = await api.get(`/api/chats`);
-      set({ chats: response.data });
+      set(state => {
+        if (JSON.stringify(state.chats) === JSON.stringify(response.data)) {
+          return state;
+        }
+        return { chats: response.data };
+      });
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to fetch chats' },

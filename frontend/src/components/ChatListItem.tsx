@@ -66,7 +66,8 @@ export const ChatListItem = memo(function ChatListItem({
 
 
   const isBlocked = otherUser.id ? chat.chat.participants.some(participant => 
-    participant.user.block.includes(otherUser.id)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    participant.user.block.includes(otherUser.id!)
   ) : false;
 
   return (

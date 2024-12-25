@@ -32,6 +32,7 @@ export default memo(function ChatList({
   }, [selectedChatId]);
   
   useEffect(() => {
+    console.log('useEffect in ChatList')
     if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId) && chats.some(chat => chat.chatId === selectedChatId)
     ) {
       void (async () => {
@@ -43,7 +44,7 @@ export default memo(function ChatList({
         }
       })();
     }
-  }, [selectedChatId, currentChat]);
+  }, [selectedChatId, currentChat?.id]);
 
   const handleMarkChatStatus = async (id: number) => {
     try {
@@ -86,7 +87,7 @@ export default memo(function ChatList({
     );
 
     return {
-      id: otherParticipant?.userId,
+      id: otherParticipant?.user.id,
       name: otherParticipant?.user.name || 'Unknown User',
       avatar: otherParticipant?.user.avatar
     }
