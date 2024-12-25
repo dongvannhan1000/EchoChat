@@ -8,19 +8,13 @@ export class ChatService {
     return await UserChat.findMany({
       where: { userId }, 
       select: {
+        id: true,
+        chatId: true,
         chat: {
           include: {
             participants: {
               include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    avatar: true,
-                    lastSeen: true,
-                    statusMessage: true
-                  }
-                }
+                user: true
               }
             },
             messages: {
@@ -132,15 +126,7 @@ export class ChatService {
       include: {
         participants: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-                lastSeen: true,
-                statusMessage: true
-              }
-            }
+            user: true
           }
         }
       }
@@ -183,5 +169,85 @@ export class ChatService {
         where: { id: chatId }
       });
     }
+  }
+
+  async markChatStatus(id: number, forceMarkAsSeen?: boolean) {
+    const userChat = await UserChat.findUnique({
+      where: { 
+        id: id
+      },
+      include: { chat: true }
+    });
+  
+    if (!userChat) {
+      throw new Error('Chat not found');
+    }
+
+    const newSeenStatus = forceMarkAsSeen !== undefined 
+      ? forceMarkAsSeen 
+      : !userChat.isSeen;
+  
+    return UserChat.update({
+      where: { id: id },
+      data: { 
+        isSeen: newSeenStatus
+      }
+    });
+  }
+
+  async pinChat(id: number) {
+    const userChat = await UserChat.findUnique({
+      where: { 
+        id: id
+      },
+      include: { chat: true }
+    });
+  
+    if (!userChat) {
+      throw new Error('Chat not found');
+    }
+
+    return UserChat.update({
+      where: { id: id },
+      data: { 
+        pinned: !userChat.pinned 
+      }
+    });
+  }
+
+  async muteChat(id: number, muteDuration?: number) {
+    const userChat = await UserChat.findUnique({
+      where: { 
+        id: id
+      },
+      include: { chat: true }
+    });
+  
+    if (!userChat) {
+      throw new Error('Chat not found');
+    }
+
+    // Calculate mutedUntil date if duration is provided
+    let mutedUntil;
+
+    if (muteDuration === 0) {
+      // Unmute: set mutedUntil to null
+      mutedUntil = null;
+    } else if (muteDuration === undefined) {
+
+      mutedUntil = new Date('2030-12-31T23:59:59Z');
+    } else {
+      // Mute for a specific duration
+      mutedUntil = new Date(Date.now() + muteDuration * 1000);
+    }
+
+    console.log('Updating mutedUntil to:', mutedUntil);
+
+    return UserChat.update({
+      where: { id: id },
+      data: { 
+        mutedUntil: mutedUntil
+      }
+    });
   }
 }

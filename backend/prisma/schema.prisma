@@ -71,7 +71,7 @@ model Message {
   senderId      Int
   chat          Chat       @relation(fields: [chatId], references: [id])
   sender        User       @relation(fields: [senderId], references: [id])
-
+  type          MessageType   @default(normal)
   content       String?
   image         String?
   isEdited      Boolean     @default(false)
@@ -90,5 +90,10 @@ enum ChatType {
 enum ChatRole {
   admin
   member
+}
+
+enum MessageType {
+  normal
+  system
 }
 

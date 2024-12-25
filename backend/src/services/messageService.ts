@@ -1,4 +1,5 @@
 import { Message, prisma, UserChat } from '../models/prisma';
+import { MessageType } from '@prisma/client';
 
 export class MessageService {
   async getChatMessages(chatId: number, userId: number, cursor?: number, limit: number = 20) {
@@ -18,7 +19,11 @@ export class MessageService {
     const messages = await Message.findMany({
       where: {
         chatId,
-        deletedAt: null
+        ...(cursor ? {
+          id: {
+            lt: cursor 
+          }
+        } : {})
       },
       include: {
         sender: {
@@ -32,14 +37,11 @@ export class MessageService {
       orderBy: {
         createdAt: 'desc'
       },
-      take: limit,
-      ...(cursor ? {
-        skip: 1,
-        cursor: {
-          id: cursor
-        }
-      } : {})
+      take: limit + 1
     });
+
+    const hasMore = messages.length > limit;
+    const resultMessages = messages.slice(0, limit).reverse();
 
     await UserChat.update({
       where: {
@@ -53,17 +55,21 @@ export class MessageService {
       }
     });
 
-    return messages;
+    return {
+      messages: resultMessages,
+      hasMore
+    }
   }
 
   async sendMessage(data: {
     chatId: number;
     senderId: number;
+    type: MessageType;
     content?: string;
     image?: string;
     replyToId?: number;
   }) {
-    const { chatId, senderId, content, image, replyToId } = data;
+    const { chatId, senderId, type, content, image, replyToId } = data;
 
     const userChat = await UserChat.findUnique({
       where: {
@@ -83,6 +89,7 @@ export class MessageService {
         data: {
           chatId,
           senderId,
+          type,
           content,
           image,
           replyToId
@@ -132,8 +139,51 @@ export class MessageService {
     return await Message.update({
       where: { id: messageId },
       data: {
+        content: 'This message has been deleted.',
         deletedAt: new Date()
       }
     });
+  };
+
+  async editMessage(data: { messageId: number; userId: number; newContent?: string; newImage?: string }) {
+    const { messageId, userId, newContent, newImage } = data;
+  
+    const message = await Message.findFirst({
+      where: {
+        id: messageId,
+        senderId: userId,
+        deletedAt: null
+      }
+    });
+  
+    if (!message) {
+      throw new Error('Message not found or not editable by this user');
+    }
+  
+    if (!newContent && !newImage) {
+      throw new Error('No new content or image provided for editing');
+    }
+  
+    const updatedMessage = await Message.update({
+      where: { id: messageId },
+      data: {
+        content: newContent || message.content,
+        image: newImage || message.image,
+        isEdited: true 
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        }
+      }
+    });
+  
+    return updatedMessage;
   }
 }
+
+

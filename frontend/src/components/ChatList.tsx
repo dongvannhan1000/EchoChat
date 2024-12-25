@@ -1,44 +1,125 @@
-import React from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Chat } from '@/types/chat'
+import { UserChat } from '@/types/chat'
+import { memo, useCallback, useEffect, useState } from "react"
+import { useAuth } from '@/hooks/useAuth'
+import { ChatListItem } from './ChatListItem'
+import { useUserChatInteractionsStore } from '@/stores/useInteraction'
+import { useChatStore } from '@/stores/useChatV2'
+import { useChat } from '@/stores/useChat'
+
 
 interface ChatListProps {
-  chats: Chat[]
-  selectedChat: Chat
-  onSelectChat: (chat: Chat) => void
+  chats: UserChat[]
+  onLeaveChat: (chatId: number) => Promise<void>
 }
 
-export const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, onSelectChat }) => {
+export default memo(function ChatList({ 
+  chats, 
+  onLeaveChat}: ChatListProps) {
+  const { user } = useAuth();
+  const { markChatStatus, pinChat, muteChat } = useUserChatInteractionsStore();
+  console.log('ChatList render')
+
+  const { currentChat, fetchChatDetails } = useChatStore()
+  const { fetchMessages } = useChat();
+
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+
+  const handleSelectChat = useCallback((chatId: number, id: number) => {
+    if (chatId !== selectedChatId) {
+      setSelectedChatId(chatId);
+      void markChatStatus(id, true);
+    }
+  }, [selectedChatId]);
+  
+  useEffect(() => {
+    console.log('useEffect in ChatList')
+    if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId) && chats.some(chat => chat.chatId === selectedChatId)
+    ) {
+      void (async () => {
+        try {
+          await fetchChatDetails(selectedChatId);
+          await fetchMessages(selectedChatId, true);
+        } catch (error) {
+          console.error('Error loading chat:', error);
+        }
+      })();
+    }
+  }, [selectedChatId, currentChat?.id]);
+
+  const handleMarkChatStatus = async (id: number) => {
+    try {
+      await markChatStatus(id);
+      console.log('markChatStatus called successfully');
+    } catch (error) {
+      console.error('Failed to change chat status:', error);
+    }
+  }
+
+  const handlePinChat = async (id: number) => {
+    try {
+      await pinChat(id);
+      console.log('pinChat called successfully');
+    } catch (error) {
+      console.error('Failed to change pin status:', error);
+    }
+  }
+
+  const handleMuteChat = async (id: number, muteDuration?: number) => {
+    try {
+      await muteChat(id, muteDuration);
+      console.log('muteChat called successfully');
+    } catch (error) {
+      console.error('Failed to mute chat:', error);
+    }
+  }
+
+  const getOtherUser = (chat: UserChat) => {
+    
+    if (chat.chat.chatType === 'group') {
+      return {
+        name: chat.chat.groupName || 'Group Chat',
+        avatar: chat.chat.groupAvatar
+      }
+    }
+    
+    const otherParticipant = chat.chat.participants.find(
+      p => p.userId !== user?.id
+    );
+
+    return {
+      id: otherParticipant?.user.id,
+      name: otherParticipant?.user.name || 'Unknown User',
+      avatar: otherParticipant?.user.avatar
+    }
+  }
+
+  
+
   return (
-    <ul className="overflow-y-auto h-[calc(100vh-120px)]">
-      {chats.map((chat) => (
-        <li
-          key={chat.id}
-          className={`p-4 hover:bg-gray-100 cursor-pointer ${
-            selectedChat.id === chat.id ? 'bg-gray-100' : ''
-          }`}
-          onClick={() => onSelectChat(chat)}
-        >
-          <div className="flex items-center space-x-3">
-            <Avatar>
-              <AvatarImage src={chat.avatar} alt={chat.name} />
-              <AvatarFallback>{chat.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <h2 className="font-semibold text-gray-800">{chat.name}</h2>
-                <span className="text-sm text-gray-500">{chat.time}</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-1">{chat.lastMessage}</p>
-            </div>
-            {chat.unread > 0 && (
-              <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
-                {chat.unread}
-              </span>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
+      <ul className="flex-1 overflow-y-auto">
+      {chats
+        .sort((a, b) => {
+          const timeA = new Date(a.updatedAt).getTime();
+          const timeB = new Date(b.updatedAt).getTime();
+          
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          
+          return timeB - timeA;
+        })
+        .map((chat, index) => (
+          <ChatListItem
+            key={`${String(chat.chatId)}-${String(index)}`}
+            chat={chat}
+            isSelected={selectedChatId === chat.chatId}
+            onSelectChat={handleSelectChat}
+            onLeaveChat={onLeaveChat}
+            onMarkChatStatus={handleMarkChatStatus}
+            onPinChat={handlePinChat}
+            onMuteChat={handleMuteChat}
+            otherUser={getOtherUser(chat)}
+          />
+        ))}
+      </ul>
   )
-}
+})

@@ -11,5 +11,6 @@ router.use(isAuth);
 router.get('/api/chats/:chatId/messages', messageController.getChatMessages as express.RequestHandler);
 router.post('/api/chats/:chatId/messages', messageController.sendMessage as express.RequestHandler);
 router.delete('/api/messages/:messageId', messageController.deleteMessage as express.RequestHandler);
+router.put('/api/messages/:messageId', messageController.editMessage as express.RequestHandler);
 
 export default router;

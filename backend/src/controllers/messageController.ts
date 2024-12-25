@@ -27,10 +27,12 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const chatId = parseInt(req.params.chatId);
+    const type = req.body.type;
     const message = await messageService.sendMessage({
       ...req.body,
       chatId,
-      senderId: userId
+      senderId: userId,
+      type
     });
     res.status(201).json(message);
   } catch (error: unknown) {
@@ -46,13 +48,39 @@ export const deleteMessage = async (req: AuthenticatedRequest, res: Response) =>
   try {
     const userId = req.user!.id;
     const messageId = parseInt(req.params.messageId);
-    await messageService.deleteMessage(messageId, userId);
-    res.json({ message: 'Message deleted' });
+    const updatedMessage = await messageService.deleteMessage(messageId, userId);
+    res.status(200).json(updatedMessage);
   }  catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });
     } else {
       res.status(500).json({ message: 'Failed to delete message' });
     }
+  }
+};
+
+export const editMessage = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const messageId = Number(req.params.messageId);
+    const { newContent, newImage } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!newContent && !newImage) {
+      return res.status(400).json({ error: 'No new content or image provided' });
+    }
+    const updatedMessage = await messageService.editMessage({
+      messageId,
+      userId,
+      newContent,
+      newImage
+    });
+    return res.status(200).json(updatedMessage);
+  } catch (error: any) {
+    console.error('Error editing message:', error.message);
+    return res.status(500).json({ error: error.message });
   }
 };

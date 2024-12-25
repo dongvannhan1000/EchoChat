@@ -1,40 +1,89 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, LogOut, Plus, X } from 'lucide-react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Search, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ChatList } from '@/components/ChatList'
+import ChatList from '@/components/ChatList'
 import { ChatWindow } from '@/components/ChatWindow'
 import { MessageInput } from '@/components/MessageInput'
 import { useAuth } from '@/hooks/useAuth'
+import { useChat } from '@/stores/useChat'
+import { useUser } from '@/stores/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { chats } from '@/constants/mockData'
-import { Chat } from '@/types/chat'
+import { User } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-// Mock user data for new message feature
-const mockUsers = [
-  { id: 'user1', name: 'Alice Johnson', email: 'alice@example.com' },
-  { id: 'user2', name: 'Bob Smith', email: 'bob@example.com' },
-  { id: 'user3', name: 'Carol Williams', email: 'carol@example.com' },
-  { id: 'user4', name: 'Nhan Dong', email: 'david@example.com' },
-]
+import { debounce } from 'lodash';
+import { useChatStore } from '@/stores/useChatV2'
+import { useUserChatInteractionsStore } from '@/stores/useInteraction'
+
+
 
 export const ChatPage: React.FC = () => {
-  const { user, logout } = useAuth()
-  const { messages, sendMessage } = useWebSocket()
-  const [selectedChat, setSelectedChat] = useState<Chat>(chats[0])
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const webSocketStore = useWebSocket();
+  const { 
+    messages, 
+    sendMessage,
+    fetchMessages,
+    isLoading,
+    hasMoreMessages,
+    sendSystemMessage
+  } = useChat();
+  const {
+    chats,
+    currentChat,
+    fetchUserChats,
+    createChat,
+    leaveChat
+  } = useChatStore()
+
+  const { users, fetchUsers } = useUser();
+
+  
+
 
   // New state for Create New Message feature
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filteredUsers, setFilteredUsers] = useState(mockUsers)
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  
+
+
+  useEffect(() => {
+    // Assuming you have the token stored somewhere
+    let mounted = true;
+
+
+    const initializeWebSocket = async () => {
+      const token = localStorage.getItem('token');
+      if (token && mounted) {
+        console.log('Initializing WebSocket connection...');
+        await webSocketStore.connect(token);
+      }
+    };
+
+    void initializeWebSocket();
+    void fetchUserChats();
+
+    return () => {
+      mounted = false;
+      console.log('Cleaning up WebSocket connection...');
+      if (webSocketStore.socket) {
+        void webSocketStore.disconnect();
+      }
+    };
+  }, []);
+
+  // const isConnected = useWebSocket(state => state.isConnected);
+
+  // useEffect(() => {
+  //   console.log('WebSocket connection status:', isConnected);
+  // }, [isConnected]);
 
   useEffect(() => {
     if (isNewMessageOpen && searchInputRef.current) {
@@ -43,47 +92,39 @@ export const ChatPage: React.FC = () => {
   }, [isNewMessageOpen])
 
   useEffect(() => {
-    const lowercasedFilter = searchTerm.toLowerCase()
-    const filtered = mockUsers.filter(user => 
-      user.name.toLowerCase().includes(lowercasedFilter) ||
-      user.email.toLowerCase().includes(lowercasedFilter)
-    )
-    setFilteredUsers(filtered)
-  }, [searchTerm])
+    if (isNewMessageOpen) {
+      void fetchUsers('');
+    }
+    if (searchTerm) {
+      const debouncedSearch = debounce(() => {
+        void fetchUsers(searchTerm);
+      }, 300);
+
+      console.log(users)
+      
+      debouncedSearch();
+      return () => {debouncedSearch.cancel()};
+    }
+  }, [searchTerm]);
 
   const handleSendMessage = (content: string) => {
-    if (user) {
-      const newMessage = {
-        id: Date.now(),
-        sender: user.name,
-        content,
-        time: new Date().toLocaleTimeString(),
-        isMine: true
-      }
-      sendMessage(newMessage)
+    if (currentChat) {
+      void sendMessage(currentChat.id, content)
     }
   }
 
-  const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
+  const handleLoadMore = async () => {
+    if (currentChat) {
+      await fetchMessages(currentChat.id, false);
+    }
+  };
 
-  const handleNewChat = (newUser: { id: string; name: string; email: string }) => {
+  const handleNewChat = async (newUser: User) => {
     console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
     setSearchTerm('')
-    // Here you would typically start a new chat or navigate to a new chat page
-    // For now, let's create a new chat and set it as selected
-    const newChat: Chat = {
-      id: Date.now(),
-      name: newUser.name,
-      lastMessage: '',
-      time: 'Now',
-      unread: 0,
-      avatar: '/placeholder.svg?height=40&width=40'
-    }
-    setSelectedChat(newChat)
+    await createChat([newUser.id]);
+    await fetchUserChats();
   }
 
   const closeNewMessagePopover = () => {
@@ -91,9 +132,41 @@ export const ChatPage: React.FC = () => {
     setSearchTerm('')
   }
 
+  const handleEditMessage = async (messageId: number, content: string, image: string) => {
+    try {
+      await useChat.getState().editMessage(messageId, content, image);
+    } catch (error) {
+      console.error('Failed to edit message:', error);
+    }
+  };
+
+  const handleDeleteMessage = (messageId: number) => {
+    void (async () => {
+      try {
+        await useChat.getState().removeMessage(messageId);
+      } catch (error) {
+        console.error('Failed to delete message:', error);
+      }
+    })();
+  };
+
+  const handleLeaveChat = async (chatId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to leave this chat?"
+    );
+    if (confirmed) {
+      await sendSystemMessage(chatId, 'system', `${user.name} left group`);
+      await leaveChat(chatId);
+    }
+  };
+
+  const [statusMessage, setStatusMessage] = useState('')
+
+  console.log('ChatPage render')
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-1/4 bg-white border-r border-gray-200">
+    <div className="flex h-full bg-gray-100">
+      <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-800">Chats</h1>
@@ -118,19 +191,21 @@ export const ChatPage: React.FC = () => {
                         type="text"
                         placeholder="Search user..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {setSearchTerm(e.target.value)}}
                         className="w-full"
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
-                      {filteredUsers.length === 0 ? (
-                        <div className="p-2 text-sm text-gray-500">No user found.</div>
+                      {users.length === 0 ? (
+                        <div className="p-2 text-sm text-gray-500">
+                          {searchTerm ? 'No user found.' : 'Start typing to search'}
+                        </div>
                       ) : (
-                        filteredUsers.map(user => (
+                        users.map(user => (
                           <button
                             key={user.id}
                             className="w-full text-left px-2 py-1 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            onClick={() => handleNewChat(user)}
+                            onClick={() => void handleNewChat({...user, id: Number(user.id)})}
                           >
                             <div>{user.name}</div>
                             <div className="text-sm text-gray-500">{user.email}</div>
@@ -141,9 +216,6 @@ export const ChatPage: React.FC = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-4 w-4" />
-              </Button>
             </div>
           </div>
           <div className="relative">
@@ -155,18 +227,41 @@ export const ChatPage: React.FC = () => {
             <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
           </div>
         </div>
+        <div className="p-4 border-b">
+        <input
+          type="text"
+          value={statusMessage}
+          onChange={(e) => {setStatusMessage(e.target.value)}}
+          placeholder="Update your status..."
+          className="w-full p-2 border rounded"
+        />
+        <button 
+          onClick={() => {onUpdateStatusMessage(statusMessage)}}
+          className="mt-2 p-2 bg-blue-500 text-white rounded"
+        >
+          Update Status
+        </button>
+      </div>
         <ChatList
           chats={chats}
-          selectedChat={selectedChat}
-          onSelectChat={setSelectedChat}
+          onLeaveChat={handleLeaveChat}
         />
       </div>
       <div className="flex-1 flex flex-col">
         <ChatWindow
-          selectedChat={selectedChat}
+          currentChat={currentChat}
           messages={messages}
+          isLoading={isLoading['fetchMessages']}
+          hasMore={hasMoreMessages} 
+          onLoadMore={() => void handleLoadMore()}
+          onEditMessage={handleEditMessage}
+          onDeleteMessage={handleDeleteMessage}
         />
-        <MessageInput onSendMessage={handleSendMessage} />
+        <MessageInput 
+          onSendMessage={handleSendMessage}
+          currentChat={currentChat} 
+          user={user}
+        />
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { PrismaClient, ChatType, ChatRole } from '@prisma/client'
+import { PrismaClient, ChatType, ChatRole, User } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs';
 
@@ -38,11 +38,20 @@ async function seedDatabase() {
   )
 
   // Generate Private Chats
-  const privateChats = await Promise.all(
-    Array.from({ length: 5 }).map(async () => {
-      const user1 = users[Math.floor(Math.random() * users.length)]
-      const user2 = users.find(u => u.id !== user1.id) || users[0]
-
+  const generateUniqueChatsWithMessages = async (users: User[], count: number) => {
+    const existingPairs = new Set<string>();
+    const privateChats = [];
+  
+    while (privateChats.length < count) {
+      const user1 = users[Math.floor(Math.random() * users.length)];
+      const remainingUsers = users.filter(u => u.id !== user1.id);
+      const user2 = remainingUsers[Math.floor(Math.random() * remainingUsers.length)];
+  
+      const chatPair = [user1.id, user2.id].sort().join('-');
+      if (existingPairs.has(chatPair)) continue;
+  
+      existingPairs.add(chatPair);
+      
       const chat = await prisma.chat.create({
         data: {
           chatType: ChatType.private,
@@ -62,30 +71,37 @@ async function seedDatabase() {
             ]
           }
         }
-      })
-
-      // Generate Messages for Private Chat
-      await Promise.all(
-        Array.from({ length: faker.number.int({ min: 5, max: 20 }) }).map(async () => {
-          const sender = Math.random() > 0.5 ? user1 : user2
-          await prisma.message.create({
-            data: {
-              chatId: chat.id,
-              senderId: sender.id,
-              content: faker.lorem.sentence(),
-              image: Math.random() > 0.8 ? faker.image.urlLoremFlickr() : null,
-            }
-          })
+      });
+  
+      const messages = Array.from({ length: faker.number.int({ min: 50, max: 100 }) })
+        .map((_, index) => {
+          const sender = Math.random() > 0.5 ? user1 : user2;
+          return {
+            chatId: chat.id,
+            senderId: sender.id,
+            content: faker.lorem.sentence(),
+            image: Math.random() > 0.8 ? faker.image.urlLoremFlickr() : null,
+            createdAt: new Date(Date.now() - index * 60 * 1000)
+          };
         })
-      )
-
-      return chat
-    })
-  )
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  
+      await prisma.message.createMany({
+        data: messages
+      });
+  
+      privateChats.push(chat);
+    }
+  
+    return privateChats;
+  };
+  
+  // Usage
+  const privateChats = await generateUniqueChatsWithMessages(users, 20);
 
   // Generate Group Chats
   const groupChats = await Promise.all(
-    Array.from({ length: 3 }).map(async () => {
+    Array.from({ length: 10 }).map(async () => {
       const groupAdminIndex = Math.floor(Math.random() * users.length)
       const groupAdmin = users[groupAdminIndex]
 
@@ -116,19 +132,23 @@ async function seedDatabase() {
       })
 
       // Generate Messages for Group Chat
-      await Promise.all(
-        Array.from({ length: faker.number.int({ min: 10, max: 50 }) }).map(async () => {
-          const sender = users[Math.floor(Math.random() * users.length)]
-          await prisma.message.create({
-            data: {
-              chatId: chat.id,
-              senderId: sender.id,
-              content: faker.lorem.sentence(),
-              image: Math.random() > 0.9 ? faker.image.urlLoremFlickr() : null,
-            }
-          })
+      const messages = Array.from({ length: faker.number.int({ min: 50, max: 100 }) })
+        .map((_, index) => {
+          const sender = users[Math.floor(Math.random() * users.length)];
+          return {
+            chatId: chat.id,
+            senderId: sender.id,
+            content: faker.lorem.sentence(),
+            image: Math.random() > 0.9 ? faker.image.urlLoremFlickr() : null,
+            createdAt: new Date(Date.now() - index * 60 * 1000)
+          };
         })
-      )
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+      await prisma.message.createMany({
+        data: messages
+      });
+
 
       return chat
     })
