@@ -14,14 +14,14 @@ interface UserChatInteractions {
   unblockUser: (userId: number) => Promise<void>;
 }
 
-export const useUserChatInteractionsStore = create<UserChatInteractions>((set, get) => ({
+export const useUserChatInteractionsStore = create<UserChatInteractions>((set) => ({
   isLoading: {},
   error: {},
 
   markChatStatus: async (id: number, forceMarkAsSeen?: boolean) => {
     const action = 'markMessageAsRead';
     try {
-      const response = await api.put(`/api/chats/${id.toString()}/toggle-read`, {
+      await api.put(`/api/chats/${id.toString()}/toggle-read`, {
         forceMarkAsSeen 
       });
       

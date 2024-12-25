@@ -107,6 +107,8 @@ export const useMessagesStore = create<MessagesStore>((set, get) => ({
         isLoading: { ...state.isLoading, [action]: true },
         error: { ...state.error, [action]: null },
       }));
+
+      console.log(type)
   
       const response = await api.post(`/api/chats/${chatId.toString()}/messages`, {
         content,

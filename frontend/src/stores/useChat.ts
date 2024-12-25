@@ -5,7 +5,7 @@
 
 
 import { create } from 'zustand';
-import { Chat, ChatRole, ChatType, Message, MessageType, UserChat } from '../types/chat';
+import { Chat, ChatType, Message, MessageType, UserChat } from '../types/chat';
 import { useWebSocket } from '../hooks/useWebSocket';
 import api from '../utils/axios'
 
@@ -30,14 +30,10 @@ interface ChatStore {
   
   editMessage: (messageId: number, content: string) => Promise<void>;
   markChatStatus: (id: number, forceMarkAsSeen?: boolean) => Promise<void>;
-  pinChat: (chatId: number, pinned: boolean) => Promise<void>;
-  muteChat: (chatId: number, mutedUntil: Date) => Promise<void>;
-  blockUser: (userId: number) => Promise<void>;
-  unblockUser: (userId: number) => Promise<void>;
-  updateGroupChat: (chatId: number, groupName?: string, groupAvatar?: string) => Promise<void>;
-  addUsersToGroup: (chatId: number, userIds: number[]) => Promise<void>;
-  removeUserFromGroup: (chatId: number, userId: number) => Promise<void>;
-  changeUserRole: (chatId: number, userId: number, newRole: ChatRole) => Promise<void>;
+  // updateGroupChat: (chatId: number, groupName?: string, groupAvatar?: string) => Promise<void>;
+  // addUsersToGroup: (chatId: number, userIds: number[]) => Promise<void>;
+  // removeUserFromGroup: (chatId: number, userId: number) => Promise<void>;
+  // changeUserRole: (chatId: number, userId: number, newRole: ChatRole) => Promise<void>;
   updateStatusMessage: (message: string) => Promise<void>;
 
 }
@@ -195,6 +191,8 @@ export const useChat = create<ChatStore>((set, get) => ({
         isLoading: { ...state.isLoading, [action]: true },
         error: { ...state.error, [action]: null },
       }));
+
+      console.log(type)
   
       const response = await api.post(`/api/chats/${chatId.toString()}/messages`, {
         content,
@@ -367,178 +365,110 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
-  pinChat: async (chatId: number, pinned: boolean) => {
-    const action = 'pinChat';
-    try {
-      await api.put(`/api/user-chats/${chatId}/pin`, { pinned });
-      set(state => ({
-        chats: state.chats.map(chat =>
-          chat.chatId === chatId ? { ...chat, pinned } : chat
-        ),
-      }));
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to pin/unpin chat' },
-      }));
-    }
-  },
 
-  muteChat: async (chatId: number, mutedUntil: Date) => {
-    const action = 'muteChat';
-    try {
-      await api.put(`/api/user-chats/${chatId}/mute`, { mutedUntil });
-      set(state => ({
-        chats: state.chats.map(chat =>
-          chat.chatId === chatId ? { ...chat, mutedUntil } : chat
-        ),
-      }));
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to mute chat' },
-      }));
-    }
-  },
-
-  blockUser: async (userId: number) => {
-    const action = 'blockUser';
-    try {
-      await api.post(`/api/users/block`, { userId });
-      // Update local state if needed
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to block user' },
-      }));
-    }
-  },
-
-  unblockUser: async (userId: number) => {
-    const action = 'unblockUser';
-    try {
-      set(state => ({
-        isLoading: { ...state.isLoading, [action]: true },
-        error: { ...state.error, [action]: null },
-      }));
-
-      await api.post(`/api/users/unblock`, { userId });
+  // updateGroupChat: async (chatId: number, groupName?: string, groupAvatar?: string) => {
+  //   const action = 'updateGroupChat';
+  //   try {
+  //     const response = await api.put(`/api/chats/${chatId}`, {
+  //       groupName,
+  //       groupAvatar,
+  //     });
       
-      // Update local state if needed
-      // You might want to refresh user data or chat list after unblocking
-      await get().fetchUserChats();
-      
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to unblock user' },
-      }));
-    } finally {
-      set(state => ({
-        isLoading: { ...state.isLoading, [action]: false },
-      }));
-    }
-  },
+  //     set(state => ({
+  //       currentChat: state.currentChat?.id === chatId
+  //         ? { ...state.currentChat, groupName, groupAvatar }
+  //         : state.currentChat,
+  //       chats: state.chats.map(chat =>
+  //         chat.chatId === chatId
+  //           ? { ...chat, chat: { ...chat.chat, groupName, groupAvatar } }
+  //           : chat
+  //       ),
+  //     }));
+  //   } catch (error) {
+  //     set(state => ({
+  //       error: { ...state.error, [action]: 'Failed to update group' },
+  //     }));
+  //   }
+  // },
 
-  updateGroupChat: async (chatId: number, groupName?: string, groupAvatar?: string) => {
-    const action = 'updateGroupChat';
-    try {
-      const response = await api.put(`/api/chats/${chatId}`, {
-        groupName,
-        groupAvatar,
-      });
+  // addUsersToGroup: async (chatId: number, userIds: number[]) => {
+  //   const action = 'addUsersToGroup';
+  //   try {
+  //     const response = await api.post(`/api/chats/${chatId}/users`, { userIds });
+  //     const updatedChat = response.data;
       
-      set(state => ({
-        currentChat: state.currentChat?.id === chatId
-          ? { ...state.currentChat, groupName, groupAvatar }
-          : state.currentChat,
-        chats: state.chats.map(chat =>
-          chat.chatId === chatId
-            ? { ...chat, chat: { ...chat.chat, groupName, groupAvatar } }
-            : chat
-        ),
-      }));
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to update group' },
-      }));
-    }
-  },
+  //     set(state => ({
+  //       currentChat: state.currentChat?.id === chatId
+  //         ? updatedChat
+  //         : state.currentChat,
+  //     }));
+  //   } catch (error) {
+  //     set(state => ({
+  //       error: { ...state.error, [action]: 'Failed to add users to group' },
+  //     }));
+  //   }
+  // },
 
-  addUsersToGroup: async (chatId: number, userIds: number[]) => {
-    const action = 'addUsersToGroup';
-    try {
-      const response = await api.post(`/api/chats/${chatId}/users`, { userIds });
-      const updatedChat = response.data;
+  // removeUserFromGroup: async (chatId: number, userId: number) => {
+  //   const action = 'removeUserFromGroup';
+  //   try {
+  //     set(state => ({
+  //       isLoading: { ...state.isLoading, [action]: true },
+  //       error: { ...state.error, [action]: null },
+  //     }));
+
+  //     await api.delete(`/api/chats/${chatId}/users/${userId}`);
       
-      set(state => ({
-        currentChat: state.currentChat?.id === chatId
-          ? updatedChat
-          : state.currentChat,
-      }));
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to add users to group' },
-      }));
-    }
-  },
+  //     // Update the current chat's participant list
+  //     set(state => ({
+  //       currentChat: state.currentChat?.id === chatId
+  //         ? {
+  //             ...state.currentChat,
+  //             participants: state.currentChat.participants.filter(
+  //               p => p.userId !== userId
+  //             ),
+  //           }
+  //         : state.currentChat,
+  //     }));
 
-  removeUserFromGroup: async (chatId: number, userId: number) => {
-    const action = 'removeUserFromGroup';
-    try {
-      set(state => ({
-        isLoading: { ...state.isLoading, [action]: true },
-        error: { ...state.error, [action]: null },
-      }));
-
-      await api.delete(`/api/chats/${chatId}/users/${userId}`);
+  //     // If the removed user is the current user, leave the chat
+  //     const currentUserId = getCurrentUserId(); // You'll need to implement this
+  //     if (userId === currentUserId) {
+  //       await get().leaveChat(chatId);
+  //     }
       
-      // Update the current chat's participant list
-      set(state => ({
-        currentChat: state.currentChat?.id === chatId
-          ? {
-              ...state.currentChat,
-              participants: state.currentChat.participants?.filter(
-                p => p.userId !== userId
-              ),
-            }
-          : state.currentChat,
-      }));
+  //   } catch (error) {
+  //     set(state => ({
+  //       error: { ...state.error, [action]: 'Failed to remove user from group' },
+  //     }));
+  //   } finally {
+  //     set(state => ({
+  //       isLoading: { ...state.isLoading, [action]: false },
+  //     }));
+  //   }
+  // },
 
-      // If the removed user is the current user, leave the chat
-      const currentUserId = getCurrentUserId(); // You'll need to implement this
-      if (userId === currentUserId) {
-        await get().leaveChat(chatId);
-      }
+  // changeUserRole: async (chatId: number, userId: number, newRole: ChatRole) => {
+  //   const action = 'changeUserRole';
+  //   try {
+  //     await api.put(`/api/chats/${chatId}/users/${userId}/role`, { role: newRole });
       
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to remove user from group' },
-      }));
-    } finally {
-      set(state => ({
-        isLoading: { ...state.isLoading, [action]: false },
-      }));
-    }
-  },
-
-  changeUserRole: async (chatId: number, userId: number, newRole: ChatRole) => {
-    const action = 'changeUserRole';
-    try {
-      await api.put(`/api/chats/${chatId}/users/${userId}/role`, { role: newRole });
-      
-      set(state => ({
-        currentChat: state.currentChat?.id === chatId
-          ? {
-              ...state.currentChat,
-              participants: state.currentChat.participants?.map(p =>
-                p.userId === userId ? { ...p, role: newRole } : p
-              ),
-            }
-          : state.currentChat,
-      }));
-    } catch (error) {
-      set(state => ({
-        error: { ...state.error, [action]: 'Failed to change user role' },
-      }));
-    }
-  },
+  //     set(state => ({
+  //       currentChat: state.currentChat?.id === chatId
+  //         ? {
+  //             ...state.currentChat,
+  //             participants: state.currentChat.participants.map(p =>
+  //               p.userId === userId ? { ...p, role: newRole } : p
+  //             ),
+  //           }
+  //         : state.currentChat,
+  //     }));
+  //   } catch (error) {
+  //     set(state => ({
+  //       error: { ...state.error, [action]: 'Failed to change user role' },
+  //     }));
+  //   }
+  // },
 
   updateStatusMessage: async (message: string) => {
     const action = 'updateStatusMessage';

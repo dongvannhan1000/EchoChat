@@ -3,7 +3,6 @@
 import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
 import { Message } from '@/types/chat';
-import { useChat } from '@/stores/useChat';
 import { useChatStore } from '@/stores/useChatV2';
 
 interface WebSocketStore {
@@ -72,14 +71,14 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
       });
 
   
-      newSocket.on('message-updated', (message: Message) => {
-        useChat.getState().updateMessage(message);
-      });
+      // newSocket.on('message-updated', (message: Message) => {
+      //   useChat.getState().updateMessage(message);
+      // });
 
-      newSocket.on('user-blocked', (data: { blockerId: number, blockedId: number }) => {
+      newSocket.on('user-blocked', () => {
         void useChatStore.getState().fetchUserChats();
       });
-       newSocket.on('user-unblocked', (data: { blockerId: number, blockedId: number }) => {
+       newSocket.on('user-unblocked', () => {
         void useChatStore.getState().fetchUserChats();
       });
   

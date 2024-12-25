@@ -34,7 +34,7 @@ interface UIStore {
   setLoading: (action: string, isLoading: boolean) => void;
 }
 
-export const useUI = create<UIStore>((set, get) => ({
+export const useUI = create<UIStore>((set) => ({
   theme: 'light',
   isSidebarOpen: false,
   modals: {},

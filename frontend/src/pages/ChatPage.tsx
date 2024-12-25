@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Search, Plus, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,6 @@ import {
 
 import { debounce } from 'lodash';
 import { useChatStore } from '@/stores/useChatV2'
-import { useUserChatInteractionsStore } from '@/stores/useInteraction'
 
 
 
@@ -132,9 +131,9 @@ export const ChatPage: React.FC = () => {
     setSearchTerm('')
   }
 
-  const handleEditMessage = async (messageId: number, content: string, image: string) => {
+  const handleEditMessage = async (messageId: number, content: string) => {
     try {
-      await useChat.getState().editMessage(messageId, content, image);
+      await useChat.getState().editMessage(messageId, content);
     } catch (error) {
       console.error('Failed to edit message:', error);
     }
@@ -155,7 +154,7 @@ export const ChatPage: React.FC = () => {
       "Are you sure you want to leave this chat?"
     );
     if (confirmed) {
-      await sendSystemMessage(chatId, 'system', `${user.name} left group`);
+      await sendSystemMessage(chatId, 'system', `${user!.name} left group`);
       await leaveChat(chatId);
     }
   };
@@ -236,7 +235,7 @@ export const ChatPage: React.FC = () => {
           className="w-full p-2 border rounded"
         />
         <button 
-          onClick={() => {onUpdateStatusMessage(statusMessage)}}
+          // onClick={() => {onUpdateStatusMessage(statusMessage)}}
           className="mt-2 p-2 bg-blue-500 text-white rounded"
         >
           Update Status

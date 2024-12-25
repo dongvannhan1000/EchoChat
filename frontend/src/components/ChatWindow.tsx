@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Chat, Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
@@ -57,24 +57,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   
 
   const getChatName = () => {
-    if (currentChat?.chatType === 'group') {
+    if (currentChat.chatType === 'group') {
       return currentChat.groupName || 'Group Chat';
     }
-    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id);
+    const otherUser = currentChat.participants.find(p => p.userId !== user?.id);
     return otherUser?.user.name || 'Chat';
   };
   
   const getChatAvatar = () => {
-    if (currentChat?.chatType === 'group') {
+    if (currentChat.chatType === 'group') {
       return currentChat.groupAvatar || '/placeholder.svg?height=40&width=40';
     }
-    const otherUser = currentChat?.participants.find(p => p.userId !== user?.id);
+    const otherUser = currentChat.participants.find(p => p.userId !== user?.id);
     return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40';
   };
   
   const handleEditClick = (message: Message) => {
     setEditingMessageId(message.id);
-    setEditContent(message.content ?? '');
+    setEditContent(message.content);
   };
   
   const handleEditSubmit = () => {
@@ -215,7 +215,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
                             <Trash className="mr-2 h-4 w-4" />
                             <span>Delete</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => {onPinMessage(message.id)}}>
+                          <DropdownMenuItem>
                             <Pin className="mr-2 h-4 w-4" />
                             <span>Pin</span>
                           </DropdownMenuItem>

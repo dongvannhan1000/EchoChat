@@ -58,7 +58,7 @@ export class MessageService {
     return {
       messages: resultMessages,
       hasMore
-    }
+    };
   }
 
   async sendMessage(data: {
