@@ -20,20 +20,12 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ message: 'Login fail', info });
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
-    return res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, avatar: user?.avatar }, token });
+    return res.json({ message: 'Login successful', user, token });
   })(req, res, next);
 };
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    req.session.destroy((err) => {
-      if (err) {
-        return next(err);
-      }
-      res.status(200).json({ message: 'Logout successful' });
-    });
-  });
+  res.status(200).json({ message: 'Logout successful' });
 };
 
 export const refreshToken = (req: Request, res: Response) => {

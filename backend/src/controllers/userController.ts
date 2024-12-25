@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
 import { User } from '../models/prisma';
+import { AuthenticatedRequest } from 'middleware/authMiddleware';
+import { UserService } from '../services/userService';
+
+const userService = new UserService();
 
 export const getUser = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -19,16 +23,16 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, avatar } = req.body;
+  const { name, avatar, statusMessage } = req.body;
 
   try {
     const updatedUser = await User.update({
       where: { id: Number(id) },
-      data: { name, avatar }
+      data: { name, avatar, statusMessage }
     });
     res.status(200).json(updatedUser);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to update post' });
+    res.status(500).json({ error: 'Unable to update user' });
   }
 };
 
@@ -59,7 +63,11 @@ export const getUsers = async (req: Request, res: Response) => {
             { email: { contains: search as string, mode: 'insensitive' } }
           ]
         }
-        : {} 
+        : {},
+      take: 10, 
+      orderBy: {
+        createdAt: 'desc' 
+      } 
     });
 
     res.status(200).json(users);
@@ -68,4 +76,41 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const blockUser = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const { userId: targetUserId } = req.body;
+    const userId = req.user.id;
+    if (userId === targetUserId) {
+      return res.status(400).json({ message: 'Cannot block yourself' });
+    }
+    const updatedUser = await userService.blockUser(userId, targetUserId);
+    res.json(updatedUser);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Failed to block user' });
+    }
+  }
+};
 
+export const unblockUser = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const { userId: targetUserId } = req.body;
+    const userId = req.user.id;
+    const updatedUser = await userService.unblockUser(userId, targetUserId);
+    res.json(updatedUser);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Failed to unblock user' });
+    }
+  }
+};
