@@ -10,11 +10,14 @@ import { useChat } from '@/stores/useChat'
 interface ChatListProps {
   chats: UserChat[]
   onLeaveChat: (chatId: number) => Promise<void>
+  chatSearchTerm: string
 }
 
-export default memo(function ChatList({ 
+export default function ChatList({ 
   chats, 
-  onLeaveChat}: ChatListProps) {
+  onLeaveChat,
+  chatSearchTerm}: ChatListProps) {
+  console.log('SearchTerm:', chatSearchTerm);
   const { user } = useAuth();
   const { markChatStatus, pinChat, muteChat } = useUserChatInteractionsStore();
   console.log('ChatList render')
@@ -98,6 +101,10 @@ export default memo(function ChatList({
   return (
       <ul className="flex-1 overflow-y-auto">
       {chats
+        .filter(chat => {
+          const otherUserName = getOtherUser(chat).name;
+          return otherUserName && otherUserName.toLowerCase().includes(chatSearchTerm.toLowerCase());
+        })
         .sort((a, b) => {
           const timeA = new Date(a.updatedAt).getTime();
           const timeB = new Date(b.updatedAt).getTime();
@@ -122,4 +129,4 @@ export default memo(function ChatList({
         ))}
       </ul>
   )
-})
+}

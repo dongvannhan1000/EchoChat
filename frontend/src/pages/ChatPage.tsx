@@ -49,6 +49,7 @@ export const ChatPage: React.FC = () => {
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [chatSearchTerm, setChatSearchTerm] = useState('')
 
   
 
@@ -222,6 +223,8 @@ export const ChatPage: React.FC = () => {
               type="text"
               placeholder="Search chats..."
               className="pl-10"
+              value={chatSearchTerm}
+              onChange={(e) => setChatSearchTerm(e.target.value)}
             />
             <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
           </div>
@@ -244,6 +247,7 @@ export const ChatPage: React.FC = () => {
         <ChatList
           chats={chats}
           onLeaveChat={handleLeaveChat}
+          chatSearchTerm={chatSearchTerm}
         />
       </div>
       <div className="flex-1 flex flex-col">

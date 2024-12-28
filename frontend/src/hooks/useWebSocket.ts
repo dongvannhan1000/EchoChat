@@ -75,12 +75,12 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
       //   useChat.getState().updateMessage(message);
       // });
 
-      newSocket.on('user-blocked', () => {
-        void useChatStore.getState().fetchUserChats();
-      });
-       newSocket.on('user-unblocked', () => {
-        void useChatStore.getState().fetchUserChats();
-      });
+      // newSocket.on('user-blocked', () => {
+      //   void useChatStore.getState().fetchUserChats();
+      // });
+      //  newSocket.on('user-unblocked', () => {
+      //   void useChatStore.getState().fetchUserChats();
+      // });
   
 
       set({ 
