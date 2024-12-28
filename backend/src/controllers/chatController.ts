@@ -24,6 +24,7 @@ export const createChat = async (req: AuthenticatedRequest, res: Response, next:
     }
 
     const { chatType, participantIds } = req.body;
+    console.log(chatType, participantIds);
     if (!['group', 'private'].includes(chatType) || !Array.isArray(participantIds) || participantIds.length === 0) {
       return res.status(400).json({ message: 'Invalid input data' });
     }
@@ -32,6 +33,7 @@ export const createChat = async (req: AuthenticatedRequest, res: Response, next:
     const chat = await chatService.createChat(userId, req.body);
     res.status(201).json(chat);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: 'Failed to create chat' });
   }
 };

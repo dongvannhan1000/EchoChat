@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
 import { useUser } from '@/stores/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { User } from '@/types/chat'
+import { Chat, User } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
@@ -50,6 +50,7 @@ export const ChatPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [chatSearchTerm, setChatSearchTerm] = useState('')
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
 
   
 
@@ -123,8 +124,10 @@ export const ChatPage: React.FC = () => {
     console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
     setSearchTerm('')
-    await createChat([newUser.id]);
-    await fetchUserChats();
+
+    const chatData = await createChat([newUser.id]);
+    console.log(chatData);
+    setSelectedChatId(chatData.id);
   }
 
   const closeNewMessagePopover = () => {
@@ -224,7 +227,7 @@ export const ChatPage: React.FC = () => {
               placeholder="Search chats..."
               className="pl-10"
               value={chatSearchTerm}
-              onChange={(e) => setChatSearchTerm(e.target.value)}
+              onChange={(e) => {setChatSearchTerm(e.target.value)}}
             />
             <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
           </div>
@@ -248,6 +251,8 @@ export const ChatPage: React.FC = () => {
           chats={chats}
           onLeaveChat={handleLeaveChat}
           chatSearchTerm={chatSearchTerm}
+          selectedChatId={selectedChatId}
+          setSelectedChatId={setSelectedChatId}
         />
       </div>
       <div className="flex-1 flex flex-col">

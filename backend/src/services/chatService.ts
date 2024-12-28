@@ -47,21 +47,24 @@ export class ChatService {
 
   // Creating a new chat or returning an existing chat
   async createChat(creatorId: number, data: {
-    chatType: ChatType;
+    id: number,
+    chatType?: ChatType;
     participantIds: number[];
     groupName?: string;
     groupAvatar?: string;
   }) {
     const { chatType, participantIds, groupName, groupAvatar } = data;
+
+    const uniqueParticipantIds = [...new Set(participantIds)];
     
-    if (chatType === 'private' && participantIds.length === 1) {
+    if (chatType === 'private' && uniqueParticipantIds.length === 1) {
       const existingChat = await Chat.findFirst({
         where: {
           chatType: 'private',
           participants: {
             every: {
               userId: {
-                in: [creatorId, participantIds[0]]
+                in: [creatorId, uniqueParticipantIds[0]]
               }
             }
           }
@@ -94,7 +97,7 @@ export class ChatService {
               role: ChatRole.admin,
               isSeen: true
             },
-            ...participantIds.map(userId => ({
+            ...uniqueParticipantIds.map(userId => ({
               userId,
               role: ChatRole.member,
               isSeen: false

@@ -11,12 +11,16 @@ interface ChatListProps {
   chats: UserChat[]
   onLeaveChat: (chatId: number) => Promise<void>
   chatSearchTerm: string
+  selectedChatId: number | null
+  setSelectedChatId: (chatId: number) => void
 }
 
 export default function ChatList({ 
   chats, 
   onLeaveChat,
-  chatSearchTerm}: ChatListProps) {
+  chatSearchTerm,
+  selectedChatId,
+  setSelectedChatId}: ChatListProps) {
   console.log('SearchTerm:', chatSearchTerm);
   const { user } = useAuth();
   const { markChatStatus, pinChat, muteChat } = useUserChatInteractionsStore();
@@ -25,7 +29,7 @@ export default function ChatList({
   const { currentChat, fetchChatDetails } = useChatStore()
   const { fetchMessages } = useChat();
 
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+
 
   const handleSelectChat = useCallback((chatId: number, id: number) => {
     if (chatId !== selectedChatId) {

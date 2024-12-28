@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { UserChat, Chat, ChatType } from '../types/chat';
+import { UserChat, Chat } from '../types/chat';
 import api from '../utils/axios';
 import { useWebSocket } from '../hooks/useWebSocket';
 
@@ -11,7 +11,7 @@ interface ChatStore {
 
   fetchUserChats: () => Promise<void>;
   fetchChatDetails: (chatId: number) => Promise<void>;
-  createChat: (userIds: number[], chatType?: ChatType) => Promise<void>;
+  createChat: (userIds: number[]) => Promise<Chat>;
   leaveChat: (chatId: number) => Promise<void>;
 }
 
@@ -87,9 +87,20 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         chatType: 'private', 
         participantIds: userIds 
       });
-      set((state) => ({
-        chats: [...state.chats, response.data],
-      }));
+
+      console.log(response.data)
+      // set((state) => ({
+      //   chats: [...state.chats, response.data],
+      // }));
+
+      set({
+        currentChat: response.data,
+        isLoading: { ...get().isLoading, [action]: false }
+      });
+
+      await get().fetchUserChats();
+
+      return response.data
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to create chat' },
