@@ -44,7 +44,9 @@ export default function AppLayout() {
             className="h-12 w-12 rounded-xl"
           >
             <Link to="/settings">
-              <Settings className="h-6 w-6" />
+              <Settings 
+                className="h-6 w-6" 
+              />
             </Link>
           </Button>
         </div>

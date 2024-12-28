@@ -1,4 +1,7 @@
+import { useAuth } from "@/hooks/useAuth";
+
 export default function Profile() {
+  const {user} = useAuth();
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Profile</h2>
@@ -7,7 +10,7 @@ export default function Profile() {
           <label className="block text-gray-700 mb-2">Name</label>
           <input
             type="text"
-            value="John Doe"
+            value={user?.name}
             className="w-full px-3 py-2 border rounded-md"
             readOnly
           />
@@ -16,7 +19,7 @@ export default function Profile() {
           <label className="block text-gray-700 mb-2">Email</label>
           <input
             type="email"
-            value="john@example.com"
+            value={user?.email}
             className="w-full px-3 py-2 border rounded-md"
             readOnly
           />
