@@ -3,7 +3,6 @@
 import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
 import { Message } from '@/types/chat';
-import { useChatStore } from '@/stores/useChatV2';
 
 interface WebSocketStore {
   socket: Socket | null;

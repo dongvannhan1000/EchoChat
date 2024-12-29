@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, Plus, X } from 'lucide-react'
+import { Search, Plus, X, Send } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import ChatList from '@/components/ChatList'
@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
 import { useUser } from '@/stores/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { Chat, User } from '@/types/chat'
+import { User } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
@@ -18,6 +18,7 @@ import {
 
 import { debounce } from 'lodash';
 import { useChatStore } from '@/stores/useChatV2'
+import { Card, CardContent } from '@/components/ui/card'
 
 
 
@@ -30,7 +31,8 @@ export const ChatPage: React.FC = () => {
     fetchMessages,
     isLoading,
     hasMoreMessages,
-    sendSystemMessage
+    sendSystemMessage,
+    updateStatusMessage
   } = useChat();
   const {
     chats,
@@ -232,21 +234,27 @@ export const ChatPage: React.FC = () => {
             <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
           </div>
         </div>
-        <div className="p-4 border-b">
-        <input
-          type="text"
-          value={statusMessage}
-          onChange={(e) => {setStatusMessage(e.target.value)}}
-          placeholder="Update your status..."
-          className="w-full p-2 border rounded"
-        />
-        <button 
-          // onClick={() => {onUpdateStatusMessage(statusMessage)}}
-          className="mt-2 p-2 bg-blue-500 text-white rounded"
-        >
-          Update Status
-        </button>
-      </div>
+        <Card className="w-full max-w-2xl mx-auto bg-white shadow-lg">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={statusMessage}
+                  onChange={(e) => {setStatusMessage(e.target.value)}}
+                  placeholder="What's on your mind?"
+                  className="w-full pl-4 pr-12 py-3 text-base bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition"
+                />
+                <Button 
+                  onClick={() => void updateStatusMessage(statusMessage)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center p-0 shadow-md transition-all duration-200 hover:shadow-lg"
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         <ChatList
           chats={chats}
           onLeaveChat={handleLeaveChat}

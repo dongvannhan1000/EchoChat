@@ -1,5 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserChat } from '@/types/chat'
-import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing, UserX, UserCheck } from 'lucide-react'
+import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing, UserX, UserCheck  } from 'lucide-react'
 import { memo } from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { useUserChatInteractionsStore } from "@/stores/useInteraction"
@@ -27,6 +29,7 @@ interface ChatListItemProps {
     id?: number,
     name: string
     avatar: string | undefined
+    statusMessage: string
   }
   onPinChat: (id: number) => Promise<void>
   onMuteChat: (id: number, muteDuration?: number) => Promise<void>
@@ -92,6 +95,35 @@ export const ChatListItem = memo(function ChatListItem({
             <h2 className="font-semibold text-gray-800 truncate">
               {otherUser.name}
             </h2>
+
+            {otherUser.statusMessage && (
+              <div className="mt-0.5">
+                {otherUser.statusMessage.length > 30 ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors"
+                        >
+                          {otherUser.statusMessage.substring(0, 30)}...
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{otherUser.statusMessage}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors"
+                  >
+                    {otherUser.statusMessage}
+                  </Badge>
+                )}
+              </div>
+            )}
             <div className="flex items-center space-x-2">
               {chat.pinned && <Pin className="h-4 w-4 text-blue-500" />}
               {(chat.mutedUntil && new Date(chat.mutedUntil) > new Date()) && 

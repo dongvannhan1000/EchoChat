@@ -1,5 +1,5 @@
 import { UserChat } from '@/types/chat'
-import { memo, useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { ChatListItem } from './ChatListItem'
 import { useUserChatInteractionsStore } from '@/stores/useInteraction'
@@ -96,7 +96,8 @@ export default function ChatList({
     return {
       id: otherParticipant?.user.id,
       name: otherParticipant?.user.name || 'Unknown User',
-      avatar: otherParticipant?.user.avatar
+      avatar: otherParticipant?.user.avatar,
+      statusMessage: otherParticipant?.user.statusMessage
     }
   }
 
