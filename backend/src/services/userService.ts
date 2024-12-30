@@ -54,4 +54,31 @@ export class UserService {
       throw error;
     }
   }
+
+  async updateStatus(userId: number, statusMessage: string) {
+    try {
+      console.log('Update status:', { userId });
+      
+      const user = await User.findUnique({
+        where: { id: userId },
+        select: { statusMessage: true }
+      });
+      const updatedUser = await User.update({
+        where: { id: userId },
+        data: {
+          statusMessage: statusMessage
+        },
+        select: {
+          id: true,
+          statusMessage: true
+        }
+      });
+      
+      console.log('Updated user status', updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Error in updateStatus:', error);
+      throw error;
+    }
+  }
 }

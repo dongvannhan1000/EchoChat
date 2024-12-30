@@ -114,3 +114,21 @@ export const unblockUser = async (req: AuthenticatedRequest, res: Response) => {
     }
   }
 };
+
+export const updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const { statusMessage } = req.body;
+    const userId = req.user.id;
+    const updatedUser = await userService.updateStatus(userId, statusMessage);
+    res.json(updatedUser);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Failed to update status user' });
+    }
+  }
+};

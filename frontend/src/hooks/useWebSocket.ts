@@ -17,7 +17,7 @@ interface WebSocketStore {
   joinRoom: (chatId: number) => void;
   leaveRoom: (chatId: number) => void;
   sendBlockUser: (userId: number) => void;
- sendUnblockUser: (userId: number) => void;
+  sendUnblockUser: (userId: number) => void;
 }
 
 const SOCKET_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
