@@ -92,20 +92,23 @@ export const ChatListItem = memo(function ChatListItem({
         </Avatar>
         <div className="flex-1 min-w-0 p-4 hover:bg-gray-50 transition-colors">
           <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
-            <div className="flex-shrink min-w-0 sm:max-w-[60%]">
-              <h2 className="font-semibold text-gray-800 truncate">
-                {otherUser.name}
-              </h2>
+            <div className="flex-shrink min-w-0 sm:w-[60%] flex flex-col justify-center">
+              <div className="flex justify-center">
+                <h2 className="font-semibold text-gray-800 truncate">
+                  {otherUser.name}
+                </h2>
+              </div>
+              
               
               {otherUser.statusMessage && (
-                <div className="mt-1">
+                <div className="mt-1 flex items-center">
                   {otherUser.statusMessage.length > 30 ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge 
                             variant="secondary" 
-                            className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors w-full truncate"
+                            className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors w-full truncate h-6 flex items-center justify-center"
                           >
                             {otherUser.statusMessage.substring(0, 30)}...
                           </Badge>
@@ -118,7 +121,7 @@ export const ChatListItem = memo(function ChatListItem({
                   ) : (
                     <Badge 
                       variant="secondary" 
-                      className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors w-full truncate"
+                      className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors w-full truncate h-6 flex items-center justify-center"
                     >
                       {otherUser.statusMessage}
                     </Badge>

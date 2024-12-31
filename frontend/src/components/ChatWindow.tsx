@@ -99,7 +99,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
       <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3">
         <Avatar>
           <AvatarImage src={getChatAvatar()} alt={getChatName()} />
-          <AvatarFallback>{getChatName().split(' ').map(n => n[0]).join('')}</AvatarFallback>
+          <AvatarFallback>{getChatName().split(' ').splice(0,3).map(n => n[0]).join('')}</AvatarFallback>
         </Avatar>
         <h2 className="text-xl font-semibold text-gray-800">{getChatName()}</h2>
       </div>
