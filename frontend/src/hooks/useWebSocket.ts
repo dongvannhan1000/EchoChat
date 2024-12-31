@@ -70,7 +70,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
         console.error('WebSocket error:', error);
       });
 
-      newSocket.on('new-message', (message: Message) => {
+      newSocket.on('message', (message: Message) => {
         // Import useChat từ store chat của bạn
         const { sendMessage } = useChat.getState();
         void sendMessage(message.chatId, message.content);
@@ -116,7 +116,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   sendMessage: (message: Partial<Message>) => {
     const { socket } = get();
     if (socket) {
-      socket.emit('new-message', message);
+      socket.emit('message', message);
     }
   },
 
