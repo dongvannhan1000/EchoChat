@@ -22,7 +22,7 @@ interface ChatStore {
   fetchUserChats: () => Promise<void>;
   fetchChatDetails: (chatId: number) => Promise<void>;
   fetchMessages: (chatId: number, reset?: boolean) => Promise<void>;
-  sendMessage: (chatId: number, content: string, image?: string, replyToId?: number) => Promise<void>;
+  sendMessage: (chatId: number, content: string, image?: string, replyToId?: number) => Promise<Message>;
   sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
   removeMessage: (messageId: number) => Promise<void>;
   createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
@@ -148,7 +148,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   },
 
   // Send a new message
-  sendMessage: async (chatId: number, content: string, image?: string) => {
+  sendMessage: async (chatId: number, content: string, image?: string, replyToId?: number) => {
     const action = 'sendMessage';
     try {
       set((state) => ({
@@ -159,9 +159,11 @@ export const useChat = create<ChatStore>((set, get) => ({
       const response = await api.post(`/api/chats/${chatId.toString()}/messages`, {
         content,
         image,
+        replyToId
       });
 
       const newMessage = response.data as Message;
+      console.log(newMessage);
       set((state) => ({
         messages: [...state.messages, newMessage].sort((a, b) => 
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -169,10 +171,12 @@ export const useChat = create<ChatStore>((set, get) => ({
       }));
 
       useWebSocket.getState().sendMessage(newMessage);
+      return newMessage
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to send message' },
       }));
+      throw error;
     } finally {
       set((state) => ({
         isLoading: { ...state.isLoading, [action]: false },

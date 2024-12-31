@@ -71,6 +71,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
       });
 
       newSocket.on('message', (message: Message) => {
+        console.log('Received message:', message);
         // Import useChat từ store chat của bạn
         useChat.setState((state) => ({
           messages: [...state.messages, message].sort((a, b) => 
@@ -119,6 +120,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   sendMessage: (message: Partial<Message>) => {
     const { socket } = get();
     if (socket) {
+      console.log('Sending message:', message);
       socket.emit('message', message);
     }
   },
