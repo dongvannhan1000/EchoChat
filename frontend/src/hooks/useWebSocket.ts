@@ -9,7 +9,7 @@ interface WebSocketStore {
   socket: Socket | null;
   isConnected: boolean;
   isInitialized: boolean;
-  connect: (token: string) => Promise<void>;
+  initializeSocket: (token: string) => Promise<void>;
   disconnect: () => Promise<void>;
   sendMessage: (message: Partial<Message>) => void;
   deleteMessage: (messageId:number) => void;
@@ -23,11 +23,13 @@ interface WebSocketStore {
 
 const SOCKET_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
-const connectWebSocket = async (token: string): Promise<Socket> => {
+export const connectWebSocket = async (token: string): Promise<Socket> => {
   const socket = io(SOCKET_URL, {
     auth: { token },
     transports: ['websocket'],
   });
+
+  console.log(socket);
 
   return new Promise((resolve, reject) => {
     // Set timeout for connection
@@ -36,14 +38,31 @@ const connectWebSocket = async (token: string): Promise<Socket> => {
       reject(new Error('Connection timeout'));
     }, 10000); // 10 seconds timeout
 
-    socket.on('connect', () => {
-      clearTimeout(timeout);
-      resolve(socket);
-    });
-
     socket.on('connect_error', (error) => {
+      console.error('Connection error:', error);
       clearTimeout(timeout);
       reject(error);
+    });
+
+    socket.on('connect', () => {
+      console.log('Socket connected in connectWebSocket:', socket.id);
+      
+      // Thiết lập các event listeners khác ngay tại đây
+      socket.on('disconnect', () => {
+        console.log('WebSocket disconnected');
+      });
+
+      socket.on('error', (error) => {
+        console.error('WebSocket error:', error);
+      });
+
+      socket.on('receive-message', (message: Message) => {
+        console.log('Received message:', message);
+        useChat.getState().addMessage(message);
+      });
+
+      clearTimeout(timeout);
+      resolve(socket);
     });
   });
 };
@@ -53,59 +72,18 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   isConnected: false,
   isInitialized: false,
 
-  connect: async (token: string): Promise<void> => {
-    const { socket, isInitialized } = get();
-    
-    if (socket || isInitialized) return;
-
+  initializeSocket: async (token: string) => {
     try {
-      const newSocket = await connectWebSocket(token);
-
-      newSocket.on('disconnect', () => {
-        set({ isConnected: false });
-        console.log('WebSocket disconnected');
-      });
-
-      newSocket.on('error', (error) => {
-        console.error('WebSocket error:', error);
-      });
-
-      newSocket.on('message', (message: Message) => {
-        console.log('Received message:', message);
-        // Import useChat từ store chat của bạn
-        useChat.setState((state) => ({
-          messages: [...state.messages, message].sort((a, b) => 
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          )
-        }));
-      });
-
-  
-      // newSocket.on('message-updated', (message: Message) => {
-      //   useChat.getState().updateMessage(message);
-      // });
-
-      // newSocket.on('user-blocked', () => {
-      //   void useChatStore.getState().fetchUserChats();
-      // });
-      //  newSocket.on('user-unblocked', () => {
-      //   void useChatStore.getState().fetchUserChats();
-      // });
-  
-
-      set({ 
-        socket: newSocket, 
-        isConnected: true,
-        isInitialized: true 
-      });
+      const socket = await connectWebSocket(token);
+      set({ socket, isConnected: true, isInitialized: true });
     } catch (error) {
-      console.error('Failed to initialize socket:', error);
-      throw error; // Re-throw để caller có thể handle
+      console.error('Socket connection failed:', error);
     }
   },
 
   disconnect: async (): Promise<void> => {
     const { socket } = get();
+    console.log(socket)
     if (!socket) return;
 
     return new Promise<void>((resolve) => {
@@ -119,9 +97,11 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
 
   sendMessage: (message: Partial<Message>) => {
     const { socket } = get();
-    if (socket) {
+    if (socket && socket.connected) {
       console.log('Sending message:', message);
-      socket.emit('message', message);
+      socket.emit('send-message', message);
+    } else {
+      console.error('Socket not connected');
     }
   },
 

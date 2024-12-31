@@ -23,6 +23,7 @@ interface ChatStore {
   fetchChatDetails: (chatId: number) => Promise<void>;
   fetchMessages: (chatId: number, reset?: boolean) => Promise<void>;
   sendMessage: (chatId: number, content: string, image?: string, replyToId?: number) => Promise<Message>;
+  addMessage: (message: Message) => void;
   sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
   removeMessage: (messageId: number) => Promise<void>;
   createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
@@ -164,11 +165,6 @@ export const useChat = create<ChatStore>((set, get) => ({
 
       const newMessage = response.data as Message;
       console.log(newMessage);
-      set((state) => ({
-        messages: [...state.messages, newMessage].sort((a, b) => 
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        ),
-      }));
 
       useWebSocket.getState().sendMessage(newMessage);
       return newMessage
@@ -182,6 +178,14 @@ export const useChat = create<ChatStore>((set, get) => ({
         isLoading: { ...state.isLoading, [action]: false },
       }));
     }
+  },
+
+  addMessage: (message: Message) => {
+    set((state) => ({
+      messages: [...state.messages, message].sort((a, b) => 
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
+    }));
   },
 
   sendSystemMessage: async (

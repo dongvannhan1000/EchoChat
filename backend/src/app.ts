@@ -20,8 +20,10 @@ const server = http.createServer(app);
 
 const io = new Server(server);
 
+
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
+  
   console.log('Connection attempt with token:', token);
   
   if (!token) {
@@ -38,14 +40,15 @@ io.use((socket, next) => {
   }
 });
 
-io.on('connection', (socket) => {
+io.on('connect', (socket) => {
   console.log('New client connected:', socket.id);
 
 
-  socket.on('message', (data) => {
+  socket.on('send-message', (data) => {
     console.log('Message received:', data);
     if (data.chatId) {
-      socket.to(data.chatId).emit('message', data);
+      console.log(`Sending message to room: ${data.chatId}`);
+      io.to(data.chatId.toString()).emit('receive-message', data);
     }
   });
 

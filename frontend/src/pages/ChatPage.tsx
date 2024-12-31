@@ -20,14 +20,15 @@ import { debounce } from 'lodash';
 import { useChatStore } from '@/stores/useChatV2'
 import { Card, CardContent } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Message } from '@/types/chat'
 
 
 
 export const ChatPage: React.FC = () => {
   const { user } = useAuth();
   const webSocketStore = useWebSocket();
-  const { 
-    messages, 
+  const {
+    messages,
     sendMessage,
     fetchMessages,
     isLoading,
@@ -55,6 +56,7 @@ export const ChatPage: React.FC = () => {
   const [chatSearchTerm, setChatSearchTerm] = useState('')
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
 
+
   
 
 
@@ -65,9 +67,9 @@ export const ChatPage: React.FC = () => {
 
     const initializeWebSocket = async () => {
       const token = localStorage.getItem('token');
-      if (token && mounted) {
+      if (token && mounted && !webSocketStore.socket) {
         console.log('Initializing WebSocket connection...');
-        await webSocketStore.connect(token);
+        await webSocketStore.initializeSocket(token);
       }
     };
 
@@ -114,6 +116,7 @@ export const ChatPage: React.FC = () => {
   const handleSendMessage = (content: string) => {
     if (currentChat) {
       void sendMessage(currentChat.id, content)
+
     }
   }
 
