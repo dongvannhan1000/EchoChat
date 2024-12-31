@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
   socket.on('message', (data) => {
     console.log('Message received:', data);
     if (data.chatId) {
-      socket.to(data.chatId).emit('new-message', data);
+      socket.to(data.chatId).emit('message', data);
     }
   });
 

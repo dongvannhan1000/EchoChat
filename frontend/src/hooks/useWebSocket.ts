@@ -72,8 +72,11 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
 
       newSocket.on('message', (message: Message) => {
         // Import useChat từ store chat của bạn
-        const { sendMessage } = useChat.getState();
-        void sendMessage(message.chatId, message.content);
+        useChat.setState((state) => ({
+          messages: [...state.messages, message].sort((a, b) => 
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          )
+        }));
       });
 
   
