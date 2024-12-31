@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
 import { Message } from '@/types/chat';
+import { useChat } from '@/stores/useChat';
 
 interface WebSocketStore {
   socket: Socket | null;
@@ -69,6 +70,12 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
         console.error('WebSocket error:', error);
       });
 
+      newSocket.on('new-message', (message: Message) => {
+        // Import useChat từ store chat của bạn
+        const { sendMessage } = useChat.getState();
+        void sendMessage(message.chatId, message.content);
+      });
+
   
       // newSocket.on('message-updated', (message: Message) => {
       //   useChat.getState().updateMessage(message);
@@ -109,7 +116,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   sendMessage: (message: Partial<Message>) => {
     const { socket } = get();
     if (socket) {
-      socket.emit('message', message);
+      socket.emit('new-message', message);
     }
   },
 
