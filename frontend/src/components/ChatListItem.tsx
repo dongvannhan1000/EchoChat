@@ -29,7 +29,7 @@ interface ChatListItemProps {
     id?: number,
     name: string
     avatar: string | undefined
-    statusMessage: string
+    statusMessage?: string
   }
   onPinChat: (id: number) => Promise<void>
   onMuteChat: (id: number, muteDuration?: number) => Promise<void>
@@ -87,54 +87,63 @@ export const ChatListItem = memo(function ChatListItem({
             alt={otherUser.name} 
           />
           <AvatarFallback>
-            {otherUser.name.split(' ').map(n => n[0]).join('')}
+            {otherUser.name.split(' ').slice(0,3).map(n => n[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800 truncate">
-              {otherUser.name}
-            </h2>
+        <div className="flex-1 min-w-0 p-4 hover:bg-gray-50 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
+            <div className="flex-shrink min-w-0 sm:max-w-[60%]">
+              <h2 className="font-semibold text-gray-800 truncate">
+                {otherUser.name}
+              </h2>
+              
+              {otherUser.statusMessage && (
+                <div className="mt-1">
+                  {otherUser.statusMessage.length > 30 ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge 
+                            variant="secondary" 
+                            className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors w-full truncate"
+                          >
+                            {otherUser.statusMessage.substring(0, 30)}...
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">{otherUser.statusMessage}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <Badge 
+                      variant="secondary" 
+                      className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors w-full truncate"
+                    >
+                      {otherUser.statusMessage}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
 
-            {otherUser.statusMessage && (
-              <div className="mt-0.5">
-                {otherUser.statusMessage.length > 30 ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge 
-                          variant="secondary" 
-                          className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors"
-                        >
-                          {otherUser.statusMessage.substring(0, 30)}...
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{otherUser.statusMessage}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs font-normal bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    {otherUser.statusMessage}
-                  </Badge>
-                )}
-              </div>
-            )}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               {chat.pinned && <Pin className="h-4 w-4 text-blue-500" />}
-              {(chat.mutedUntil && new Date(chat.mutedUntil) > new Date()) && 
+              {(chat.mutedUntil && new Date(chat.mutedUntil) > new Date()) && (
                 <BellOff className="h-4 w-4 text-gray-500" />
-              }
-              <span className="text-xs text-gray-500">
-                {new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              )}
+              <span className="text-xs text-gray-500 whitespace-nowrap">
+                {new Date(chat.updatedAt).toLocaleTimeString([], { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
               </span>
             </div>
           </div>
-          <p className="text-sm text-gray-600 truncate mt-1">{chat.lastMessage}</p>
+
+          <p className="text-sm text-gray-600 truncate mt-2 max-w-full">
+            {chat.lastMessage}
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           {!chat.isSeen && (

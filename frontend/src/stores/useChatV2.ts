@@ -11,7 +11,7 @@ interface ChatStore {
 
   fetchUserChats: () => Promise<void>;
   fetchChatDetails: (chatId: number) => Promise<void>;
-  createChat: (userIds: number[]) => Promise<Chat>;
+  createChat: (userIds: number[], type: string, groupName?: string) => Promise<Chat>;
   leaveChat: (chatId: number) => Promise<void>;
 }
 
@@ -75,7 +75,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  createChat: async (userIds: number[]) => {
+  createChat: async (userIds: number[], type: string, groupName?: string) => {
     const action = 'createChat';
     try {
       set((state) => ({
@@ -84,8 +84,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }));
 
       const response = await api.post('/api/chats', { 
-        chatType: 'private', 
-        participantIds: userIds 
+        chatType: type, 
+        participantIds: userIds,
+        groupName
       });
 
       console.log(response.data)

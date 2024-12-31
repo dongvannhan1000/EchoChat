@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, Plus, X, Send } from 'lucide-react'
+import { Search, Plus, X, Send, MoreHorizontal } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import ChatList from '@/components/ChatList'
@@ -19,6 +19,7 @@ import {
 import { debounce } from 'lodash';
 import { useChatStore } from '@/stores/useChatV2'
 import { Card, CardContent } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 
 
 
@@ -127,7 +128,17 @@ export const ChatPage: React.FC = () => {
     setIsNewMessageOpen(false)
     setSearchTerm('')
 
-    const chatData = await createChat([newUser.id]);
+    const chatData = await createChat([newUser.id], 'private');
+    console.log(chatData);
+    setSelectedChatId(chatData.id);
+  }
+
+  const handleNewGroupChat = async (newUser: User) => {
+    console.log('Starting new chat with:', newUser)
+    setIsNewMessageOpen(false)
+    setSearchTerm('')
+
+    const chatData = await createChat([newUser.id], 'group', `${user!.name}, ${newUser.name} Group`);
     console.log(chatData);
     setSelectedChatId(chatData.id);
   }
@@ -207,14 +218,39 @@ export const ChatPage: React.FC = () => {
                         </div>
                       ) : (
                         users.map(user => (
-                          <button
-                            key={user.id}
-                            className="w-full text-left px-2 py-1 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            onClick={() => void handleNewChat({...user, id: Number(user.id)})}
-                          >
-                            <div>{user.name}</div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
-                          </button>
+                          <div key={user.id} className="w-full border-b last:border-b-0">
+                            <div className="px-3 py-2 hover:bg-gray-50 flex items-center justify-between group">
+                              <div>
+                                <div className="font-medium">{user.name}</div>
+                                <div className="text-sm text-gray-500">{user.email}</div>
+                              </div>
+                              
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Open menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => void handleNewChat({...user, id: Number(user.id)})}
+                                  >
+                                    Start Chat
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => void handleNewGroupChat({...user, id: Number(user.id)})}
+                                  >
+                                    Create Group Chat
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
                         ))
                       )}
                     </div>
