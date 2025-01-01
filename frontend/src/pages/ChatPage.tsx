@@ -20,7 +20,6 @@ import { debounce } from 'lodash';
 import { useChatStore } from '@/stores/useChatV2'
 import { Card, CardContent } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { Message } from '@/types/chat'
 
 
 
