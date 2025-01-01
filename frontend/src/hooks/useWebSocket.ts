@@ -62,9 +62,16 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
       });
 
       socket.on('message-updated', (message: Message) => {
-        console.log('Received message:', message);
+        console.log('Updated message:', message);
         useChat.getState().setEditMessage(message);
       });
+
+      socket.on('message-deleted', (message: Message) => {
+        console.log('Deleted message:', message);
+        useChat.getState().deleteMessage(message);
+      });
+
+
 
       clearTimeout(timeout);
       resolve(socket);

@@ -26,6 +26,7 @@ interface ChatStore {
   addMessage: (message: Message) => void;
   sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
   removeMessage: (messageId: number) => Promise<void>;
+  deleteMessage: (message: Message) => void;
   createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
   leaveChat: (chatId: number) => Promise<void>;
   
@@ -236,15 +237,9 @@ export const useChat = create<ChatStore>((set, get) => ({
     try {
       const { data: updatedMessage } = await api.delete(`/api/messages/${messageId.toString()}`);
 
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === messageId
-          ? { ...msg, content: updatedMessage.content, deletedAt: updatedMessage.deletedAt }
-          : msg
-      ),
-    }));
 
-    useWebSocket.getState().deleteMessage(messageId);
+    useWebSocket.getState().deleteMessage(updatedMessage);
+    return updatedMessage
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to delete message' },
@@ -252,15 +247,15 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
-  // deleteMessage: (message: Message) => {
-  //   set((state) => ({
-  //     messages: state.messages.map((msg) =>
-  //       msg.id === messageId
-  //         ? { ...msg, content: updatedMessage.content, deletedAt: updatedMessage.deletedAt }
-  //         : msg
-  //     ),
-  //   }));
-  // },
+  deleteMessage: (message: Message) => {
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg.id === message.id
+          ? { ...msg, content: message.content, deletedAt: message.deletedAt }
+          : msg
+      ),
+    }));
+  },
 
   // Create a new chat
   createChat: async (userIds: number[]) => {
