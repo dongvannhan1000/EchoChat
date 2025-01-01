@@ -30,6 +30,7 @@ interface ChatStore {
   leaveChat: (chatId: number) => Promise<void>;
   
   editMessage: (messageId: number, content: string) => Promise<void>;
+  setEditMessage: (message: Message) => void;
   markChatStatus: (id: number, forceMarkAsSeen?: boolean) => Promise<void>;
   // updateGroupChat: (chatId: number, groupName?: string, groupAvatar?: string) => Promise<void>;
   // addUsersToGroup: (chatId: number, userIds: number[]) => Promise<void>;
@@ -251,6 +252,16 @@ export const useChat = create<ChatStore>((set, get) => ({
     }
   },
 
+  // deleteMessage: (message: Message) => {
+  //   set((state) => ({
+  //     messages: state.messages.map((msg) =>
+  //       msg.id === messageId
+  //         ? { ...msg, content: updatedMessage.content, deletedAt: updatedMessage.deletedAt }
+  //         : msg
+  //     ),
+  //   }));
+  // },
+
   // Create a new chat
   createChat: async (userIds: number[]) => {
     const action = 'createChat';
@@ -315,19 +326,6 @@ export const useChat = create<ChatStore>((set, get) => ({
       const response = await api.put(`/api/messages/${(messageId).toString()}`, payload);
       const updatedMessage = response.data;
       
-      set(state => ({
-        messages: state.messages.map(msg => 
-          msg.id === messageId 
-            ? { 
-                ...msg, 
-                content: updatedMessage.content, 
-                image: updatedMessage.image, 
-                isEdited: true 
-              } 
-            : msg
-        ),
-      }));
-
       useWebSocket.getState().sendMessageUpdate(updatedMessage as Message);
 
       return updatedMessage;
@@ -341,6 +339,21 @@ export const useChat = create<ChatStore>((set, get) => ({
         isLoading: { ...state.isLoading, [action]: false },
       }));
     }
+  },
+
+  setEditMessage: (message: Message) => {
+    set(state => ({
+      messages: state.messages.map(msg => 
+        msg.id === message.id 
+          ? { 
+              ...msg, 
+              content: message.content, 
+              image: message.image, 
+              isEdited: true 
+            } 
+          : msg
+      ),
+    }));
   },
 
   markChatStatus: async (id: number, forceMarkAsSeen?: boolean) => {

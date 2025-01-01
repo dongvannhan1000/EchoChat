@@ -67,9 +67,9 @@ io.on('connect', (socket) => {
     socket.leave(chatId.toString()); 
   });
 
-  socket.on('update-message', (updatedMessage) => {
+  socket.on('updated-message', (updatedMessage) => {
     console.log('Message updated:', updatedMessage);
-    socket.to(updatedMessage.chatId).emit('message-updated', updatedMessage);
+    io.to(updatedMessage.chatId.toString()).emit('message-updated', updatedMessage);
   });
   
   socket.on('delete-message', (messageId) => {

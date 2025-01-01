@@ -61,6 +61,11 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
         useChat.getState().addMessage(message);
       });
 
+      socket.on('message-updated', (message: Message) => {
+        console.log('Received message:', message);
+        useChat.getState().setEditMessage(message);
+      });
+
       clearTimeout(timeout);
       resolve(socket);
     });
@@ -115,7 +120,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   sendMessageUpdate: (message: Message) => {
     const { socket } = get();
     if (socket) {
-      socket.emit('update-message', message); 
+      socket.emit('updated-message', message); 
     }
   },
 
