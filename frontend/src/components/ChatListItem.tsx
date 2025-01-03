@@ -145,7 +145,7 @@ export const ChatListItem = memo(function ChatListItem({
           </div>
 
           <p className="text-sm text-gray-600 truncate mt-2 max-w-full">
-            {chat.lastMessage}
+            {chat.chat.lastMessage}
           </p>
         </div>
         <div className="flex items-center space-x-2">

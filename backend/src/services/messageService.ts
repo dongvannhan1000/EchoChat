@@ -1,4 +1,4 @@
-import { Message, prisma, UserChat } from '../models/prisma';
+import { Chat, Message, prisma, UserChat } from '../models/prisma';
 import { MessageType } from '@prisma/client';
 
 export class MessageService {
@@ -95,7 +95,8 @@ export class MessageService {
           replyToId
         },
         include: {
-          sender: true
+          sender: true,
+          chat: true
         }
       }),
 
@@ -108,13 +109,27 @@ export class MessageService {
         },
         data: {
           isSeen: false,
-          lastMessage: content || 'Sent an image',
           updatedAt: new Date()
         }
-      })
+      }),
+
+      
     ]);
 
-    return message;
+    const updatedChat = await Chat.updateMany({
+      where: {
+        id: chatId
+      },
+      data: {
+        lastMessage: content || 'Sent an image',
+        updatedAt: new Date()
+      }
+    });
+
+    return {
+      message,
+      updatedChat
+    };
   }
 
   async deleteMessage(messageId: number, userId: number) {

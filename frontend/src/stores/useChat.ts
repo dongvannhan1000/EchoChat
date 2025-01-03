@@ -8,6 +8,7 @@ import { create } from 'zustand';
 import { Chat, ChatType, Message, MessageType, UserChat } from '../types/chat';
 import { useWebSocket } from '../hooks/useWebSocket';
 import api from '../utils/axios'
+import { useChatStore } from './useChatV2';
 
 
 interface ChatStore {
@@ -165,8 +166,11 @@ export const useChat = create<ChatStore>((set, get) => ({
         replyToId
       });
 
-      const newMessage = response.data as Message;
+      const newMessage = response.data.message as Message;
       console.log(newMessage);
+      console.log(response.data.updatedChat)
+
+      useChatStore.getState().setCurrentChat(response.data.updatedChat as Chat)
 
       useWebSocket.getState().sendMessage(newMessage);
       return newMessage
@@ -188,6 +192,9 @@ export const useChat = create<ChatStore>((set, get) => ({
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       )
     }));
+
+
+
   },
 
   sendSystemMessage: async (

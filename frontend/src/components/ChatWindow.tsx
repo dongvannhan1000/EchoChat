@@ -33,6 +33,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   onLoadMore,
   onEditMessage, 
   onDeleteMessage }) => {
+
+  console.log(currentChat)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null)
@@ -68,7 +70,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
     if (currentChat.chatType === 'group') {
       return currentChat.groupAvatar || '/placeholder.svg?height=40&width=40';
     }
+
+    
     const otherUser = currentChat.participants.find(p => p.userId !== user?.id);
+    
     return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40';
   };
   
@@ -97,11 +102,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   return (
     <>
       <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3">
-        <Avatar>
-          <AvatarImage src={getChatAvatar()} alt={getChatName()} />
-          <AvatarFallback>{getChatName().split(' ').splice(0,3).map(n => n[0]).join('')}</AvatarFallback>
-        </Avatar>
-        <h2 className="text-xl font-semibold text-gray-800">{getChatName()}</h2>
+        {currentChat && currentChat.participants ? (
+          <>
+            <Avatar>
+              <AvatarImage src={getChatAvatar()} alt={getChatName()} />
+              <AvatarFallback>
+                {getChatName()
+                  .split(' ')
+                  .splice(0, 3)
+                  .map((n) => n[0])
+                  .join('')}
+              </AvatarFallback>
+            </Avatar>
+            <h2 className="text-xl font-semibold text-gray-800">{getChatName()}</h2>
+          </>
+        ) : (
+          <div className="text-gray-500 text-sm">Loading chat details...</div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
         {/* Loading overlay */}

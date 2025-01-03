@@ -13,6 +13,7 @@ interface ChatStore {
   fetchChatDetails: (chatId: number) => Promise<void>;
   createChat: (userIds: number[], type: string, groupName?: string) => Promise<Chat>;
   leaveChat: (chatId: number) => Promise<void>;
+  setCurrentChat: (chat: Chat) => void
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -20,6 +21,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   currentChat: null,
   isLoading: {},
   error: {},
+
+  setCurrentChat: (chat) => {set({ currentChat: chat })},
 
   fetchUserChats: async () => {
     const action = 'fetchUserChats';

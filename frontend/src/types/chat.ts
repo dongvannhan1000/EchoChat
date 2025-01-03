@@ -26,6 +26,7 @@ export interface Message {
   deletedAt?: Date;
   createdAt: Date;
   sender: User;
+  chat: Chat;
 }
 
 export interface Chat {
@@ -33,6 +34,7 @@ export interface Chat {
   chatType: ChatType;
   groupName?: string;
   groupAvatar?: string;
+  lastMessage?: string;
   createdBy: number;
   createdAt: Date;
   updatedAt: Date;
@@ -46,7 +48,6 @@ export interface UserChat {
   chatId: number;
   user: User;
   chat: Chat;
-  lastMessage?: string;
   isSeen: boolean;
   role: ChatRole;
   mutedUntil: Date | null;

@@ -33,7 +33,6 @@ export class ChatService {
             }
           }
         },
-        lastMessage: true,
         isSeen: true,
         pinned: true,
         updatedAt: true

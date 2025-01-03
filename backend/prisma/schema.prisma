@@ -38,7 +38,7 @@ model Chat {
   groupName     String?
   groupAvatar   String?
   createdBy     Int
-
+  lastMessage   String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   messages      Message[]
@@ -54,7 +54,7 @@ model UserChat {
   user          User       @relation(fields: [userId], references: [id])
   chat          Chat       @relation(fields: [chatId], references: [id])
 
-  lastMessage   String?
+
   isSeen        Boolean     @default(false)
   role          ChatRole    @default(member)
   mutedUntil    DateTime?
