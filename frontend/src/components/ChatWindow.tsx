@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Chat, Message } from '@/types/chat'
+import { Message } from '@/types/chat'
 import { useAuth } from '@/hooks/useAuth'
 import { Loader2, User, UserMinus, UserPlus, Users } from 'lucide-react'
+import { useChatStore } from '@/stores/useChatV2'
 import { formatMessageTime } from '@/utils/formatTime'
 import { Button } from './ui/button'
 import { 
@@ -15,7 +16,6 @@ import { Input } from "@/components/ui/input"
 import { MoreVertical, Edit, Trash, Pin } from 'lucide-react'
 
 interface ChatWindowProps {
-  currentChat: Chat | null
   messages: Message[]
   isLoading: boolean
   hasMore: boolean
@@ -26,7 +26,6 @@ interface ChatWindowProps {
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = (({ 
-  currentChat, 
   messages, 
   isLoading, 
   hasMore, 
@@ -34,12 +33,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   onEditMessage, 
   onDeleteMessage }) => {
 
+  const { currentChat } = useChatStore();
   console.log(currentChat)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null)
   const [editContent, setEditContent] = useState('');
   const [editImage, setEditImage] = useState<string | null>(null);
+
+  const [lastValidChat, setLastValidChat] = useState(currentChat);
+
+
+  useEffect(() => {
+    if (currentChat && currentChat.participants) {
+      setLastValidChat(currentChat);
+    }
+  }, [currentChat]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -59,21 +68,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   
 
   const getChatName = () => {
-    if (currentChat.chatType === 'group') {
-      return currentChat.groupName || 'Group Chat';
+    if (!lastValidChat) return 'Unknown Chat';
+    if (lastValidChat.chatType === 'group') {
+      return lastValidChat.groupName || 'Unnamed Group';
     }
-    const otherUser = currentChat.participants.find(p => p.userId !== user?.id);
-    return otherUser?.user.name || 'Chat';
+    const otherUser = lastValidChat.participants?.find(
+      (p) => p.userId !== user?.id
+    );
+    return otherUser?.user.name || 'Unknown User';
   };
   
   const getChatAvatar = () => {
-    if (currentChat.chatType === 'group') {
-      return currentChat.groupAvatar || '/placeholder.svg?height=40&width=40';
+    if (!lastValidChat) return '/placeholder.svg?height=40&width=40';
+    if (lastValidChat.chatType === 'group') {
+      return lastValidChat.groupAvatar || '/placeholder.svg?height=40&width=40';
     }
-
-    
-    const otherUser = currentChat.participants.find(p => p.userId !== user?.id);
-    
+    const otherUser = lastValidChat.participants.find(
+      (p) => p.userId !== user?.id
+    );
     return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40';
   };
   
@@ -102,7 +114,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   return (
     <>
       <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3">
-        {currentChat && currentChat.participants ? (
+        {lastValidChat ? (
           <>
             <Avatar>
               <AvatarImage src={getChatAvatar()} alt={getChatName()} />

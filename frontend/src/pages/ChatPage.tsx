@@ -303,7 +303,6 @@ export const ChatPage: React.FC = () => {
       </div>
       <div className="flex-1 flex flex-col">
         <ChatWindow
-          currentChat={currentChat}
           messages={messages}
           isLoading={isLoading['fetchMessages']}
           hasMore={hasMoreMessages} 
