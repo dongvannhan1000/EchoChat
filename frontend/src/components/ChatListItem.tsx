@@ -136,7 +136,7 @@ export const ChatListItem = memo(function ChatListItem({
                 <BellOff className="h-4 w-4 text-gray-500" />
               )}
               <span className="text-xs text-gray-500 whitespace-nowrap">
-                {new Date(chat.updatedAt).toLocaleTimeString([], { 
+                {new Date(chat.chat.updatedAt).toLocaleTimeString([], { 
                   hour: '2-digit', 
                   minute: '2-digit' 
                 })}

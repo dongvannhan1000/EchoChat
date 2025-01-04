@@ -26,12 +26,12 @@ interface ChatStore {
   sendMessage: (chatId: number, content: string, image?: string, replyToId?: number) => Promise<Message>;
   addMessage: (message: Message) => void;
   sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
-  removeMessage: (messageId: number) => Promise<void>;
+  removeMessage: (messageId: number) => Promise<Message>;
   deleteMessage: (message: Message) => void;
   createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
   leaveChat: (chatId: number) => Promise<void>;
   
-  editMessage: (messageId: number, content: string) => Promise<void>;
+  editMessage: (messageId: number, content: string) => Promise<Message>;
   setEditMessage: (message: Message) => void;
   markChatStatus: (id: number, forceMarkAsSeen?: boolean) => Promise<void>;
   // updateGroupChat: (chatId: number, groupName?: string, groupAvatar?: string) => Promise<void>;
@@ -327,6 +327,8 @@ export const useChat = create<ChatStore>((set, get) => ({
 
       const response = await api.put(`/api/messages/${(messageId).toString()}`, payload);
       const updatedMessage = response.data;
+
+      console.log('Updated message in useChat', updatedMessage)
       
       useWebSocket.getState().sendMessageUpdate(updatedMessage as Message);
 

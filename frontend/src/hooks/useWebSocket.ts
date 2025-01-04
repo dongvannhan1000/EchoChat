@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
 import { Message } from '@/types/chat';
 import { useChat } from '@/stores/useChat';
+import { useChatStore } from '@/stores/useChatV2';
 
 interface WebSocketStore {
   socket: Socket | null;
@@ -59,16 +60,19 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
       socket.on('receive-message', (message: Message) => {
         console.log('Received message:', message);
         useChat.getState().addMessage(message);
+        void useChatStore.getState().fetchUserChats()
       });
 
       socket.on('message-updated', (message: Message) => {
         console.log('Updated message:', message);
         useChat.getState().setEditMessage(message);
+        void useChatStore.getState().fetchUserChats()
       });
 
       socket.on('message-deleted', (message: Message) => {
         console.log('Deleted message:', message);
         useChat.getState().deleteMessage(message);
+        void useChatStore.getState().fetchUserChats()
       });
 
 
@@ -111,6 +115,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
     const { socket } = get();
     if (socket && socket.connected) {
       console.log('Sending message:', message);
+      void useChatStore.getState().fetchUserChats()
       socket.emit('send-message', message);
     } else {
       console.error('Socket not connected');
@@ -120,6 +125,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   deleteMessage: (messageId: number) => {
     const { socket } = get();
     if (socket) {
+      void useChatStore.getState().fetchUserChats()
       socket.emit('delete-message', messageId);
     }
   },

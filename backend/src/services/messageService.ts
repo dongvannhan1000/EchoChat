@@ -150,6 +150,10 @@ export class MessageService {
       data: {
         content: 'This message has been deleted.',
         deletedAt: new Date()
+      },
+      include: {
+        sender: true,
+        chat: true
       }
     });
   };
@@ -173,25 +177,44 @@ export class MessageService {
       throw new Error('No new content or image provided for editing');
     }
   
-    const updatedMessage = await Message.update({
-      where: { id: messageId },
-      data: {
-        content: newContent || message.content,
-        image: newImage || message.image,
-        isEdited: true 
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
+    return await prisma.$transaction(async (tx) => {
+      // Update the message
+      const updatedMessage = await tx.message.update({
+        where: { id: messageId },
+        data: {
+          content: newContent || message.content,
+          image: newImage || message.image,
+          isEdited: true
+        },
+        include: {
+          sender: true,
+          chat: true
         }
+      });
+
+      // Check if this is the last message in the chat
+      const lastMessage = await tx.message.findFirst({
+        where: {
+          chatId: message.chatId,
+          deletedAt: null
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      // If this is the last message, update the chat's lastMessage
+      if (lastMessage?.id === messageId) {
+        await tx.chat.update({
+          where: { id: message.chatId },
+          data: {
+            lastMessage: newContent || message.content
+          }
+        });
       }
+
+      return updatedMessage;
     });
-  
-    return updatedMessage;
   }
 }
 

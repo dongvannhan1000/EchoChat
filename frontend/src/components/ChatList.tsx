@@ -29,6 +29,8 @@ export default function ChatList({
   const { currentChat, fetchChatDetails } = useChatStore()
   const { fetchMessages } = useChat();
 
+  
+
 
 
   const handleSelectChat = useCallback((chatId: number, id: number) => {
