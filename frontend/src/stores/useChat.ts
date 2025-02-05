@@ -28,8 +28,6 @@ interface ChatStore {
   sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
   removeMessage: (messageId: number) => Promise<Message>;
   deleteMessage: (message: Message) => void;
-  createChat: (userIds: number[], chatType?: ChatType, groupName?: string, groupAvatar?: string) => Promise<void>;
-  leaveChat: (chatId: number) => Promise<void>;
   
   editMessage: (messageId: number, content: string) => Promise<Message>;
   setEditMessage: (message: Message) => void;
@@ -265,53 +263,6 @@ export const useChat = create<ChatStore>((set, get) => ({
   },
 
   // Create a new chat
-  createChat: async (userIds: number[]) => {
-    const action = 'createChat';
-    try {
-      set((state) => ({
-        isLoading: { ...state.isLoading, [action]: true },
-        error: { ...state.error, [action]: null },
-      }));
-
-      const response = await api.post('/api/chats', { 
-        chatType: 'private', 
-        participantIds: userIds 
-      });
-      set((state) => ({
-        chats: [...state.chats, response.data],
-      }));
-    } catch (error) {
-      set((state) => ({
-        error: { ...state.error, [action]: 'Failed to create chat' },
-      }));
-    } finally {
-      set((state) => ({
-        isLoading: { ...state.isLoading, [action]: false },
-      }));
-    }
-  },
-
-  // Leave a chat
-  leaveChat: async (chatId: number) => {
-    const action = 'leaveChat';
-    try {
-      await api.delete(`/api/chats/${chatId.toString()}/leave`);
-      set((state) => {
-        const updatedChats = state.chats.filter((chat) => chat.chatId !== chatId);
-        
-        return {
-          chats: updatedChats,
-          currentChat: null, // Always set to null when leaving a chat
-        };
-      });
-
-      useWebSocket.getState().leaveRoom(chatId);
-    } catch (error) {
-      set((state) => ({
-        error: { ...state.error, [action]: 'Failed to leave chat' },
-      }));
-    }
-  },
 
   editMessage: async (messageId: number, content: string, image?: string) => {
     const action = 'editMessage';

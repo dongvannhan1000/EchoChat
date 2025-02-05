@@ -34,10 +34,11 @@ export default function ChatList({
 
 
   const handleSelectChat = useCallback((chatId: number, id: number) => {
-    if (chatId !== selectedChatId) {
+    if (chatId) {
       setSelectedChatId(chatId);
       void markChatStatus(id, true);
     }
+    
   }, [selectedChatId]);
   
   useEffect(() => {
