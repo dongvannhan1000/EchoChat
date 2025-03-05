@@ -5,7 +5,7 @@
 
 
 import { create } from 'zustand';
-import { Chat, ChatType, Message, MessageType, UserChat } from '../types/chat';
+import { Chat, Message, MessageType, UserChat } from '../types/chat';
 import { useWebSocket } from '../hooks/useWebSocket';
 import api from '../utils/axios'
 import { useChatStore } from './useChatV2';
