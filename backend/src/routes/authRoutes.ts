@@ -10,5 +10,6 @@ router.post('/api/register', validateRegistration, validate, authController.regi
 router.post('/api/login', authController.login);
 router.post('/api/logout', authController.logout);
 router.post('/api/refresh-token', authController.refreshToken);
+router.get('/api/me', authController.getCurrentUser);
 
 export default router;

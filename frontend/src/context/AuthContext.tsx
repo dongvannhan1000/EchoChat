@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState} from 'react'
 import { User } from '@/types/chat'
+import api from '@/utils/axios'
 
 interface AuthContextType {
   user: User | null
@@ -9,12 +10,14 @@ interface AuthContextType {
   refreshToken: () => Promise<void>;
   isAuthenticated: () => boolean;
   updateUser: (userData: Partial<User>) => void
+  loading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const getStoredToken = () => localStorage.getItem('token');
 
@@ -32,26 +35,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async () => {
     const token = getStoredToken();
-    if (!token) return;
+    console.log('Retrieved token:', token);
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/refresh-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
+      const response = await api.get('/api/me');
+      const { user: userData } = response.data;
+      console.log('User data:', userData);
 
-      if (response.ok) {
-        const data = await response.json();
-        saveToken(data.token as string);
-        // Assuming the backend includes user data with the refreshed token
-        setUser(data.user as User);
-      } else {
-        throw new Error('Token refresh failed');
+      if (!userData) {
+        throw new Error('No user data received');
       }
+      
+      setUser(userData);
     } catch (error) {
       console.error('Error refreshing token:', error);
       removeToken();
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,17 +66,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        
-      });
-
-      if (!response.ok) throw new Error('Login failed');
-      const data = await response.json() as { user: User, token: string };
+      const response = await api.post('/api/login', { email, password });
+      const data = response.data;
+      
       saveToken(data.token);
-      setUser(data.user); // Assuming backend returns `user` object
+      setUser(data.user);
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -80,13 +79,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      if (!response.ok) throw new Error('Registration failed');
-      const data = await response.json() as { user: User};
+      const response = await api.post('/api/register', { name, email, password });
+      const data = response.data;
+      
+      if (data.token) {
+        saveToken(data.token);
+      }
       setUser(data.user);
     } catch (error) {
       console.error('Error registering:', error);
@@ -95,17 +93,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async(): Promise<void> => {
-    await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    })
-      .then(() => {
-        setUser(null);
-        localStorage.removeItem('token');
-    })
-      .catch((error: unknown) => {
-        console.error('Error logging out:', error)
-      });
+    try {
+      await api.post('/api/logout');
+      setUser(null);
+      removeToken();
+    } catch (error) {
+      console.error('Error logging out:', error);
+      // Still remove user and token on error
+      setUser(null);
+      removeToken();
+    }
   };
 
   const refreshToken = async () => {
@@ -113,27 +110,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!token) return;
 
     try {
-      const response = await fetch(`${String(import.meta.env.VITE_BACKEND_URL)}/api/refresh-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-
-      if (!response.ok) throw new Error('Token refresh failed');
-
-      const data = await response.json() as { token: string; user: User };
+      const response = await api.post('/api/refresh-token', { token });
+      const data = response.data;
+      
       saveToken(data.token);
       setUser(data.user);
+      return data.token;
     } catch (error) {
       console.error('Error refreshing token:', error);
       removeToken();
+      setUser(null);
+      throw error;
     }
   };
 
-  const isAuthenticated = () => !!getStoredToken();
+  const isAuthenticated = () => {
+    const token = getStoredToken();
+    return !!token; // Chỉ kiểm tra token, không kiểm tra user
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated, updateUser }}>
+    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   )
