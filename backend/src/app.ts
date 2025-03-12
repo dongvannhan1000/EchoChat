@@ -18,7 +18,12 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server);
+
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL, 
+  },
+});
 
 
 io.use((socket, next) => {
@@ -109,7 +114,7 @@ io.on('connect', (socket) => {
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors({
-  origin: '*', 
+  origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 app.use(sessionMiddleware);
