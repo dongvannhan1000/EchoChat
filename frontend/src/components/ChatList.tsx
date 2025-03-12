@@ -21,10 +21,8 @@ export default function ChatList({
   chatSearchTerm,
   selectedChatId,
   setSelectedChatId}: ChatListProps) {
-  console.log('SearchTerm:', chatSearchTerm);
   const { user } = useAuth();
   const { markChatStatus, pinChat, muteChat } = useUserChatInteractionsStore();
-  console.log('ChatList render')
 
   const { currentChat, fetchChatDetails } = useChatStore()
   const { fetchMessages } = useChat();
@@ -42,7 +40,6 @@ export default function ChatList({
   }, [selectedChatId]);
   
   useEffect(() => {
-    console.log('useEffect in ChatList')
     if (selectedChatId && (!currentChat || currentChat.id !== selectedChatId) && chats.some(chat => chat.chatId === selectedChatId)
     ) {
       void (async () => {
@@ -59,7 +56,6 @@ export default function ChatList({
   const handleMarkChatStatus = async (id: number) => {
     try {
       await markChatStatus(id);
-      console.log('markChatStatus called successfully');
     } catch (error) {
       console.error('Failed to change chat status:', error);
     }
@@ -68,7 +64,6 @@ export default function ChatList({
   const handlePinChat = async (id: number) => {
     try {
       await pinChat(id);
-      console.log('pinChat called successfully');
     } catch (error) {
       console.error('Failed to change pin status:', error);
     }
@@ -77,7 +72,6 @@ export default function ChatList({
   const handleMuteChat = async (id: number, muteDuration?: number) => {
     try {
       await muteChat(id, muteDuration);
-      console.log('muteChat called successfully');
     } catch (error) {
       console.error('Failed to mute chat:', error);
     }

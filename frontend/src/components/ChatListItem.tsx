@@ -49,7 +49,6 @@ export const ChatListItem = memo(function ChatListItem({
   const { user, updateUser } = useAuth();
   const { blockUser, unblockUser } = useUserChatInteractionsStore();
   const handleBlock = async () => {
-   console.log('Handling block for user:', otherUser.id);
    if (otherUser.id) {
     await blockUser(otherUser.id);
     if (user) {
@@ -58,7 +57,6 @@ export const ChatListItem = memo(function ChatListItem({
    }
  };
   const handleUnblock = async () => {
-   console.log('Handling unblock for user:', otherUser.id);
    if (otherUser.id) {
      await unblockUser(otherUser.id);
     if (user) {

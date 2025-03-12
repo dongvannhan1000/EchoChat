@@ -34,7 +34,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   onDeleteMessage }) => {
 
   const { currentChat } = useChatStore();
-  console.log(currentChat)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null)
@@ -110,7 +109,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   
 
 
-  console.log('ChatWindow render')
   return (
     <>
       <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3">

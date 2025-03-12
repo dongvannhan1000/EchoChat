@@ -67,7 +67,6 @@ export const ChatPage: React.FC = () => {
     const initializeWebSocket = async () => {
       const token = localStorage.getItem('token');
       if (token && mounted && !webSocketStore.socket) {
-        console.log('Initializing WebSocket connection...');
         await webSocketStore.initializeSocket(token);
       }
     };
@@ -77,7 +76,6 @@ export const ChatPage: React.FC = () => {
 
     return () => {
       mounted = false;
-      console.log('Cleaning up WebSocket connection...');
       if (webSocketStore.socket) {
         void webSocketStore.disconnect();
       }
@@ -105,7 +103,6 @@ export const ChatPage: React.FC = () => {
         void fetchUsers(searchTerm);
       }, 300);
 
-      console.log(users)
       
       debouncedSearch();
       return () => {debouncedSearch.cancel()};
@@ -126,22 +123,18 @@ export const ChatPage: React.FC = () => {
   };
 
   const handleNewChat = async (newUser: User) => {
-    console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
     setSearchTerm('')
 
     const chatData = await createChat([newUser.id], 'private');
-    console.log(chatData);
     setSelectedChatId(chatData.id);
   }
 
   const handleNewGroupChat = async (newUser: User) => {
-    console.log('Starting new chat with:', newUser)
     setIsNewMessageOpen(false)
     setSearchTerm('')
 
     const chatData = await createChat([newUser.id], 'group', `${user!.name}, ${newUser.name} Group`);
-    console.log(chatData);
     setSelectedChatId(chatData.id);
   }
 
@@ -180,7 +173,6 @@ export const ChatPage: React.FC = () => {
 
   const [statusMessage, setStatusMessage] = useState('')
 
-  console.log('ChatPage render')
 
   return (
     <div className="flex h-full bg-gray-100">

@@ -62,7 +62,6 @@ export const useChat = create<ChatStore>((set, get) => ({
 
       const response = await api.get(`/api/chats`);
       set({ chats: response.data });
-      console.log('API Response chats', response.data);
     } catch (error) {
       set((state) => ({
         error: { ...state.error, [action]: 'Failed to fetch chats' },
@@ -85,15 +84,14 @@ export const useChat = create<ChatStore>((set, get) => ({
         hasMoreMessages: true
       });
 
-      console.log('Fetching details for chat ID:', chatId);
       const response = await api.get(`/api/chats/${chatId.toString()}`);
       set({
         currentChat: response.data,
         isLoading: { ...get().isLoading, [action]: false }
       });
 
-      const updatedState = get();
-      console.log('Updated current chat:', updatedState.currentChat);
+      // const updatedState = get();
+      // console.log('Updated current chat:', updatedState.currentChat);
       useWebSocket.getState().joinRoom(chatId);
     } catch (error) {
       set((state) => ({
@@ -165,8 +163,6 @@ export const useChat = create<ChatStore>((set, get) => ({
       });
 
       const newMessage = response.data.message as Message;
-      console.log(newMessage);
-      console.log(response.data.updatedChat)
 
       useChatStore.getState().setCurrentChat(response.data.updatedChat as Chat)
 
@@ -238,7 +234,6 @@ export const useChat = create<ChatStore>((set, get) => ({
   // Delete a message
   removeMessage: async (messageId: number) => {
     const action = 'deleteMessage';
-    console.log('Delete message')
     try {
       const { data: updatedMessage } = await api.delete(`/api/messages/${messageId.toString()}`);
 
@@ -279,7 +274,6 @@ export const useChat = create<ChatStore>((set, get) => ({
       const response = await api.put(`/api/messages/${(messageId).toString()}`, payload);
       const updatedMessage = response.data;
 
-      console.log('Updated message in useChat', updatedMessage)
       
       useWebSocket.getState().sendMessageUpdate(updatedMessage as Message);
 
@@ -314,13 +308,11 @@ export const useChat = create<ChatStore>((set, get) => ({
   markChatStatus: async (id: number, forceMarkAsSeen?: boolean) => {
     const action = 'markMessageAsRead';
     try {
-      console.log('Sending API request', id, forceMarkAsSeen);
-      const response = await api.post(`/api/chats/${id.toString()}/toggle-read`, {
+
+      await api.post(`/api/chats/${id.toString()}/toggle-read`, {
         forceMarkAsSeen 
       });
-      console.log('API Response:', response);
       set(state => {
-        console.log('Current state:', state);
         const updatedChats = state.chats.map(chat => {
           if (chat.id === id) {
             const newSeenStatus = forceMarkAsSeen !== undefined 

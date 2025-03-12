@@ -30,8 +30,6 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
     transports: ['websocket'],
   });
 
-  console.log(socket);
-
   return new Promise((resolve, reject) => {
     // Set timeout for connection
     const timeout = setTimeout(() => {
@@ -46,11 +44,9 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
     });
 
     socket.on('connect', () => {
-      console.log('Socket connected in connectWebSocket:', socket.id);
       
       // Thiết lập các event listeners khác ngay tại đây
       socket.on('disconnect', () => {
-        console.log('WebSocket disconnected');
       });
 
       socket.on('error', (error) => {
@@ -58,19 +54,16 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
       });
 
       socket.on('receive-message', (message: Message) => {
-        console.log('Received message:', message);
         useChat.getState().addMessage(message);
         void useChatStore.getState().fetchUserChats()
       });
 
       socket.on('message-updated', (message: Message) => {
-        console.log('Updated message:', message);
         useChat.getState().setEditMessage(message);
         void useChatStore.getState().fetchUserChats()
       });
 
-      socket.on('message-deleted', (message: Message) => {
-        console.log('Deleted message:', message);
+      socket.on('message-deleted', (message: Message) => {;
         useChat.getState().deleteMessage(message);
         void useChatStore.getState().fetchUserChats()
       });
@@ -99,7 +92,6 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
 
   disconnect: async (): Promise<void> => {
     const { socket } = get();
-    console.log(socket)
     if (!socket) return;
 
     return new Promise<void>((resolve) => {
@@ -114,7 +106,6 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   sendMessage: (message: Partial<Message>) => {
     const { socket } = get();
     if (socket && socket.connected) {
-      console.log('Sending message:', message);
       void useChatStore.getState().fetchUserChats()
       socket.emit('send-message', message);
     } else {

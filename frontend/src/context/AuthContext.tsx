@@ -35,7 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async () => {
     const token = getStoredToken();
-    console.log('Retrieved token:', token);
     if (!token) {
       setLoading(false);
       return;
@@ -44,7 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await api.get('/api/me');
       const { user: userData } = response.data;
-      console.log('User data:', userData);
 
       if (!userData) {
         throw new Error('No user data received');

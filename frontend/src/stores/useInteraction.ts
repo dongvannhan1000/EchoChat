@@ -51,9 +51,7 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set) =
   pinChat: async (id: number) => {
     const action = 'pinChat';
     try {
-      console.log('Sending API request to pin chat', id);
-      const response = await api.put(`/api/chats/${id.toString()}/pin`);
-      console.log('API Response:', response);
+      await api.put(`/api/chats/${id.toString()}/pin`);
       
       // Update the chats in the chatStore
       useChatStore.setState(state => {
@@ -77,11 +75,9 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set) =
   muteChat: async (id: number, muteDuration?: number) => {
     const action = 'muteChat';
     try {
-      console.log('Sending API request to mute chat', id);
       const response = await api.put(`/api/chats/${id.toString()}/mute`, {
         duration: muteDuration
       });
-      console.log('API Response:', response);
       
       useChatStore.setState((state) => {
         const updatedChats = state.chats.map((chat) => {
@@ -110,9 +106,8 @@ export const useUserChatInteractionsStore = create<UserChatInteractions>((set) =
       }));
 
 
-      const response = await api.post(`/api/users/block`, { userId });
+      await api.post(`/api/users/block`, { userId });
 
-      console.log('Block response', response.data)
 
       useWebSocket.getState().sendBlockUser(userId);
       

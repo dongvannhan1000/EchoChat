@@ -138,7 +138,6 @@ export const useMessagesStore = create<MessagesStore>((set, get) => ({
 
   removeMessage: async (messageId: number) => {
     const action = 'deleteMessage';
-    console.log('Delete message')
     try {
       const { data: updatedMessage } = await api.delete(`/api/messages/${messageId.toString()}`);
 

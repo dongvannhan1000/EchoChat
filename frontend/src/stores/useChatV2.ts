@@ -26,7 +26,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   fetchUserChats: async () => {
     const action = 'fetchUserChats';
-    console.log('API fetchUserChats')
     try {
       set((state) => ({
         isLoading: { ...state.isLoading, [action]: true },
@@ -92,7 +91,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         groupName
       });
 
-      console.log(response.data)
       // set((state) => ({
       //   chats: [...state.chats, response.data],
       // }));

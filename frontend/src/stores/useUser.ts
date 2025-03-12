@@ -28,7 +28,6 @@ export const useUser = create<UserStore>((set) => ({
     try {
       set({ isLoading: true });
       const response = await api.get('/api/users', { params: { search: searchTerm || '' } });
-      console.log('API Response:', response.data);
       set({ users: response.data, isLoading: false });
     } catch (error) {
       set({ error: 'Failed to fetch users', isLoading: false });

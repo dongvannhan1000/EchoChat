@@ -11,5 +11,9 @@ export default defineConfig({
   },
   build: {
     sourcemap: true
-  }
+  },
+  server: {
+    host: '0.0.0.0',
+    port: parseInt(process.env.PORT as string) || 3000, // Render sẽ cấp cổng tự động
+  },
 })
