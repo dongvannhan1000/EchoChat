@@ -13,7 +13,14 @@ export default defineConfig({
     sourcemap: true
   },
   server: {
+    host: '0.0.0.0',  
+    port: parseInt(process.env.PORT as any) || 4173, 
+    strictPort: true, 
+  },
+  preview: {
     host: '0.0.0.0',
-    port: parseInt(process.env.PORT as string) || 4173, // Render sẽ cấp cổng tự động
+    port: parseInt(process.env.PORT as any) || 4173,
+    strictPort: true,
+    allowedHosts: ['echo-chat-cqg2.onrender.com'], 
   },
 })
