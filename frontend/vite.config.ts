@@ -14,6 +14,6 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: parseInt(process.env.PORT as string) || 3000, // Render sẽ cấp cổng tự động
+    port: parseInt(process.env.PORT as string) || 4173, // Render sẽ cấp cổng tự động
   },
 })
