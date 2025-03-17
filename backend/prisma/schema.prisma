@@ -20,7 +20,8 @@ model User {
   name          String
   email         String     @unique
   password      String
-  avatar        String?
+  avatarId      Int?       @unique
+  avatar        Image?     
   block         Int[]      @default([])
   statusMessage String?
   lastSeen      DateTime?
@@ -73,13 +74,23 @@ model Message {
   sender        User       @relation(fields: [senderId], references: [id])
   type          MessageType   @default(normal)
   content       String?
-  image         String?
+  imageId       Int?       @unique
+  image         Image?     @relation(fields: [imageId], references: [id])
   isEdited      Boolean     @default(false)
   replyToId     Int?
   deletedAt     DateTime?
   createdAt     DateTime    @default(now())
 
   @@map("messages")
+}
+
+model Image {
+  id        Int       @id @default(autoincrement())
+  url       String
+  key       String
+  userId    Int?      @unique
+  user      User?     @relation(fields: [userId], references: [id])
+  message   Message?  
 }
 
 enum ChatType {
@@ -96,4 +107,6 @@ enum MessageType {
   normal
   system
 }
+
+
 

@@ -23,19 +23,29 @@ async function seedDatabase() {
   const users = await Promise.all(
     Array.from({ length: 10 }).map(async () => {
       const hashedPassword = await bcrypt.hash('123456', 10);
+  
+      const avatar = await prisma.image.create({
+        data: {
+          url: faker.image.avatarGitHub(),
+          key: faker.string.uuid(),
+        }
+      });
+  
+      // Tạo user với avatarId
       return prisma.user.create({
         data: {
           name: sanitizeName(`${faker.person.firstName()} ${faker.person.lastName()}`),
           email: faker.internet.email(),
           password: hashedPassword,
-          avatar: faker.image.avatarGitHub(),
+          avatarId: avatar.id,
           block: [],
           statusMessage: faker.person.bio(),
           lastSeen: faker.date.recent(),
         }
-      })
+      });
     })
-  )
+  );
+  
 
   // Generate Private Chats
   const generateUniqueChatsWithMessages = async (users: User[], count: number) => {
