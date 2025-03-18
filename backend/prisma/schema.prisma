@@ -37,7 +37,8 @@ model Chat {
   id            Int          @id @default(autoincrement())
   chatType      ChatType     @default(private) // Enum field for chat type
   groupName     String?
-  groupAvatar   String?
+  groupAvatarId Int?         @unique
+  groupAvatar   Image?       
   createdBy     Int
   lastMessage   String?
   createdAt     DateTime     @default(now())
@@ -91,6 +92,8 @@ model Image {
   userId    Int?      @unique
   user      User?     @relation(fields: [userId], references: [id])
   message   Message?  
+  chatId    Int?      @unique
+  chat      Chat?     @relation(fields: [chatId], references: [id])
 }
 
 enum ChatType {

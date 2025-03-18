@@ -71,7 +71,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
     if (lastValidChat.chatType === 'group') {
       return lastValidChat.groupName || 'Unnamed Group';
     }
-    const otherUser = lastValidChat.participants?.find(
+    const otherUser = lastValidChat.participants.find(
       (p) => p.userId !== user?.id
     );
     return otherUser?.user.name || 'Unknown User';
@@ -80,12 +80,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   const getChatAvatar = () => {
     if (!lastValidChat) return '/placeholder.svg?height=40&width=40';
     if (lastValidChat.chatType === 'group') {
-      return lastValidChat.groupAvatar || '/placeholder.svg?height=40&width=40';
+      return lastValidChat.groupAvatar?.url || '/placeholder.svg?height=40&width=40';
     }
     const otherUser = lastValidChat.participants.find(
       (p) => p.userId !== user?.id
     );
-    return otherUser?.user.avatar || '/placeholder.svg?height=40&width=40';
+    return otherUser?.user.avatar?.url || '/placeholder.svg?height=40&width=40';
   };
   
   const handleEditClick = (message: Message) => {
@@ -188,7 +188,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
               >
                 {!isCurrentUserMessage && (
                   <Avatar className="mr-2">
-                    <AvatarImage src={message.sender.avatar || '/placeholder.svg?height=40&width=40'} alt={message.sender.name} />
+                    <AvatarImage src={message.sender.avatar?.url || '/placeholder.svg?height=40&width=40'} alt={message.sender.name} />
                     <AvatarFallback>{message.sender.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                 )}

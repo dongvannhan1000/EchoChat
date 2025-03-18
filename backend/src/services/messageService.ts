@@ -84,23 +84,39 @@ export class MessageService {
       throw new Error('Access denied');
     }
 
-    const [message] = await prisma.$transaction([
-      Message.create({
+    
+
+    const message = await prisma.$transaction(async (tx) => {
+      // Tạo bản ghi Image nếu có
+      let imageId = undefined;
+      if (image) {
+        const imageRecord = await tx.image.create({
+          data: {
+            url: image,
+            key: `user_${senderId}_${Date.now()}`
+          }
+        });
+        imageId = imageRecord.id;
+      }
+
+      // Tạo message với imageId (nếu có)
+      const message = await tx.message.create({
         data: {
           chatId,
           senderId,
           type,
           content,
-          image,
-          replyToId
+          replyToId,
+          imageId 
         },
         include: {
           sender: true,
-          chat: true
+          chat: true,
+          image: true
         }
-      }),
+      });
 
-      UserChat.updateMany({
+      await tx.userChat.updateMany({
         where: {
           chatId,
           userId: {
@@ -111,10 +127,10 @@ export class MessageService {
           isSeen: false,
           updatedAt: new Date()
         }
-      }),
+      });
 
-      
-    ]);
+      return message;
+    });
 
     const updatedChat = await Chat.updateMany({
       where: {
@@ -166,6 +182,9 @@ export class MessageService {
         id: messageId,
         senderId: userId,
         deletedAt: null
+      },
+      include: {
+        image: true
       }
     });
   
@@ -178,17 +197,36 @@ export class MessageService {
     }
   
     return await prisma.$transaction(async (tx) => {
+      let imageId = message.imageId;
+
+      if (newImage) {
+        if (message.imageId) {
+          await tx.image.delete({
+            where: { id: message.imageId }
+          });
+        }
+  
+        const newImageRecord = await tx.image.create({
+          data: {
+            url: newImage,
+            key: `user_${userId}_${Date.now()}`
+          }
+        });
+  
+        imageId = newImageRecord.id;
+      }
       // Update the message
       const updatedMessage = await tx.message.update({
         where: { id: messageId },
         data: {
           content: newContent || message.content,
-          image: newImage || message.image,
+          imageId: imageId,
           isEdited: true
         },
         include: {
           sender: true,
-          chat: true
+          chat: true,
+          image: true
         }
       });
 
@@ -208,7 +246,7 @@ export class MessageService {
         await tx.chat.update({
           where: { id: message.chatId },
           data: {
-            lastMessage: newContent || message.content
+            lastMessage: newContent || message.content || 'Send an image'
           }
         });
       }

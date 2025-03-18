@@ -59,7 +59,7 @@ export default function AppLayout() {
               className="h-12 w-12 rounded-xl"
             >
               <Avatar>
-                <AvatarImage src={user?.avatar} />
+                <AvatarImage src={user?.avatar?.url} />
                 <AvatarFallback>
                   {user?.name.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>

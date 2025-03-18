@@ -12,6 +12,7 @@ import messageRoutes from './routes/messageRoutes';
 import { Server } from 'socket.io';
 import http from 'http';
 import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -112,6 +113,7 @@ io.on('connect', (socket) => {
 });
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({extended: true}));
 app.use(cors({
   origin: process.env.FRONTEND_URL,

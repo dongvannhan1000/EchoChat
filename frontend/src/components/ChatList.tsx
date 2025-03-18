@@ -81,8 +81,10 @@ export default function ChatList({
     
     if (chat.chat.chatType === 'group') {
       return {
+        id: chat.chat.id || 0,
         name: chat.chat.groupName || 'Group Chat',
-        avatar: chat.chat.groupAvatar
+        avatar: chat.chat.groupAvatar ? chat.chat.groupAvatar.url : '/placeholder.svg?height=40&width=40',
+        statusMessage: ''
       }
     }
     
@@ -90,12 +92,21 @@ export default function ChatList({
       p => p.userId !== user?.id
     );
 
-    return {
-      id: otherParticipant?.user.id,
-      name: otherParticipant?.user.name || 'Unknown User',
-      avatar: otherParticipant?.user.avatar,
-      statusMessage: otherParticipant?.user.statusMessage
+    if (otherParticipant) {
+      return {
+        id: otherParticipant.user.id,
+        name: otherParticipant.user.name || 'Unknown User',
+        avatar: otherParticipant.user.avatar ? otherParticipant.user.avatar.url : '/placeholder.svg?height=40&width=40',
+        statusMessage: otherParticipant.user.statusMessage || ''
+      }
     }
+    return {
+      id: 0,
+      name: 'Unknown User',
+      avatar: null,
+      statusMessage: null
+    }
+    
   }
 
   
@@ -104,7 +115,8 @@ export default function ChatList({
       <ul className="flex-1 overflow-y-auto">
       {chats
         .filter(chat => {
-          const otherUserName = getOtherUser(chat).name;
+          const otherUser = getOtherUser(chat)
+          const otherUserName = otherUser.name;
           return otherUserName && otherUserName.toLowerCase().includes(chatSearchTerm.toLowerCase());
         })
         .sort((a, b) => {

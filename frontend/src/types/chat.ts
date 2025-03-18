@@ -8,34 +8,25 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  avatar?: string;
+  avatarId: number | null;
+  avatar: Image | null;
   block: number[];
-  statusMessage?: string;
-  lastSeen?: Date;
-}
-
-export interface Message {
-  id: number;
-  chatId: number;
-  senderId: number;
-  type: MessageType;
-  content: string;
-  image?: string;
-  isEdited: boolean;
-  replyToId?: number;
-  deletedAt?: Date;
+  statusMessage: string | null;
+  lastSeen: Date | null;
+  messages: Message[];
+  chats: UserChat[];
   createdAt: Date;
-  sender: User;
-  chat: Chat;
+  updatedAt: Date;
 }
 
 export interface Chat {
   id: number;
   chatType: ChatType;
-  groupName?: string;
-  groupAvatar?: string;
-  lastMessage?: string;
+  groupName: string | null;
+  groupAvatarId: number | null;
+  groupAvatar: Image | null;
   createdBy: number;
+  lastMessage: string | null;
   createdAt: Date;
   updatedAt: Date;
   messages: Message[];
@@ -53,4 +44,29 @@ export interface UserChat {
   mutedUntil: Date | null;
   pinned: boolean;
   updatedAt: Date;
+}
+
+export interface Message {
+  id: number;
+  chatId: number;
+  senderId: number;
+  chat: Chat;
+  sender: User;
+  type: MessageType;
+  content: string;
+  imageId: number | null;
+  image: Image | null;
+  isEdited: boolean;
+  replyToId: number | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+}
+
+export interface Image {
+  id: number;
+  url: string;
+  key: string;
+  userId: number | null;
+  user: User | null;
+  message: Message | null;
 }

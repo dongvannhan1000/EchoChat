@@ -26,10 +26,10 @@ interface ChatListItemProps {
   onLeaveChat: (chatId: number) => Promise<void>
   onMarkChatStatus: (id: number) => Promise<void>
   otherUser: {
-    id?: number,
+    id: number,
     name: string
-    avatar: string | undefined
-    statusMessage?: string
+    avatar: string | null
+    statusMessage: string | null
   }
   onPinChat: (id: number) => Promise<void>
   onMuteChat: (id: number, muteDuration?: number) => Promise<void>
@@ -68,7 +68,7 @@ export const ChatListItem = memo(function ChatListItem({
 
   const isBlocked = otherUser.id ? chat.chat.participants.some(participant => 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    participant.user.block.includes(otherUser.id!)
+    participant.user.block.includes(otherUser.id)
   ) : false;
 
   return (
