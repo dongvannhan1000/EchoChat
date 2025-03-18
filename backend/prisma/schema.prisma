@@ -76,7 +76,7 @@ model Message {
   type          MessageType   @default(normal)
   content       String?
   imageId       Int?       @unique
-  image         Image?     @relation(fields: [imageId], references: [id])
+  image         Image?     
   isEdited      Boolean     @default(false)
   replyToId     Int?
   deletedAt     DateTime?
@@ -91,7 +91,8 @@ model Image {
   key       String
   userId    Int?      @unique
   user      User?     @relation(fields: [userId], references: [id])
-  message   Message?  
+  messageId Int?      @unique
+  message   Message?  @relation(fields: [messageId], references: [id])
   chatId    Int?      @unique
   chat      Chat?     @relation(fields: [chatId], references: [id])
 }

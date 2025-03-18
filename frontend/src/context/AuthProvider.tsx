@@ -3,6 +3,7 @@ import { User } from '@/types/chat'
 import api from '@/utils/axios'
 import { AxiosRequestConfig } from "axios";
 import { AuthContext } from './AuthContext';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
@@ -15,6 +16,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUser = (userData: Partial<User>) => {
     setUser(prev => prev ? { ...prev, ...userData } : null)
   }
+
+  useEffect(() => {
+    const initSocketWithToken = async () => {
+      if (accessToken && !useWebSocket.getState().isInitialized) {
+        console.log('Initializing socket with token');
+        await useWebSocket.getState().initializeSocket(accessToken);
+      }
+    };
+    
+    void initSocketWithToken();
+    
+    return () => {
+      if (!accessToken && useWebSocket.getState().isConnected) {
+        void useWebSocket.getState().disconnect();
+      }
+    };
+  }, [accessToken]);
 
   useEffect(() => {
     const requestInterceptor = api.interceptors.request.use(
@@ -98,6 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       sessionStorage.setItem('accessToken', accessToken);
       setAccessToken(accessToken);
       setUser(data.user as User);
+
+      await useWebSocket.getState().initializeSocket(accessToken);
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -116,6 +136,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async(): Promise<void> => {
     try {
+
+      if (useWebSocket.getState().isConnected) {
+        await useWebSocket.getState().disconnect();
+      }
+
       await api.post('/api/logout');
       sessionStorage.removeItem('accessToken');
       setAccessToken(null);
@@ -135,12 +160,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.post('/api/refresh-token');
       const data = response.data;
       
-      sessionStorage.setItem('accessToken', data.accessToken as string);
-      setAccessToken(data.accessToken as string);
+      const newToken = data.accessToken as string;
+      sessionStorage.setItem('accessToken', newToken);
+      setAccessToken(newToken);
+      
       if (data.user) {
         setUser(data.user as User);
       }
-      return data.accessToken as string;
+
+      if (useWebSocket.getState().socket) {
+        await useWebSocket.getState().disconnect();
+        await useWebSocket.getState().initializeSocket(newToken);
+      }
+      return newToken;
     } catch (error) {
       console.error('Error refreshing token:', error);
       sessionStorage.removeItem('accessToken');

@@ -115,11 +115,18 @@ async function seedDatabase() {
       const groupAdminIndex = Math.floor(Math.random() * users.length)
       const groupAdmin = users[groupAdminIndex]
 
+      const avatar = await prisma.image.create({
+        data: {
+          url: faker.image.urlLoremFlickr({ category: 'abstract' }),
+          key: faker.string.uuid(),
+        }
+      });
+
       const chat = await prisma.chat.create({
         data: {
           chatType: ChatType.group,
           groupName: faker.company.name() + " Group",
-          groupAvatar: faker.image.urlLoremFlickr({ category: 'abstract' }),
+          groupAvatarId: avatar.id,
           createdBy: groupAdmin.id,
           participants: {
             create: [

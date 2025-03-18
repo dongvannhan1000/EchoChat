@@ -25,9 +25,11 @@ interface WebSocketStore {
 const SOCKET_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export const connectWebSocket = async (token: string): Promise<Socket> => {
+  console.log('Attempting to connect with token:', token.substring(0, 10) + '...');
   const socket = io(SOCKET_URL, {
-    auth: { token },
-    transports: ['websocket'],
+    auth: { token }, 
+    transports: ['websocket', 'polling'], 
+    withCredentials: true,
   });
 
   return new Promise((resolve, reject) => {
@@ -45,12 +47,15 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
 
     socket.on('connect', () => {
       
-      // Thiết lập các event listeners khác ngay tại đây
       socket.on('disconnect', () => {
       });
 
       socket.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        console.error('Connection error details:', {
+          message: error.message,
+          data: error.data,
+          description: error.description
+        });
       });
 
       socket.on('receive-message', (message: Message) => {

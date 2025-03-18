@@ -87,7 +87,6 @@ export class ChatService {
       data: {
         chatType,
         groupName,
-        groupAvatar,
         createdBy: creatorId,
         participants: {
           create: [
