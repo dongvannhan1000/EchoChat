@@ -14,8 +14,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, curre
   const [newMessage, setNewMessage] = useState('')
 
 
-   if (!currentChat || !user) return null;
-   const isPrivateChat = currentChat.chatType === 'private'
+  if (!currentChat || !user) return null;
+
+  
+  const isPrivateChat = currentChat.chatType === 'private'
   const otherParticipant = isPrivateChat 
     ? currentChat.participants.find(p => p.userId !== user.id)
     : null

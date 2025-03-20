@@ -45,7 +45,7 @@ export const ChatPage: React.FC = () => {
 
   const { users, fetchUsers } = useUser();
 
-  
+
 
 
   // New state for Create New Message feature
@@ -60,14 +60,19 @@ export const ChatPage: React.FC = () => {
 
 
   useEffect(() => {
-    // Assuming you have the token stored somewhere
     let mounted = true;
 
-
     const initializeWebSocket = async () => {
-      const token = localStorage.getItem('token');
-      if (token && mounted && !webSocketStore.socket) {
-        await webSocketStore.initializeSocket(token);
+      const token = sessionStorage.getItem('accessToken');
+      if (token && mounted && !webSocketStore.isInitialized) {
+        try {
+          console.log('ChatPage: Initializing WebSocket with access token');
+          await webSocketStore.initializeSocket(token);
+        } catch (error) {
+          console.error('ChatPage: WebSocket initialization failed:', error);
+        }
+      } else if (!token) {
+        console.warn('ChatPage: No access token found for WebSocket initialization');
       }
     };
 
@@ -76,7 +81,42 @@ export const ChatPage: React.FC = () => {
 
     return () => {
       mounted = false;
-      if (webSocketStore.socket) {
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleTokenChange = () => {
+      const token = sessionStorage.getItem('accessToken');
+      if (token && !webSocketStore.isInitialized) {
+        void webSocketStore.initializeSocket(token);
+      } else if (!token && webSocketStore.isConnected) {
+        void webSocketStore.disconnect();
+      }
+    };
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'accessToken') {
+        handleTokenChange();
+      }
+    });
+
+    return () => {
+      window.removeEventListener('storage', handleTokenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (webSocketStore.isConnected) {
+      console.log('ChatPage: WebSocket connected');
+    } else {
+      console.log('ChatPage: WebSocket disconnected');
+    }
+  }, [webSocketStore.isConnected]);
+
+  useEffect(() => {
+    return () => {
+      if (webSocketStore.isConnected) {
+        console.log('ChatPage: Disconnecting WebSocket on unmount');
         void webSocketStore.disconnect();
       }
     };
@@ -87,6 +127,17 @@ export const ChatPage: React.FC = () => {
   // useEffect(() => {
   //   console.log('WebSocket connection status:', isConnected);
   // }, [isConnected]);
+
+  useEffect(() => {
+    if (user && !webSocketStore.isConnected) {
+      const token = sessionStorage.getItem('accessToken');
+      if (token) {
+        void webSocketStore.initializeSocket(token);
+      }
+    } else if (!user && webSocketStore.isConnected) {
+      void webSocketStore.disconnect();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (isNewMessageOpen && searchInputRef.current) {

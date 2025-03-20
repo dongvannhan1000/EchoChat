@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+[App.tsx](mdc:frontend/src/App.tsx) [AppLayout.tsx](mdc:frontend/src/components/AppLayout.tsx) [Profile.tsx](mdc:frontend/src/pages/Profile.tsx)
+[imageController.ts](mdc:backend/src/controllers/imageController.ts) [imageService.ts](mdc:backend/src/services/imageService.ts) [imageRoutes.ts](mdc:backend/src/routes/imageRoutes.ts)
+
+If you design for UX/UI, should use componets from shadcn-ui like others.

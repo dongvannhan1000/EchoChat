@@ -63,6 +63,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        block: user.block,
         statusMessage: user.statusMessage
       }, 
       accessToken 
