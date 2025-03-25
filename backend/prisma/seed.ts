@@ -1,6 +1,7 @@
-import { PrismaClient, ChatType, ChatRole, User } from '@prisma/client'
+import { PrismaClient, ChatType, ChatRole, User, Message, Image } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -18,32 +19,40 @@ async function seedDatabase() {
   await prisma.userChat.deleteMany()
   await prisma.chat.deleteMany()
   await prisma.user.deleteMany()
+  await prisma.image.deleteMany()
 
   // Generate Users
   const users = await Promise.all(
     Array.from({ length: 10 }).map(async () => {
       const hashedPassword = await bcrypt.hash('123456', 10);
-  
-      const avatar = await prisma.image.create({
-        data: {
-          url: faker.image.avatarGitHub(),
-          key: faker.string.uuid(),
-        }
-      });
-  
-      // Tạo user với avatarId
-      return prisma.user.create({
+
+      const user = await prisma.user.create({
         data: {
           name: sanitizeName(`${faker.person.firstName()} ${faker.person.lastName()}`),
           email: faker.internet.email(),
           password: hashedPassword,
-          avatarId: avatar.id,
           block: [],
           statusMessage: faker.person.bio(),
           lastSeen: faker.date.recent(),
         }
       });
+  
+      const avatar = await prisma.image.create({
+        data: {
+          url: faker.image.avatarGitHub(),
+          key: faker.string.uuid(),
+          userId: user.id  
+        }
+      });
+  
+      return await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          avatarId: avatar.id
+        }
+      });
     })
+
   );
   
 
@@ -83,21 +92,59 @@ async function seedDatabase() {
         }
       });
   
-      const messages = Array.from({ length: faker.number.int({ min: 50, max: 100 }) })
-        .map((_, index) => {
-          const sender = Math.random() > 0.5 ? user1 : user2;
-          return {
-            chatId: chat.id,
-            senderId: sender.id,
-            content: faker.lorem.sentence(),
-            image: Math.random() > 0.8 ? faker.image.urlLoremFlickr() : null,
-            createdAt: new Date(Date.now() - index * 60 * 1000)
+      const messages: Array<Prisma.MessageCreateManyInput & { createdAt: Date }> = [];
+      const images: Prisma.ImageCreateManyInput[] = [];
+
+      for (let i = 0; i < faker.number.int({ min: 50, max: 100 }); i++) {
+        const sender = Math.random() > 0.5 ? user1 : user2;
+        const messageCreatedAt = new Date(Date.now() - i * 60 * 1000);
+        
+        const messageData: Prisma.MessageCreateManyInput & { createdAt: Date } = {
+          chatId: chat.id,
+          senderId: sender.id,
+          content: faker.lorem.sentence(),
+          createdAt: messageCreatedAt
+        };
+
+        if (Math.random() > 0.8) {
+          const imageRecord = {
+            url: faker.image.urlLoremFlickr(),
+            key: `chat_${chat.id}_message_${i}`,
           };
-        })
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+          
+          images.push(imageRecord);
+          
+        }
+
+        messages.push(messageData);
+      }
+
+      messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
   
-      await prisma.message.createMany({
-        data: messages
+      await prisma.$transaction(async (tx) => {
+        let imageIndex = 0;
+
+        for (let i = 0; i < messages.length; i++) {
+          if (imageIndex < images.length) {
+            const createdMessage = await tx.message.create({
+              data: messages[i]
+            });
+      
+            await tx.image.create({
+              data: {
+                ...images[imageIndex],
+                messageId: createdMessage.id
+              }
+            });
+
+            imageIndex++;
+          } else {
+            await tx.message.create({
+              data: messages[i]
+            });
+          }
+        }
       });
   
       privateChats.push(chat);
@@ -115,18 +162,12 @@ async function seedDatabase() {
       const groupAdminIndex = Math.floor(Math.random() * users.length)
       const groupAdmin = users[groupAdminIndex]
 
-      const avatar = await prisma.image.create({
-        data: {
-          url: faker.image.urlLoremFlickr({ category: 'abstract' }),
-          key: faker.string.uuid(),
-        }
-      });
+      
 
       const chat = await prisma.chat.create({
         data: {
           chatType: ChatType.group,
           groupName: faker.company.name() + " Group",
-          groupAvatarId: avatar.id,
           createdBy: groupAdmin.id,
           participants: {
             create: [
@@ -148,22 +189,79 @@ async function seedDatabase() {
         }
       })
 
-      // Generate Messages for Group Chat
-      const messages = Array.from({ length: faker.number.int({ min: 50, max: 100 }) })
-        .map((_, index) => {
-          const sender = users[Math.floor(Math.random() * users.length)];
-          return {
-            chatId: chat.id,
-            senderId: sender.id,
-            content: faker.lorem.sentence(),
-            image: Math.random() > 0.9 ? faker.image.urlLoremFlickr() : null,
-            createdAt: new Date(Date.now() - index * 60 * 1000)
-          };
-        })
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      const avatar = await prisma.image.create({
+        data: {
+          url: faker.image.urlLoremFlickr({ category: 'abstract' }),
+          key: faker.string.uuid(),
+          chatId: chat.id
+        }
+      });
 
-      await prisma.message.createMany({
-        data: messages
+      await prisma.chat.update({
+        where: { id: chat.id },
+        data: {
+          groupAvatarId: avatar.id
+        }
+      })
+
+      // Generate Messages for Group Chat
+      const messages: Array<Prisma.MessageCreateManyInput & { createdAt: Date }> = [];
+      const images: Prisma.ImageCreateManyInput[] = [];
+
+      const messageCount = faker.number.int({ min: 50, max: 100 });
+
+      for (let i = 0; i < messageCount; i++) {
+        const sender = users[Math.floor(Math.random() * users.length)];
+        const messageCreatedAt = new Date(Date.now() - i * 60 * 1000);
+        
+        const messageData: Prisma.MessageCreateManyInput & { createdAt: Date } = {
+          chatId: chat.id,
+          senderId: sender.id,
+          content: faker.lorem.sentence(),
+          createdAt: messageCreatedAt
+        };
+
+        if (Math.random() > 0.8) {
+          const imageRecord = {
+            url: faker.image.urlLoremFlickr(),
+            key: `chat_${chat.id}_message_${i}`
+          };
+          
+          images.push(imageRecord);
+          
+        }
+
+        messages.push(messageData);
+      }
+
+      messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+      await prisma.$transaction(async (tx) => {
+        let imageIndex = 0;
+
+        for (let i = 0; i < messages.length; i++) {
+          if (imageIndex < images.length) {
+
+            const createdMessage = await tx.message.create({
+              data: {
+                ...messages[i],
+              }
+            });
+
+            await tx.image.create({
+              data: {
+                ...images[imageIndex],
+                messageId: createdMessage.id 
+              }
+            });
+
+            imageIndex++;
+          } else {
+            await tx.message.create({
+              data: messages[i]
+            });
+          }
+        }
       });
 
 

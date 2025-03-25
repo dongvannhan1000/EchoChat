@@ -9,7 +9,6 @@ interface AuthContextType {
   logout: () => Promise<void>
   refreshToken: () => Promise<string | null>;
   isAuthenticated: () => boolean;
-  updateUser: (userData: Partial<User>) => void
   loading: boolean;
 }
 

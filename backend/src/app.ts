@@ -88,9 +88,14 @@ io.on('connect', (socket) => {
   socket.on('block-user', async (data: { blockedId: number }) => {
     try {
       const userId = (socket.data.user as any).id;
+
+      if (!data.blockedId) {
+        console.error('Invalid blockedId');
+        return;
+      }
       
       // Broadcast to all relevant users
-      io.emit('user-blocked', {
+      io.to(userId.toString()).to(data.blockedId.toString()).emit('user-blocked', {
         blockerId: userId,
         blockedId: data.blockedId
       });
@@ -102,9 +107,14 @@ io.on('connect', (socket) => {
   socket.on('unblock-user', async (data: { blockedId: number }) => {
     try {
       const userId = (socket.data.user as any).id;
+
+      if (!data.blockedId) {
+        console.error('Invalid blockedId');
+        return;
+      }
       
       // Broadcast to all relevant users
-      io.emit('user-unblocked', {
+      io.to(userId.toString()).to(data.blockedId.toString()).emit('user-unblocked', {
         blockerId: userId,
         blockedId: data.blockedId
       });

@@ -17,7 +17,9 @@ import { UserChat } from '@/types/chat'
 import { MoreVertical, Pin, BellOff, CheckCircle, LogOut, Eye, BellRing, UserX, UserCheck  } from 'lucide-react'
 import { memo } from "react"
 import { useAuth } from '@/hooks/useAuth'
+import { useUser } from "@/stores/useUser"
 import { useUserChatInteractionsStore } from "@/stores/useInteraction"
+import { useChatStore } from "@/stores/useChatV2"
 
 interface ChatListItemProps {
   chat: UserChat
@@ -46,13 +48,16 @@ export const ChatListItem = memo(function ChatListItem({
   otherUser
 }: ChatListItemProps) {
 
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
+  const { updateUser } = useUser();
   const { blockUser, unblockUser } = useUserChatInteractionsStore();
+  const { fetchUserChats } = useChatStore();
   const handleBlock = async () => {
    if (otherUser.id) {
     await blockUser(otherUser.id);
     if (user) {
-      updateUser({ block: [...user.block, otherUser.id] });
+      await updateUser(user.id, { block: [...user.block, otherUser.id] });
+      await fetchUserChats();
     }  
    }
  };
@@ -60,14 +65,14 @@ export const ChatListItem = memo(function ChatListItem({
    if (otherUser.id) {
      await unblockUser(otherUser.id);
     if (user) {
-      updateUser({ block: user.block.filter(id => id !== otherUser.id) });
+      await updateUser(user.id, { block: user.block.filter(id => id !== otherUser.id) });
+      await fetchUserChats();
     }
    }
  };
 
 
   const isBlocked = otherUser.id ? chat.chat.participants.some(participant => 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     participant.user.block.includes(otherUser.id)
   ) : false;
 

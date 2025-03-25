@@ -6,16 +6,13 @@ import { AuthContext } from './AuthContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   const [accessToken, setAccessToken] = useState<string | null>(() => {
     return sessionStorage.getItem('accessToken');
   });
-
-  const updateUser = (userData: Partial<User>) => {
-    setUser(prev => prev ? { ...prev, ...userData } : null)
-  }
 
   useEffect(() => {
     const initSocketWithToken = async () => {
@@ -187,7 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   )

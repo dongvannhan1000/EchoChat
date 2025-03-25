@@ -225,6 +225,7 @@ export const ChatPage: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState('')
 
 
+
   return (
     <div className="flex h-full bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col">
@@ -355,8 +356,6 @@ export const ChatPage: React.FC = () => {
         />
         <MessageInput 
           onSendMessage={handleSendMessage}
-          currentChat={currentChat} 
-          user={user}
         />
       </div>
     </div>

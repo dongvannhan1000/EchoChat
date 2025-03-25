@@ -73,6 +73,20 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
         void useChatStore.getState().fetchUserChats()
       });
 
+      socket.on('user-blocked', async (data: { userId: number, blockedId: number }) => {;
+        console.log('User blocked event received:', data);
+        await useChatStore.getState().fetchUserChats()
+      });
+
+      socket.on('user-unblocked', async (data: { userId: number, blockedId: number }) => {;
+        console.log('User unblocked event received:', data);
+        await useChatStore.getState().fetchUserChats()
+      });
+
+
+
+      
+
 
 
       clearTimeout(timeout);

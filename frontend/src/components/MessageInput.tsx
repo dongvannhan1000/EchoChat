@@ -1,21 +1,40 @@
-import React, { useState } from 'react'
-import { Send, Ban } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Send, Ban, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Chat, User } from '@/types/chat'
+import { useChatStore } from '@/stores/useChatV2'
+import { useAuth } from '@/hooks/useAuth'
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void
-  currentChat: Chat | null
-  user: User | null
 }
 
-export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, currentChat, user }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   const [newMessage, setNewMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
+  const { user } = useAuth();
+  // const { selectedUser} = useUser();
+  const { currentChat } = useChatStore()
 
-  if (!currentChat || !user) return null;
+  useEffect(() => {
+    if (user && currentChat) {
+      setIsLoading(false)
+    }
+  }, [user, currentChat])
+  console.log(user)
 
+  if (isLoading || !user || !currentChat) {
+    return (
+      <div className="bg-gray-100 border-t border-gray-200 p-4">
+        <div className="flex items-center justify-center text-gray-500 space-x-2">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
+  
   
   const isPrivateChat = currentChat.chatType === 'private'
   const otherParticipant = isPrivateChat 
