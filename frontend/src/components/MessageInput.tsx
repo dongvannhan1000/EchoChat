@@ -22,7 +22,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
       setIsLoading(false)
     }
   }, [user, currentChat])
-  console.log(user)
 
   if (isLoading || !user || !currentChat) {
     return (

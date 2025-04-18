@@ -95,6 +95,8 @@ model Image {
   message   Message?  @relation(fields: [messageId], references: [id])
   chatId    Int?      @unique
   chat      Chat?     @relation(fields: [chatId], references: [id])
+  createdAt DateTime  @default(now())
+
 
   @@map("images")
 }

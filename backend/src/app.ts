@@ -5,6 +5,7 @@ import passport from './config/passport';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import chatRoutes from './routes/chatRoutes';
+import imageRoutes from './routes/imageRoutes';
 import { sessionMiddleware } from './config/session';
 import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
@@ -144,6 +145,7 @@ app.use('/', authRoutes);
 app.use('/', userRoutes);
 app.use('/', chatRoutes);
 app.use('/', messageRoutes);
+app.use('/', imageRoutes);
 
 app.use(errorHandler);
 
