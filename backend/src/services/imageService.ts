@@ -135,25 +135,24 @@ export class ImageService {
   }
 
   async deleteImage(type: 'user' | 'chat' | 'message', id: number) {
-    try {
-      let whereClause: any = {};
+    let whereClause: any = {};
       
-      if (type === 'user') {
-        whereClause = { userId: id };
-      } else if (type === 'chat') {
-        whereClause = { chatId: id };
-      } else if (type === 'message') {
-        whereClause = { messageId: id };
-      }
+    if (type === 'user') {
+      whereClause = { userId: id };
+    } else if (type === 'chat') {
+      whereClause = { chatId: id };
+    } else if (type === 'message') {
+      whereClause = { messageId: id };
+    }
 
-      const image = await prisma.image.findUnique({
-        where: whereClause
-      });
+    const image = await prisma.image.findUnique({
+      where: whereClause
+    });
 
-      if (!image) {
-        throw new Error('Image not found');
-      }
-
+    if (!image) {
+      throw new Error('Image not found');
+    }
+    try {
       // Delete images from S3 bucket
       await this.s3Client.send(
         new DeleteObjectCommand({
@@ -187,6 +186,5 @@ export class ImageService {
       throw new Error('Failed to generate access URL for image');
     }
   }
-}
 }
 
