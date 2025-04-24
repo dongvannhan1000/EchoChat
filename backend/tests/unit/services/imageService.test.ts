@@ -1,15 +1,15 @@
 // tests/unit/services/imageService.test.ts
-import { ImageService } from '../../src/services/imageService';
+import { ImageService } from '../../../src/services/imageService';
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { prisma } from '../../src/models/prisma';
+import { prisma } from '../../../src/models/prisma';
 import express from 'express';
 import multer from 'multer';
 
 // Mocking các dependencies
 jest.mock('@aws-sdk/client-s3');
 jest.mock('@aws-sdk/s3-request-presigner');
-jest.mock('../../src/models/prisma', () => ({
+jest.mock('../../../src/models/prisma', () => ({
   prisma: {
     image: {
       findUnique: jest.fn(),
@@ -27,13 +27,6 @@ describe('ImageService', () => {
   const originalEnv = process.env;
   
   beforeEach(() => {
-    process.env = { 
-      ...originalEnv,
-      AWS_S3_BUCKET_NAME: 'test-bucket',
-      AWS_REGION: 'test-region',
-      AWS_ACCESS_KEY_ID: 'test-key',
-      AWS_SECRET_ACCESS_KEY: 'test-secret',
-    };
     
     // Reset mocks
     jest.clearAllMocks();
@@ -47,10 +40,6 @@ describe('ImageService', () => {
     (getSignedUrl as jest.Mock).mockResolvedValue('https://presigned-url.example.com');
     
     imageService = new ImageService();
-  });
-  
-  afterEach(() => {
-    process.env = originalEnv;
   });
   
   describe('uploadImage', () => {

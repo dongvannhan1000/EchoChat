@@ -28,18 +28,18 @@ const upload = multer({
 });
 
 // Upload routes
-router.post('/api/images/user/avatar', isAuth, upload.single('image'), uploadUserAvatar as express.RequestHandler);
-router.post('/api/images/chat/avatar', isAuth, upload.single('image'), uploadChatAvatar as express.RequestHandler);
-router.post('/api/images/message/image', isAuth, upload.single('image'), uploadMessageImage as express.RequestHandler);
+router.post('/api/images/user/avatar', upload.single('image'), uploadUserAvatar as express.RequestHandler);
+router.post('/api/images/chat/avatar', upload.single('image'), uploadChatAvatar as express.RequestHandler);
+router.post('/api/images/message/image', upload.single('image'), uploadMessageImage as express.RequestHandler);
 
 // Get routes
-router.get('/api/images/user/:userId/avatar', isAuth, getUserAvatar as express.RequestHandler);
-router.get('/api/images/chat/:chatId/avatar', isAuth, getChatAvatar as express.RequestHandler);
-router.get('/api/images/message/:messageId/image', isAuth, getMessageImage as express.RequestHandler);
+router.get('/api/images/user/:userId/avatar', getUserAvatar as express.RequestHandler);
+router.get('/api/images/chat/:chatId/avatar', getChatAvatar as express.RequestHandler);
+router.get('/api/images/message/:messageId/image', getMessageImage as express.RequestHandler);
 
 // Delete routes
-router.delete('/api/images/user/avatar', isAuth, deleteUserAvatar as express.RequestHandler);
-router.delete('/api/images/chat/:chatId/avatar', isAuth, deleteChatAvatar as express.RequestHandler);
-router.delete('/api/images/message/:messageId/image', isAuth, deleteMessageImage as express.RequestHandler);
+router.delete('/api/images/user/avatar', deleteUserAvatar as express.RequestHandler);
+router.delete('/api/images/chat/:chatId/avatar', deleteChatAvatar as express.RequestHandler);
+router.delete('/api/images/message/:messageId/image', deleteMessageImage as express.RequestHandler);
 
 export default router;
