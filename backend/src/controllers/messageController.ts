@@ -1,11 +1,10 @@
-import { Response } from 'express';
-import { AuthenticatedRequest } from 'middleware/authMiddleware';
+import { Request, Response } from 'express';
 import { MessageService } from '../services/messageService';
 
 const messageService = new MessageService();
 
 
-export const getChatMessages = async (req: AuthenticatedRequest, res: Response) => {
+export const getChatMessages = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const chatId = parseInt(req.params.chatId);
@@ -23,7 +22,7 @@ export const getChatMessages = async (req: AuthenticatedRequest, res: Response) 
   }
 };
 
-export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
+export const sendMessage = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const chatId = parseInt(req.params.chatId);
@@ -44,7 +43,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const deleteMessage = async (req: AuthenticatedRequest, res: Response) => {
+export const deleteMessage = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const messageId = parseInt(req.params.messageId);
@@ -59,7 +58,7 @@ export const deleteMessage = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
-export const editMessage = async (req: AuthenticatedRequest, res: Response) => {
+export const editMessage = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const messageId = Number(req.params.messageId);

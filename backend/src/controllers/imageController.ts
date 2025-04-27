@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { ImageService } from '../services/imageService';
-import { AuthenticatedRequest } from 'middleware/authMiddleware';
 
 const imageService = new ImageService();
 
-export const uploadUserAvatar = async (req: AuthenticatedRequest, res: Response) => {
+export const uploadUserAvatar = async (req: Request, res: Response) => {
   try {
     const file = req.file;
     if (!file) {
@@ -27,7 +26,7 @@ export const uploadUserAvatar = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-export const uploadChatAvatar = async (req: AuthenticatedRequest, res: Response) => {
+export const uploadChatAvatar = async (req: Request, res: Response) => {
   try {
     const file = req.file;
     if (!file) {
@@ -53,7 +52,7 @@ export const uploadChatAvatar = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-export const uploadMessageImage = async (req: AuthenticatedRequest, res: Response) => {
+export const uploadMessageImage = async (req: Request, res: Response) => {
   try {
     const file = req.file;
     if (!file) {
@@ -79,7 +78,7 @@ export const uploadMessageImage = async (req: AuthenticatedRequest, res: Respons
   }
 };
 
-export const getUserAvatar = async (req: AuthenticatedRequest, res: Response) => {
+export const getUserAvatar = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId);
     
@@ -98,7 +97,7 @@ export const getUserAvatar = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
-export const getChatAvatar = async (req: AuthenticatedRequest, res: Response) => {
+export const getChatAvatar = async (req: Request, res: Response) => {
   try {
     const chatId = parseInt(req.params.chatId);
     
@@ -119,7 +118,7 @@ export const getChatAvatar = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
-export const getMessageImage = async (req: AuthenticatedRequest, res: Response) => {
+export const getMessageImage = async (req: Request, res: Response) => {
   try {
     const messageId = parseInt(req.params.messageId);
     
@@ -140,7 +139,7 @@ export const getMessageImage = async (req: AuthenticatedRequest, res: Response) 
   }
 };
 
-export const deleteUserAvatar = async (req: AuthenticatedRequest, res: Response) => {
+export const deleteUserAvatar = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -157,7 +156,7 @@ export const deleteUserAvatar = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-export const deleteChatAvatar = async (req: AuthenticatedRequest, res: Response) => {
+export const deleteChatAvatar = async (req: Request, res: Response) => {
   try {
     const chatId = parseInt(req.params.chatId);
     
@@ -173,7 +172,7 @@ export const deleteChatAvatar = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-export const deleteMessageImage = async (req: AuthenticatedRequest, res: Response) => {
+export const deleteMessageImage = async (req: Request, res: Response) => {
   try {
     const messageId = parseInt(req.params.messageId);
     

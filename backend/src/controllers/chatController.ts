@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from 'middleware/authMiddleware';
 import { ChatService } from '../services/chatService';
 
 const chatService = new ChatService();
 
-export const getUserChats = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const getUserChats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
     }
     const userId = req.user.id;
     const chats = await chatService.getUserChats(userId);
@@ -17,7 +17,7 @@ export const getUserChats = async (req: AuthenticatedRequest, res: Response, nex
   }
 };
 
-export const createChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const createChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -38,7 +38,7 @@ export const createChat = async (req: AuthenticatedRequest, res: Response, next:
   }
 };
 
-export const getChatDetails = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const getChatDetails = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -52,7 +52,7 @@ export const getChatDetails = async (req: AuthenticatedRequest, res: Response, n
   }
 };
 
-export const leaveChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const leaveChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -71,7 +71,7 @@ export const leaveChat = async (req: AuthenticatedRequest, res: Response, next: 
   }
 };
 
-export const markChatStatus = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const markChatStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const { forceMarkAsSeen } = req.body;
@@ -95,7 +95,7 @@ export const markChatStatus = async (req: AuthenticatedRequest, res: Response, n
   }
 };
 
-export const pinChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const pinChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     if (!req.user) {
@@ -116,7 +116,7 @@ export const pinChat = async (req: AuthenticatedRequest, res: Response, next: Ne
   }
 };
 
-export const muteChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const muteChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const { duration } = req.body;

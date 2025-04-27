@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { User } from '../models/prisma';
-import { AuthenticatedRequest } from 'middleware/authMiddleware';
 import { UserService } from '../services/userService';
 
 const userService = new UserService();
@@ -77,7 +76,7 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const blockUser = async (req: AuthenticatedRequest, res: Response) => {
+export const blockUser = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -98,7 +97,7 @@ export const blockUser = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const unblockUser = async (req: AuthenticatedRequest, res: Response) => {
+export const unblockUser = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -116,7 +115,7 @@ export const unblockUser = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+export const updateStatus = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });

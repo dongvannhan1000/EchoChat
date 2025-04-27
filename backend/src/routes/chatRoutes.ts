@@ -1,6 +1,7 @@
 import express from 'express';
 import * as chatController from '../controllers/chatController';
 import { isAuth } from '../middleware/authMiddleware';
+import { asyncWrapper } from '../utils/asyncWrapper';
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 router.use(isAuth);
 
 // API Chat
-router.get('/api/chats', chatController.getUserChats as express.RequestHandler);
+router.get('/api/chats', asyncWrapper(chatController.getUserChats));
 router.post('/api/chats', chatController.createChat as express.RequestHandler);
 router.get('/api/chats/:chatId', chatController.getChatDetails as express.RequestHandler);
 router.delete('/api/chats/:chatId/leave', chatController.leaveChat as express.RequestHandler);
