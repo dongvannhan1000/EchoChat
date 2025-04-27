@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import * as authService from '../services/authService';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
@@ -76,11 +76,12 @@ export const logout = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json({ message: 'Logout successful' });
 };
 
-export const refreshToken = async (req: Request, res: Response) => {
+export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    return res.status(401).json({ message: 'No token provided' });
+    res.status(401).json({ message: 'No token provided' });
+    return;
   }
 
   try {
@@ -88,7 +89,8 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     const user = await authService.getUserById(decoded.id);
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      res.status(401).json({ message: 'User not found' });
+      return;
     }
 
     // Create new token
@@ -98,24 +100,26 @@ export const refreshToken = async (req: Request, res: Response) => {
       { expiresIn: ACCESS_TOKEN_EXPIRES }
     );
 
-    return res.json({
+    res.json({
       message: 'Token refreshed',
       accessToken,
       user
     });
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ message: 'Token is not valid' });
+      res.status(401).json({ message: 'Token is not valid' });
+      return;
     }
-    return res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
 };
 
-export const getCurrentUser = async (req: Request, res: Response) => {
+export const getCurrentUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'No token provided' });
+    res.status(401).json({ message: 'No token provided' });
+    return;
   }
   
   const token = authHeader.split(' ')[1];
@@ -125,14 +129,16 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     
     const user = await authService.getUserById(decoded.id);
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      res.status(401).json({ message: 'User not found' });
+      return;
     }
     
-    return res.json({ user });
+    res.json({ user });
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ message: 'Token is not valid' });
+      res.status(401).json({ message: 'Token is not valid' });
+      return;
     }
-    return res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
