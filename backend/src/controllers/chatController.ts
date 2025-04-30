@@ -1,17 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { ChatService } from '../services/chatService';
 
 const chatService = new ChatService();
 
-export const getUserChats = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserChats:RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
       return;
     }
     const userId = req.user.id;
-    const chats = await chatService.getUserChats(userId);
-    res.json(chats);
+    console.log(userId)
+    try {
+      const chats = await chatService.getUserChats(userId);
+      console.log('Standalone test chats:', chats);
+      res.json(chats);
+    } catch (e) {
+      console.error('Standalone test error:', e);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Failed to get chats' });
   }

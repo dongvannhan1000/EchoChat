@@ -58,14 +58,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
 
     return res.json({ 
       message: 'Login successfully', 
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        block: user.block,
-        statusMessage: user.statusMessage
-      }, 
+      user, 
       accessToken 
     });
   })(req, res, next);

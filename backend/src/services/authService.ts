@@ -11,14 +11,5 @@ export const register = async ({ name, email, password }: { name: string; email:
 export const getUserById = async (id: number) => {
   return await User.findUnique({
     where: { id },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      avatar: true,
-      statusMessage: true,
-      lastSeen: true,
-      block: true
-    }
   });
 };
