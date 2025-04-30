@@ -7,12 +7,14 @@ export const uploadUserAvatar = async (req: Request, res: Response) => {
   try {
     const file = req.file;
     if (!file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
     }
 
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated' });
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
     }
 
     const imageMetadata = await imageService.uploadImage(file, userId);
@@ -30,12 +32,14 @@ export const uploadChatAvatar = async (req: Request, res: Response) => {
   try {
     const file = req.file;
     if (!file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
     }
 
     const chatId = req.body.chatId ? parseInt(req.body.chatId) : undefined;
     if (!chatId) {
-      return res.status(400).json({ message: 'Chat ID is required' });
+      res.status(400).json({ message: 'Chat ID is required' });
+      return;
     }
 
     // TODO: Kiểm tra người dùng có quyền thay đổi avatar của chat không
@@ -56,12 +60,14 @@ export const uploadMessageImage = async (req: Request, res: Response) => {
   try {
     const file = req.file;
     if (!file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
     }
 
     const messageId = req.body.messageId ? parseInt(req.body.messageId) : undefined;
     if (!messageId) {
-      return res.status(400).json({ message: 'Message ID is required' });
+      res.status(400).json({ message: 'Message ID is required' });
+      return;
     }
 
     // TODO: Kiểm tra người dùng có phải là người gửi tin nhắn không
@@ -84,7 +90,8 @@ export const getUserAvatar = async (req: Request, res: Response) => {
     
     const image = await imageService.getImage('user', userId);
     if (!image) {
-      return res.status(404).json({ message: 'User has no avatar' });
+      res.status(404).json({ message: 'User has no avatar' });
+      return;
     }
     
     res.status(200).json(image);
@@ -105,7 +112,8 @@ export const getChatAvatar = async (req: Request, res: Response) => {
     
     const image = await imageService.getImage('chat', chatId);
     if (!image) {
-      return res.status(404).json({ message: 'Chat has no avatar' });
+      res.status(404).json({ message: 'Chat has no avatar' });
+      return;
     }
     
     res.status(200).json(image);
@@ -126,7 +134,8 @@ export const getMessageImage = async (req: Request, res: Response) => {
     
     const image = await imageService.getImage('message', messageId);
     if (!image) {
-      return res.status(404).json({ message: 'Message has no image' });
+      res.status(404).json({ message: 'Message has no image' });
+      return;
     }
     
     res.status(200).json(image);
@@ -143,7 +152,8 @@ export const deleteUserAvatar = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated' });
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
     }
 
     await imageService.deleteImage('user', userId);
