@@ -101,6 +101,17 @@ model Image {
   @@map("images")
 }
 
+model PendingUpload {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  type        String   // 'user', 'chat', or 'message'
+  referenceId Int      // userId, chatId, or will be linked to messageId later
+  userId      Int?     // for tracking who initiated the upload (optional)
+  previousKey String?  // key of the file that will be replaced (if any)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
 enum ChatType {
   private
   group

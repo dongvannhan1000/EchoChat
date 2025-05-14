@@ -52,19 +52,6 @@ router
   .get(   isAuth, getMessageImage)
   .delete(isAuth, deleteMessageImage);
 
-// // Upload routes
-// router.post('/api/images/user/avatar', upload.single('image'), uploadUserAvatar as express.RequestHandler);
-// router.post('/api/images/chat/avatar', upload.single('image'), uploadChatAvatar as express.RequestHandler);
-// router.post('/api/images/message/image', upload.single('image'), uploadMessageImage as express.RequestHandler);
 
-// // Get routes
-// router.get('/api/images/user/:userId/avatar', getUserAvatar as express.RequestHandler);
-// router.get('/api/images/chat/:chatId/avatar', getChatAvatar as express.RequestHandler);
-// router.get('/api/images/message/:messageId/image', getMessageImage as express.RequestHandler);
-
-// // Delete routes
-// router.delete('/api/images/user/avatar', deleteUserAvatar as express.RequestHandler);
-// router.delete('/api/images/chat/:chatId/avatar', deleteChatAvatar as express.RequestHandler);
-// router.delete('/api/images/message/:messageId/image', deleteMessageImage as express.RequestHandler);
 
 export default router;

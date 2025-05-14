@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import chatRoutes from './routes/chatRoutes';
 import imageRoutes from './routes/imageRoutes';
+import presignedUrlRoutes from './routes/presignedUrlRoutes';
 import { sessionMiddleware } from './config/session';
 import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
@@ -146,6 +147,7 @@ app.use('/', userRoutes);
 app.use('/', chatRoutes);
 app.use('/', messageRoutes);
 app.use('/', imageRoutes);
+app.use('/', presignedUrlRoutes);
 
 app.use(errorHandler);
 
