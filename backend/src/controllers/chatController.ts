@@ -10,10 +10,8 @@ export const getUserChats:RequestHandler = async (req: Request, res: Response, n
       return;
     }
     const userId = req.user.id;
-    console.log(userId)
     try {
       const chats = await chatService.getUserChats(userId);
-      console.log('Standalone test chats:', chats);
       res.json(chats);
     } catch (e) {
       console.error('Standalone test error:', e);

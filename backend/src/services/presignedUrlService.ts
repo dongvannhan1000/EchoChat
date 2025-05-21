@@ -355,3 +355,5 @@ export class PresignedUrlService {
     }
   }
 }
+
+export const presignedUrlService = new PresignedUrlService();

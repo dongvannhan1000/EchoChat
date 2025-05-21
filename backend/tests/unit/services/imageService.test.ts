@@ -1,4 +1,3 @@
-// tests/unit/services/imageService.test.ts
 import { ImageService } from '../../../src/services/imageService';
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -6,8 +5,17 @@ import { prisma } from '../../../src/models/prisma';
 import express from 'express';
 import multer from 'multer';
 
-// Mocking các dependencies
-jest.mock('@aws-sdk/client-s3');
+
+jest.mock('@aws-sdk/client-s3', () => {
+  return {
+    S3Client: jest.fn().mockImplementation(() => ({
+      send: jest.fn().mockResolvedValue({})
+    })),
+    PutObjectCommand: jest.fn(),
+    DeleteObjectCommand: jest.fn(),
+    GetObjectCommand: jest.fn()
+  };
+});
 jest.mock('@aws-sdk/s3-request-presigner');
 jest.mock('../../../src/models/prisma', () => ({
   prisma: {
@@ -23,18 +31,11 @@ jest.mock('../../../src/models/prisma', () => ({
 describe('ImageService', () => {
   let imageService: ImageService;
   
-  // Mock environment variables
-  const originalEnv = process.env;
-  
   beforeEach(() => {
     
     // Reset mocks
     jest.clearAllMocks();
     
-    // Mock S3Client implementation
-    (S3Client as jest.Mock).mockImplementation(() => ({
-      send: jest.fn().mockResolvedValue({})
-    }));
     
     // Mock getSignedUrl
     (getSignedUrl as jest.Mock).mockResolvedValue('https://presigned-url.example.com');

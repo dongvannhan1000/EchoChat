@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from 'types/user';
+import { AppUser } from 'types/user';
 
 export const isAuth: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,7 +11,7 @@ export const isAuth: RequestHandler = (req: Request, res: Response, next: NextFu
     };
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-    req.user = decoded as User;
+    req.user = decoded as AppUser;
     next();
   } catch (error) {
     res.status(401).json({ msg: 'Token is not valid' });

@@ -110,6 +110,7 @@ model PendingUpload {
   previousKey String?  // key of the file that will be replaced (if any)
   expiresAt   DateTime
   createdAt   DateTime @default(now())
+  @@map("pending_uploads")
 }
 
 enum ChatType {
