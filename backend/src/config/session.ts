@@ -12,12 +12,14 @@ export const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  store: new PrismaSessionStore(
-    prisma as unknown as IPrisma<'session'>,
-    {
-      checkPeriod: 2 * 60 * 1000,  // ms
-      dbRecordIdIsSessionId: true,
-      dbRecordIdFunction: undefined
-    }
-  )
+  store: process.env.NODE_ENV === 'test' 
+    ? undefined 
+    : new PrismaSessionStore(
+        prisma as unknown as IPrisma<'session'>,
+        {
+          checkPeriod: 2 * 60 * 1000,  // ms
+          dbRecordIdIsSessionId: true,
+          dbRecordIdFunction: undefined
+        }
+      )
 });

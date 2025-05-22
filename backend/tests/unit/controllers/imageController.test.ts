@@ -10,6 +10,8 @@ import {
   deleteUserAvatar
 } from '../../../src/controllers/imageController';
 import { ImageService } from '../../../src/services/imageService';
+import express from 'express';
+import multer from 'multer';
 
 // Mock the ImageService
 jest.mock('../../../src/services/imageService');
