@@ -26,12 +26,14 @@ export const sendMessage = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const chatId = parseInt(req.params.chatId);
-    const type = req.body.type;
+    const { content, imageFileKey, replyToId, type } = req.body;
     const message = await messageService.sendMessage({
-      ...req.body,
       chatId,
       senderId: userId,
-      type
+      type,
+      content,
+      image: imageFileKey ? { fileKey: imageFileKey } : undefined, // Map imageFileKey thành object
+      replyToId
     });
     res.status(201).json(message);
   } catch (error: unknown) {

@@ -20,6 +20,7 @@ import { debounce } from 'lodash';
 import { useChatStore } from '@/stores/useChatV2'
 import { Card, CardContent } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { MessageType } from '@/types/chat'
 
 
 
@@ -160,11 +161,11 @@ export const ChatPage: React.FC = () => {
     }
   }, [searchTerm]);
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = (content: string, type: MessageType, imageUrl?: string, imageFileKey?: string) => {
     if (currentChat) {
-      void sendMessage(currentChat.id, content)
-
+      return sendMessage(currentChat.id, content, type, imageUrl, imageFileKey);
     }
+    return Promise.reject(new Error('No chat selected'));
   }
 
   const handleLoadMore = async () => {

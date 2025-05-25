@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { MoreVertical, Edit, Trash, Pin } from 'lucide-react'
 
+
 interface ChatWindowProps {
   messages: Message[]
   isLoading: boolean
@@ -91,6 +92,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
   const handleEditClick = (message: Message) => {
     setEditingMessageId(message.id);
     setEditContent(message.content);
+    setEditImage(message.image?.url || null)
   };
   
   const handleEditSubmit = () => {
@@ -188,8 +190,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
               >
                 {!isCurrentUserMessage && (
                   <Avatar className="mr-2">
-                    <AvatarImage src={message.sender.avatar?.url || '/placeholder.svg?height=40&width=40'} alt={message.sender.name} />
-                    <AvatarFallback>{message.sender.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarImage 
+                      src={message.sender.avatar?.url || '/placeholder.svg?height=40&width=40'} 
+                      alt={message.sender.name} 
+                    />
+                    <AvatarFallback>
+                      {message.sender.name
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')}
+                    </AvatarFallback>
                   </Avatar>
                 )}
                 <div
@@ -204,32 +214,87 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
                   } ${isDeleted ? 'italic' : ''}`}
                 >
                   {!isCurrentUserMessage && isGroupChat && (
-                    <p className="text-xs font-semibold mb-1">{message.sender.name}</p>
-                  )}
-                  {editingMessageId === message.id ? (
-                    <div className="flex items-center">
-                      <Input
-                        value={editContent}
-                        onChange={(e) => {setEditContent(e.target.value)}}
-                        className="mr-2 text-black bg-white"
-                      />
-                      <Button onClick={handleEditSubmit}>Save</Button>
+                    <div className="px-4 pt-2 pb-1">
+                      <p className="text-xs font-semibold opacity-75">{message.sender.name}</p>
                     </div>
-                  ) : (
-                    <p>{message.content}</p>
                   )}
-                  {isEdited && !isDeleted && (
-                    <span className="text-xs text-yellow-400 mt-1 italic">Edited</span>
+
+                  {/* Message Image Display */}
+                  {message.image && !isDeleted && (
+                      <div className={`${message.content ? "p-2 pb-1" : "p-2"}`}>
+                        <div className="rounded-lg overflow-hidden bg-white/10">
+                          <img
+                            src={message.image?.url || "/placeholder.svg"}
+                            alt="Shared image"
+                            className="max-w-full h-auto max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => window.open(message.image?.url, "_blank")}
+                            onError={(e) => {
+                              e.currentTarget.src = "/placeholder.svg?height=200&width=300"
+                            }}
+                          />
+                        </div>
+                      </div>
                   )}
-                  <span className="text-xs mt-1 block">
-                    {formatMessageTime(new Date(message.createdAt).toISOString())}
-                  </span>
+                  <div
+                      className={`px-4 ${message.image && message.content ? "pb-2" : message.content ? "py-2" : ""}`}
+                    >
+
+                  
+                    {editingMessageId === message.id ? (
+                      <div className="flex items-center">
+                        <Input
+                          value={editContent}
+                          onChange={(e) => {setEditContent(e.target.value)}}
+                          className="text-black bg-white border-gray-300"
+                        />
+                        {message.image && (
+                          <div className="relative">
+                            <img
+                              src={message.image?.url || "/placeholder.svg"}
+                              alt="Current image"
+                              className="max-w-full h-auto max-h-32 object-cover rounded border"
+                            />
+                            <p className="text-xs opacity-75 mt-1">Current image (cannot be changed during edit)</p>
+                          </div>
+                        )}
+                        <div className="flex space-x-2">
+                              <Button
+                                onClick={handleEditSubmit}
+                                size="sm"
+                                className="bg-green-500 hover:bg-green-600 text-white"
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setEditingMessageId(null)
+                                  setEditContent("")
+                                  setEditImage(null)
+                                }}
+                                size="sm"
+                                variant="outline"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                      </div>
+                    ) : (
+                      message.content && <p className="break-words">{message.content}</p>
+                    )}
+                  </div>
+                  {/* Message Footer */}
+                  <div className="px-4 pb-2">
+                      {isEdited && !isDeleted && <span className="text-xs opacity-75 italic block">Edited</span>}
+                      <span className="text-xs opacity-75 block">
+                        {formatMessageTime(new Date(message.createdAt).toISOString())}
+                      </span>
+                  </div>
                 </div>
                 {isCurrentUserMessage && !isDeleted && (
-                    <div className="self-end mt-1">
+                    <div className="self-end mt-1 ml-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-100">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -238,7 +303,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
                             <Edit className="mr-2 h-4 w-4" />
                             <span>Edit</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => {onDeleteMessage(message.id)}}>
+                          <DropdownMenuItem 
+                            onClick={() => {onDeleteMessage(message.id)}}
+                            className="text-red-600 focus:text-red-600"
+                          >
                             <Trash className="mr-2 h-4 w-4" />
                             <span>Delete</span>
                           </DropdownMenuItem>

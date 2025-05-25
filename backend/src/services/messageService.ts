@@ -1,5 +1,6 @@
 import { Chat, Message, prisma, UserChat } from '../models/prisma';
 import { MessageType } from '@prisma/client';
+import { presignedUrlService } from './presignedUrlService';
 
 export class MessageService {
   async getChatMessages(chatId: number, userId: number, cursor?: number, limit: number = 20) {
@@ -66,7 +67,7 @@ export class MessageService {
     senderId: number;
     type: MessageType;
     content?: string;
-    image?: string;
+    image?: { fileKey: string };
     replyToId?: number;
   }) {
     const { chatId, senderId, type, content, image, replyToId } = data;
@@ -88,16 +89,6 @@ export class MessageService {
 
     const message = await prisma.$transaction(async (tx) => {
       // Tạo bản ghi Image nếu có
-      let imageId = undefined;
-      if (image) {
-        const imageRecord = await tx.image.create({
-          data: {
-            url: image,
-            key: `user_${senderId}_${Date.now()}`
-          }
-        });
-        imageId = imageRecord.id;
-      }
 
       // Tạo message với imageId (nếu có)
       const message = await tx.message.create({
@@ -107,12 +98,10 @@ export class MessageService {
           type,
           content,
           replyToId,
-          imageId 
         },
         include: {
           sender: true,
           chat: true,
-          image: true
         }
       });
 
@@ -132,6 +121,10 @@ export class MessageService {
       return message;
     });
 
+    if (image?.fileKey) {
+      await presignedUrlService.confirmUpload(image.fileKey, 'message', message.id);
+    }
+
     const updatedChat = await Chat.updateMany({
       where: {
         id: chatId
@@ -141,6 +134,7 @@ export class MessageService {
         updatedAt: new Date()
       }
     });
+
 
     return {
       message,

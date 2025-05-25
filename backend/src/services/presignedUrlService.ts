@@ -187,7 +187,7 @@ export class PresignedUrlService {
       const presignedUrl = await this.generatePresignedPutUrl(fileKey, contentType, 60);
       
       // Generate the CloudFront URL where the file will be accessible after upload
-      const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
+      // const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
       
       // Store temporary metadata about the pending upload
       await prisma.pendingUpload.create({
@@ -202,8 +202,8 @@ export class PresignedUrlService {
       
       return {
         presignedUrl,
-        fileKey,
-        cloudFrontUrl
+        fileKey
+        // cloudFrontUrl
       };
     } catch (error) {
       console.error('Error generating presigned URL for message image:', error);
@@ -223,6 +223,7 @@ export class PresignedUrlService {
           type: type
         }
       });
+
 
       if (!pendingUpload) {
         throw new Error('No pending upload found for this key');
@@ -260,7 +261,13 @@ export class PresignedUrlService {
           if (!messageId) {
             throw new Error('Message ID is required for message image uploads');
           }
-          imageData.messageId = messageId;
+          const messageExists = await prisma.message.findUnique({
+            where: { id: messageId }
+          });
+
+          if (!messageExists) {
+            throw new Error('Message not found');
+          }
         }
 
         await prisma.image.create({
