@@ -39,7 +39,7 @@ export class ChatService {
       },
       orderBy: [
         { pinned: 'desc' },
-        { updatedAt: 'desc' }
+        { chat: { updatedAt: 'desc' } }
       ]
     });
   }

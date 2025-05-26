@@ -119,15 +119,15 @@ export default function ChatList({
           const otherUserName = otherUser.name;
           return otherUserName && otherUserName.toLowerCase().includes(chatSearchTerm.toLowerCase());
         })
-        .sort((a, b) => {
-          const timeA = new Date(a.updatedAt).getTime();
-          const timeB = new Date(b.updatedAt).getTime();
+        // .sort((a, b) => {
+        //   const timeA = new Date(a.updatedAt).getTime();
+        //   const timeB = new Date(b.updatedAt).getTime();
           
-          if (a.pinned && !b.pinned) return -1;
-          if (!a.pinned && b.pinned) return 1;
+        //   if (a.pinned && !b.pinned) return -1;
+        //   if (!a.pinned && b.pinned) return 1;
           
-          return timeB - timeA;
-        })
+        //   return timeB - timeA;
+        // })
         .map((chat, index) => (
           <ChatListItem
             key={`${String(chat.chatId)}-${String(index)}`}

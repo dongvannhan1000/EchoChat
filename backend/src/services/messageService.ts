@@ -132,14 +132,13 @@ export class MessageService {
       console.log('confirmUpload completed for message:', message.id);
     }
 
-    const updatedChat = await Chat.updateMany({
-      where: {
-        id: chatId
-      },
+    const updatedChat = await prisma.chat.update({
+      where: { id: chatId },
       data: {
         lastMessage: content || 'Sent an image',
         updatedAt: new Date()
       }
+      // nếu muốn lấy thêm field nào khác thì include hoặc select ở đây
     });
 
     const finalMessage = await prisma.message.findUnique({
