@@ -215,6 +215,7 @@ export class PresignedUrlService {
    * Confirm that an upload has completed and update the database accordingly
    */
   async confirmUpload(fileKey: string, type: 'user' | 'chat' | 'message', messageId?: number) {
+    console.log('confirmUpload called:', { fileKey, type, messageId });
     try {
       // Find the pending upload
       const pendingUpload = await prisma.pendingUpload.findFirst({
@@ -233,7 +234,7 @@ export class PresignedUrlService {
       const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
 
       // Begin database transaction
-      await prisma.$transaction(async (prisma) => {
+      const result = await prisma.$transaction(async (prisma) => {
         // If there's an existing image, delete it (we'll clean up S3 on a schedule)
         if (pendingUpload.previousKey) {
           await prisma.image.deleteMany({
@@ -268,19 +269,30 @@ export class PresignedUrlService {
           if (!messageExists) {
             throw new Error('Message not found');
           }
+          imageData.messageId = messageId;
         }
 
-        await prisma.image.create({
+        const createdImage = await prisma.image.create({
           data: imageData
         });
+
+        if (type === 'message' && messageId) {
+          const updatedMessage = await prisma.message.update({
+            where: { id: messageId },
+            data: { imageId: createdImage.id }
+          });
+          console.log('Message updated with imageId:', updatedMessage.imageId);
+        }
 
         // Delete the pending upload
         await prisma.pendingUpload.delete({
           where: { id: pendingUpload.id }
         });
+
+        return createdImage;
       });
 
-      return { success: true, cloudFrontUrl };
+      return { success: true, cloudFrontUrl, image: result };
     } catch (error) {
       console.error('Error confirming upload:', error);
       throw new Error('Failed to confirm upload');

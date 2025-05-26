@@ -161,9 +161,9 @@ export const ChatPage: React.FC = () => {
     }
   }, [searchTerm]);
 
-  const handleSendMessage = (content: string, type: MessageType, imageUrl?: string, imageFileKey?: string) => {
+  const handleSendMessage = async (content: string, type: MessageType, imageFileKey?: string, replyToId?: number) => {
     if (currentChat) {
-      return sendMessage(currentChat.id, content, type, imageUrl, imageFileKey);
+      return await sendMessage(currentChat.id, content, type, imageFileKey, replyToId);
     }
     return Promise.reject(new Error('No chat selected'));
   }

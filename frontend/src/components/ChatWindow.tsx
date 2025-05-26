@@ -166,6 +166,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
             </div>
           )}
           {messages.map((message) => {
+            console.log(message)
             const isCurrentUserMessage = message.senderId === user?.id
             const isDeleted = !!message.deletedAt;
             const isEdited = message.isEdited
@@ -235,11 +236,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
                         </div>
                       </div>
                   )}
+                  
+                  {/* Message Content */}
                   <div
                       className={`px-4 ${message.image && message.content ? "pb-2" : message.content ? "py-2" : ""}`}
                     >
-
-                  
                     {editingMessageId === message.id ? (
                       <div className="flex items-center">
                         <Input
@@ -279,9 +280,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
                             </div>
                       </div>
                     ) : (
-                      message.content && <p className="break-words">{message.content}</p>
+                      // Chỉ hiển thị text nếu có content và không phải chuỗi rỗng
+                      message.content && message.content.trim() !== '' && (
+                        <p className="break-words">{message.content}</p>
+                      )
                     )}
                   </div>
+                  
                   {/* Message Footer */}
                   <div className="px-4 pb-2">
                       {isEdited && !isDeleted && <span className="text-xs opacity-75 italic block">Edited</span>}

@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { MessageType, Message} from '@/types/chat'
 
 interface MessageInputProps {
-  onSendMessage: (message: string, type: MessageType, imageUrl?: string, imageFileKey?: string) => Promise<Message>
+  onSendMessage: (message: string, type: MessageType, imageFileKey?: string, replyToId?: number) => Promise<Message>
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
@@ -88,10 +88,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
       }
 
       // Send message with image URL
-      const message = await onSendMessage(newMessage, 'normal', imageFileKey)
-      if (imageFileKey) {
-        await imageUploadService.confirmMessageImageUpload(imageFileKey, message.id);
-      }
+      const message = await onSendMessage(newMessage, 'normal', imageFileKey, undefined)
+      console.log(message)
+      // if (imageFileKey) {
+      //   await imageUploadService.confirmMessageImageUpload(imageFileKey, message.id);
+      // }
       
       // Clear form
       setNewMessage("")

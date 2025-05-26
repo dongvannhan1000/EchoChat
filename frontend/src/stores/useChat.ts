@@ -23,7 +23,7 @@ interface ChatStore {
   fetchUserChats: () => Promise<void>;
   fetchChatDetails: (chatId: number) => Promise<void>;
   fetchMessages: (chatId: number, reset?: boolean) => Promise<void>;
-  sendMessage: (chatId: number, content: string, type: MessageType, imageUrl?: string, imageFileKey?: string, replyToId?: number) => Promise<Message>;
+  sendMessage: (chatId: number, content: string, type: MessageType, imageFileKey?: string, replyToId?: number) => Promise<Message>;
   addMessage: (message: Message) => void;
   sendSystemMessage: (chatId: number, type: MessageType, content: string) => Promise<void>;
   removeMessage: (messageId: number) => Promise<Message>;
@@ -148,7 +148,7 @@ export const useChat = create<ChatStore>((set, get) => ({
   },
 
   // Send a new message
-  sendMessage: async (chatId: number, content: string, type: MessageType, imageUrl?: string, imageFileKey?: string, replyToId?: number) => {
+  sendMessage: async (chatId: number, content: string, type: MessageType, imageFileKey?: string, replyToId?: number) => {
     const action = 'sendMessage';
     try {
       set((state) => ({
@@ -159,7 +159,6 @@ export const useChat = create<ChatStore>((set, get) => ({
       const response = await api.post(`/api/chats/${chatId.toString()}/messages`, {
         content,
         type,
-        imageUrl,
         imageFileKey,
         replyToId
       });

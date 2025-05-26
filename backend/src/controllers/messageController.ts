@@ -32,7 +32,7 @@ export const sendMessage = async (req: Request, res: Response) => {
       senderId: userId,
       type,
       content,
-      image: imageFileKey ? { fileKey: imageFileKey } : undefined, // Map imageFileKey thành object
+      imageFileKey,
       replyToId
     });
     res.status(201).json(message);

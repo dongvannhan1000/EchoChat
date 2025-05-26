@@ -33,7 +33,8 @@ export class MessageService {
             name: true,
             avatar: true
           }
-        }
+        },
+        image: true
       },
       orderBy: {
         createdAt: 'desc'
@@ -67,10 +68,14 @@ export class MessageService {
     senderId: number;
     type: MessageType;
     content?: string;
-    image?: { fileKey: string };
+    imageFileKey?: string;
     replyToId?: number;
   }) {
-    const { chatId, senderId, type, content, image, replyToId } = data;
+
+    console.log('sendMessage called with data:', data);
+    const { chatId, senderId, type, content, imageFileKey, replyToId } = data;
+
+    
 
     const userChat = await UserChat.findUnique({
       where: {
@@ -121,8 +126,10 @@ export class MessageService {
       return message;
     });
 
-    if (image?.fileKey) {
-      await presignedUrlService.confirmUpload(image.fileKey, 'message', message.id);
+    if (imageFileKey) {
+      console.log('Starting confirmUpload for message:', message.id);
+      await presignedUrlService.confirmUpload(imageFileKey, 'message', message.id);
+      console.log('confirmUpload completed for message:', message.id);
     }
 
     const updatedChat = await Chat.updateMany({
@@ -135,9 +142,20 @@ export class MessageService {
       }
     });
 
+    const finalMessage = await prisma.message.findUnique({
+      where: { id: message.id },
+      include: {
+        sender: true,
+        chat: true,
+        image: true, // Bây giờ sẽ có image data
+      }
+    });
+
+    console.log('Final message imageId:', finalMessage?.imageId);
+
 
     return {
-      message,
+      message: finalMessage,
       updatedChat
     };
   }
