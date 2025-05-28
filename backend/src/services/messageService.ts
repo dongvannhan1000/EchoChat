@@ -137,6 +137,13 @@ export class MessageService {
       data: {
         lastMessage: content || 'Sent an image',
         updatedAt: new Date()
+      },
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        }
       }
       // nếu muốn lấy thêm field nào khác thì include hoặc select ở đây
     });

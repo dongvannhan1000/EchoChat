@@ -124,11 +124,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
     );
   }
   
-  
+  console.log('currentChat:', currentChat);
+  console.log('participants:', currentChat?.participants);
+  console.log('user:', user);
+  console.log('user.id:', user?.id);
   const isPrivateChat = currentChat.chatType === 'private'
   const otherParticipant = isPrivateChat 
     ? currentChat.participants.find(p => p.userId !== user.id)
     : null
+
+  console.log('otherParticipant:', otherParticipant)
+  console.log('user.block:', user.block)
+  console.log('otherParticipant?.user.block:', otherParticipant?.user.block)
+  
   const isBlocked = otherParticipant?.user.block.includes(user.id) || false
   const hasBlocked = user.block.includes(otherParticipant?.userId || 0) || false
 

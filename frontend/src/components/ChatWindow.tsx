@@ -166,7 +166,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = (({
             </div>
           )}
           {messages.map((message) => {
-            console.log(message)
             const isCurrentUserMessage = message.senderId === user?.id
             const isDeleted = !!message.deletedAt;
             const isEdited = message.isEdited
