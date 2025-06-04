@@ -59,7 +59,7 @@ async function seedDatabase() {
   // Generate Private Chats
   const generateUniqueChatsWithMessages = async (users: User[], count: number) => {
     const existingPairs = new Set<string>();
-    const privateChats = [];
+    const privateChats: Chat[] = [];
   
     while (privateChats.length < count) {
       const user1 = users[Math.floor(Math.random() * users.length)];
@@ -147,7 +147,7 @@ async function seedDatabase() {
         }
       });
   
-      (privateChats as Chat[]).push(chat);
+      privateChats.push(chat);
     }
   
     return privateChats;
