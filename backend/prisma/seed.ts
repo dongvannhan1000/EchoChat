@@ -1,4 +1,4 @@
-import { PrismaClient, ChatType, ChatRole, User, Message, Image } from '@prisma/client'
+import { PrismaClient, ChatType, ChatRole, User, Message, Image, Chat } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client'
@@ -147,7 +147,7 @@ async function seedDatabase() {
         }
       });
   
-      privateChats.push(chat);
+      (privateChats as Chat[]).push(chat);
     }
   
     return privateChats;

@@ -207,6 +207,31 @@ describe('Presigned URL Integration Tests', () => {
         userId: 1,
         expiresAt: new Date()
       });
+
+      (prisma.message.findUnique as jest.Mock).mockResolvedValue({
+        id: 101,
+        content: 'Test message',
+        chatId: 4,
+        userId: 1
+      });
+
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(prisma);
+      });
+
+      (prisma.image.create as jest.Mock).mockResolvedValue({
+        id: 1,
+        url: expect.any(String),
+        key: fileKey,
+        messageId: 101
+      });
+
+      (prisma.message.update as jest.Mock).mockResolvedValue({
+        id: 101,
+        imageId: 1
+      });
+
+      (prisma.pendingUpload.delete as jest.Mock).mockResolvedValue({});
       
       // Step 2: Confirm upload with message ID (now that message is created)
       await request(app)

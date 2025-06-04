@@ -18,6 +18,11 @@ export const prisma = {
       findMany: jest.fn(),
       deleteMany: jest.fn(),
     },
+    message: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
     $transaction: jest.fn().mockImplementation(async (callback) => {
       return callback(prisma);
     }),

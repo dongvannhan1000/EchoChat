@@ -166,7 +166,9 @@ export const useChat = create<ChatStore>((set, get) => ({
       const newMessage = response.data.message as Message;
       console.log('Chat updated:', response.data.updatedChat);
 
-      useChatStore.getState().setCurrentChat(response.data.updatedChat)
+      useChatStore.getState().setCurrentChat(response.data.updatedChat as Chat)
+
+      // get().addMessage(newMessage);
 
       useWebSocket.getState().sendMessage(newMessage);
       return newMessage

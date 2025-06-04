@@ -15,6 +15,7 @@ import { Server } from 'socket.io';
 import http from 'http';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
+import { prisma } from './models/prisma';
 
 dotenv.config();
 
@@ -54,11 +55,27 @@ io.on('connect', (socket) => {
   console.log('New client connected:', socket.id);
 
 
-  socket.on('send-message', (data) => {
+  socket.on('send-message', async (data) => {
     console.log('Message received:', data);
     if (data.chatId) {
       console.log(`Sending message to room: ${data.chatId}`);
-      io.to(data.chatId.toString()).emit('receive-message', data);
+
+      const updatedChat = await prisma.chat.findUnique({
+        where: { id: data.chatId },
+        include: {
+          participants: {
+            include: {
+              user: true
+            }
+          }
+        }
+      });
+
+      console.log('Updated chat:', updatedChat);
+      io.to(data.chatId.toString()).emit('receive-message', {
+        message: data,
+        updatedChat
+      });
     }
   });
 

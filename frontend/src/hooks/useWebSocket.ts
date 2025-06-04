@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
-import { Message } from '@/types/chat';
+import { Chat, Message } from '@/types/chat';
 import { useChat } from '@/stores/useChat';
 import { useChatStore } from '@/stores/useChatV2';
 
@@ -58,8 +58,16 @@ export const connectWebSocket = async (token: string): Promise<Socket> => {
         });
       });
 
-      socket.on('receive-message', (message: Message) => {
-        useChat.getState().addMessage(message);
+      socket.on('receive-message', (data: { message: Message, updatedChat: Chat }) => {
+        
+        
+
+        const currentChat = useChatStore.getState().currentChat;
+        if (currentChat && currentChat.id === data.message.chatId) {
+          useChat.getState().addMessage(data.message);
+          useChatStore.getState().setCurrentChat(data.updatedChat);
+        }
+
         void useChatStore.getState().fetchUserChats()
       });
 
@@ -125,7 +133,7 @@ export const useWebSocket = create<WebSocketStore>((set, get) => ({
   sendMessage: (message: Partial<Message>) => {
     const { socket } = get();
     if (socket && socket.connected) {
-      void useChatStore.getState().fetchUserChats()
+      // void useChatStore.getState().fetchUserChats()
       socket.emit('send-message', message);
     } else {
       console.error('Socket not connected');
