@@ -20,6 +20,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useUser } from "@/stores/useUser"
 import { useUserChatInteractionsStore } from "@/stores/useInteraction"
 import { useChatStore } from "@/stores/useChatV2"
+import { formatMessageTime } from "@/utils/formatTime"
 
 interface ChatListItemProps {
   chat: UserChat
@@ -139,10 +140,7 @@ export const ChatListItem = memo(function ChatListItem({
                 <BellOff className="h-4 w-4 text-gray-500" />
               )}
               <span className="text-xs text-gray-500 whitespace-nowrap">
-                {new Date(chat.chat.updatedAt).toLocaleTimeString([], { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
+                {formatMessageTime(chat.chat.updatedAt.toString())}
               </span>
             </div>
           </div>

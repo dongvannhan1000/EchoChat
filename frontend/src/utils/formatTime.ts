@@ -14,14 +14,20 @@ export const formatMessageTime = (timestamp: string) => {
 
   if (isToday) {
     // If from today, show only time
-    return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return messageDate.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
   } else {
     // If not from today, show date and time
-    return messageDate.toLocaleString([], { 
+    return messageDate.toLocaleString('en-US', { 
       month: 'short', 
       day: 'numeric', 
       hour: '2-digit', 
-      minute: '2-digit' 
+      minute: '2-digit',
+      hour12: false 
     });
+
   }
 }
