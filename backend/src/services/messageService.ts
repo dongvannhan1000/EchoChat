@@ -93,9 +93,9 @@ export class MessageService {
     
 
     const message = await prisma.$transaction(async (tx) => {
-      // Tạo bản ghi Image nếu có
+      // Create image record
 
-      // Tạo message với imageId (nếu có)
+      // Create message with imageId
       const message = await tx.message.create({
         data: {
           chatId,
@@ -145,7 +145,6 @@ export class MessageService {
           }
         }
       }
-      // nếu muốn lấy thêm field nào khác thì include hoặc select ở đây
     });
 
     const finalMessage = await prisma.message.findUnique({
@@ -153,7 +152,7 @@ export class MessageService {
       include: {
         sender: true,
         chat: true,
-        image: true, // Bây giờ sẽ có image data
+        image: true,
       }
     });
 

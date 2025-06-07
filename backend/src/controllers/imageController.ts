@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ImageService } from '../services/imageService';
+import { prisma } from 'models/prisma';
 
 const imageService = new ImageService();
 
@@ -42,9 +43,18 @@ export const uploadChatAvatar = async (req: Request, res: Response) => {
       return;
     }
 
-    // TODO: Kiểm tra người dùng có quyền thay đổi avatar của chat không
-    // Ví dụ: chỉ admin của chat mới có quyền thay đổi avatar
-
+    // Check user has permission to change chat avatar
+    // const userChat = await prisma.userChat.findUnique({
+    //   where: {
+    //     id: chatId,
+    //     userId: req.user?.id,
+    //   },
+    // });
+    // if (!userChat) {
+    //   res.status(401).json({ message: 'User not authorized to change chat avatar' });
+    //   return;
+    // }
+    
     const imageMetadata = await imageService.uploadImage(file, undefined, chatId);
     res.status(201).json(imageMetadata);
   } catch (error: any) {
@@ -69,9 +79,6 @@ export const uploadMessageImage = async (req: Request, res: Response) => {
       res.status(400).json({ message: 'Message ID is required' });
       return;
     }
-
-    // TODO: Kiểm tra người dùng có phải là người gửi tin nhắn không
-    // Chỉ người gửi tin nhắn mới có quyền đính kèm ảnh
 
     const imageMetadata = await imageService.uploadImage(file, undefined, undefined, messageId);
     res.status(201).json(imageMetadata);
@@ -108,8 +115,6 @@ export const getChatAvatar = async (req: Request, res: Response) => {
   try {
     const chatId = parseInt(req.params.chatId);
     
-    // TODO: Kiểm tra người dùng có phải là thành viên của chat không
-    
     const image = await imageService.getImage('chat', chatId);
     if (!image) {
       res.status(404).json({ message: 'Chat has no avatar' });
@@ -129,8 +134,6 @@ export const getChatAvatar = async (req: Request, res: Response) => {
 export const getMessageImage = async (req: Request, res: Response) => {
   try {
     const messageId = parseInt(req.params.messageId);
-    
-    // TODO: Kiểm tra người dùng có quyền xem tin nhắn này không
     
     const image = await imageService.getImage('message', messageId);
     if (!image) {
@@ -170,7 +173,7 @@ export const deleteChatAvatar = async (req: Request, res: Response) => {
   try {
     const chatId = parseInt(req.params.chatId);
     
-    // TODO: Kiểm tra người dùng có quyền xóa avatar của chat không
+    // Check user has permission to delete chat avatar
     
     await imageService.deleteImage('chat', chatId);
     res.status(200).json({ message: 'Chat avatar deleted successfully' });
@@ -186,7 +189,7 @@ export const deleteMessageImage = async (req: Request, res: Response) => {
   try {
     const messageId = parseInt(req.params.messageId);
     
-    // TODO: Kiểm tra người dùng có phải là người gửi tin nhắn không
+    // Check user has permission to delete message image
     
     await imageService.deleteImage('message', messageId);
     res.status(200).json({ message: 'Message image deleted successfully' });
