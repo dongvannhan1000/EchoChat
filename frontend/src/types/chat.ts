@@ -8,7 +8,6 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  avatarId: number | null;
   avatar: Image | null;
   block: number[];
   statusMessage: string | null;
@@ -63,10 +62,10 @@ export interface Message {
 }
 
 export interface Image {
-  id: number;
+  id?: number;
   url: string;
-  key: string;
+  key?: string;
   userId: number | null;
-  user: User | null;
-  message: Message | null;
+  user?: User | null;
+  message?: Message | null;
 }

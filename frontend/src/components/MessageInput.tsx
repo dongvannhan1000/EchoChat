@@ -78,8 +78,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
           
           // Extract file key from the service (you might need to modify the service to return this)
           imageFileKey = extractFileKeyFromUrl(uploadResult)
-          // const confirmResult = await imageUploadService.confirmMessageImageUpload(imageFileKey, currentChat.id)
-          // imageUrl = confirmResult
         } catch (error) {
           toast.error('Failed to upload image')
           setIsUploading(false)
@@ -90,9 +88,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
       // Send message with image URL
       const message = await onSendMessage(newMessage, 'normal', imageFileKey, undefined)
       console.log(message)
-      // if (imageFileKey) {
-      //   await imageUploadService.confirmMessageImageUpload(imageFileKey, message.id);
-      // }
+ 
       
       // Clear form
       setNewMessage("")
@@ -140,13 +136,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
   const isBlocked = otherParticipant?.user.block.includes(user.id) || false
   const hasBlocked = user.block.includes(otherParticipant?.userId || 0) || false
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   if (newMessage.trim()) {
-  //     onSendMessage(newMessage)
-  //     setNewMessage('')
-  //   }
-  // }
    if (isPrivateChat && (isBlocked || hasBlocked)) {
     return (
       <div className="bg-gray-100 border-t border-gray-200 p-4">

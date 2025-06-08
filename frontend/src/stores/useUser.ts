@@ -15,6 +15,7 @@ interface UserStore {
   fetchUsers: (searchTerm: string) => Promise<void>;
   fetchUser: (userId: number) => Promise<void>;
   updateUser: (userId: number, data: Partial<User>) => Promise<void>;
+  updateLocalUserAvatar: (avatarUrl: string, userId: number) => void;
   setSelectedUser: (user: User | null) => void;
 }
 
@@ -47,6 +48,7 @@ export const useUser = create<UserStore>((set) => ({
   updateUser: async (userId: number, data: Partial<User>) => {
     try {
       set({ isLoading: true });
+      
       const response = await api.put(`/api/users/${userId.toString()}`, data);
       set((state) => ({
         users: state.users.map((user) =>
@@ -58,6 +60,20 @@ export const useUser = create<UserStore>((set) => ({
     } catch (error) {
       set({ error: 'Failed to update user', isLoading: false });
     }
+  },
+
+  updateLocalUserAvatar: (avatarUrl: string, userId: number) => {
+    set((state) => ({
+      selectedUser: state.selectedUser?.id === userId 
+        ? { ...state.selectedUser, avatar: { url: avatarUrl, userId } }
+        : state.selectedUser,
+      // Update trong users array nếu có
+      users: state.users.map((user) =>
+        user.id === userId 
+          ? { ...user, avatar: { url: avatarUrl, userId } }
+          : user
+      ),
+    }));
   },
 
   setSelectedUser: (user: User | null) => {

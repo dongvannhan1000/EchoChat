@@ -58,12 +58,12 @@ export interface PresignedUrlResponse {
         await this.uploadFileToS3(presignedResponse.presignedUrl, file);
         
         // Confirm upload immediately for avatars
-        await api.post('/api/upload/confirm', {
+        const confirmUploadResponse = await api.post('/api/upload/confirm', {
           fileKey: presignedResponse.fileKey,
           type: 'user'
         });
         
-        return presignedResponse.cloudFrontUrl;
+        return confirmUploadResponse.data.cloudFrontUrl;
       } catch (error) {
         console.error('Error uploading user avatar:', error);
         throw new Error('Failed to upload avatar');
@@ -113,6 +113,7 @@ export interface PresignedUrlResponse {
     }
   
     private async uploadFileToS3(presignedUrl: string, file: File): Promise<void> {
+      console.log('Uploading file to S3:', presignedUrl);
       const response = await fetch(presignedUrl, {
         method: 'PUT',
         body: file,

@@ -20,7 +20,6 @@ model User {
   name          String
   email         String     @unique
   password      String
-  avatarId      Int?       @unique
   avatar        Image?     
   block         Int[]      @default([])
   statusMessage String?
@@ -37,7 +36,6 @@ model Chat {
   id            Int          @id @default(autoincrement())
   chatType      ChatType     @default(private) // Enum field for chat type
   groupName     String?
-  groupAvatarId Int?         @unique
   groupAvatar   Image?       
   createdBy     Int
   lastMessage   String?

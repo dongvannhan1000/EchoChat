@@ -12,14 +12,36 @@ import {
   Edit3, 
   Camera,
   UserCheck,
-  Clock
+  Clock,
+  Loader2,
+  X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { formatMessageTime } from "@/utils/formatTime";
+import { imageUploadService } from '@/services/imageUploadService';
+import { toast } from 'sonner';
+import { useUser } from '@/stores/useUser';
+import { useEffect } from 'react';
 
 export default function Profile() {
+  
   const { user } = useAuth();
+  const { selectedUser, setSelectedUser, updateLocalUserAvatar } = useUser();
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user && (!selectedUser || selectedUser.id !== user.id)) {
+      setSelectedUser(user);
+    }
+  }, [user, selectedUser, setSelectedUser]);
+
+  useEffect(() => {
+    console.log('selectedUser changed:', selectedUser?.avatar?.url);
+  }, [selectedUser]);
 
   if (!user) {
     return (
@@ -32,7 +54,6 @@ export default function Profile() {
     );
   }
 
-
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -41,6 +62,68 @@ export default function Profile() {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file using service
+    const validation = imageUploadService.validateImageFile(file);
+    if (!validation.isValid) {
+      toast.error(validation.error);
+      return;
+    }
+
+    setSelectedAvatar(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setAvatarPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeAvatar = () => {
+    setSelectedAvatar(null);
+    setAvatarPreview(null);
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = "";
+    }
+  };
+
+
+  const handleAvatarUpload = async () => {
+    if (!selectedAvatar || !selectedUser) return;
+
+    console.log(selectedUser);
+
+    setIsUploadingAvatar(true);
+    try {
+      const uploadResult = await imageUploadService.uploadUserAvatar(selectedAvatar);
+      updateLocalUserAvatar(uploadResult, selectedUser.id);
+
+      toast.success('Avatar updated successfully!');
+      setSelectedAvatar(null);
+      setAvatarPreview(null);
+      
+    } catch (error) {
+      toast.error('Failed to upload avatar');
+      console.error('Avatar upload error:', error);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (selectedAvatar) {
+      await handleAvatarUpload();
+      console.log(selectedUser)
+    }
+    setIsEditing(false);
+  };
+
+  const currentAvatarUrl = avatarPreview || selectedUser?.avatar?.url || '/placeholder.svg?height=40&width=40';
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -52,10 +135,15 @@ export default function Profile() {
         </div>
         <Button
           variant={isEditing ? "default" : "outline"}
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={isEditing ? handleSaveChanges : () => setIsEditing(true)}
+          disabled={isUploadingAvatar}
           className="gap-2"
         >
-          <Edit3 className="h-4 w-4" />
+          {isUploadingAvatar ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Edit3 className="h-4 w-4" />
+          )}
           {isEditing ? "Save Changes" : "Edit Profile"}
         </Button>
       </div>
@@ -69,7 +157,7 @@ export default function Profile() {
                 <div className="relative">
                   <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
                     <AvatarImage 
-                      src={user.avatar?.url || '/placeholder.svg?height=40&width=40'} 
+                      src={currentAvatarUrl} 
                       alt={user.name}
                       className="object-cover"
                     />
@@ -77,16 +165,40 @@ export default function Profile() {
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
+                  
                   {isEditing && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0 shadow-md"
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
+                    <div className="absolute -bottom-2 -right-2 flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={isUploadingAvatar}
+                        className="h-8 w-8 rounded-full p-0 shadow-md"
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+                      
+                      {selectedAvatar && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={removeAvatar}
+                          disabled={isUploadingAvatar}
+                          className="h-8 w-8 rounded-full p-0 shadow-md"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-white" />
+                    </div>
                   )}
                 </div>
+                
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
                   <p className="text-gray-600 flex items-center gap-2 mt-1">
@@ -99,9 +211,22 @@ export default function Profile() {
                       Active User
                     </Badge>
                   </div>
+                  
+                  {/* Avatar Preview Info */}
+                  {selectedAvatar && (
+                    <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+                      <p className="text-xs text-blue-600 font-medium">
+                        New avatar selected: {selectedAvatar.name}
+                      </p>
+                      <p className="text-xs text-blue-500">
+                        Click "Save Changes" to update your avatar
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardHeader>
+            
             <CardContent className="space-y-6">
               <Separator />
               
@@ -241,6 +366,16 @@ export default function Profile() {
           </Card>
         </div>
       </div>
+
+      {/* Hidden Avatar Input */}
+      <input 
+        ref={avatarInputRef} 
+        type="file" 
+        accept="image/*" 
+        onChange={handleAvatarSelect} 
+        className="hidden" 
+        disabled={isUploadingAvatar}
+      />
     </div>
   );
 }

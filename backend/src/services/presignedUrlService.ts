@@ -30,6 +30,7 @@ export class PresignedUrlService {
   async generateAvatarPresignedUrl(userId: number, contentType: string) {
     try {
       // Check if user exists
+      console.log('Generating presigned URL for avatar:', userId);
       const user = await prisma.user.findUnique({
         where: { id: userId }
       });
@@ -45,7 +46,7 @@ export class PresignedUrlService {
       const presignedUrl = await this.generatePresignedPutUrl(fileKey, contentType, 60);
       
       // Generate the CloudFront URL where the file will be accessible after upload
-      const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
+      // const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
       
       // Check if the user already has an avatar
       const existingImage = await prisma.image.findUnique({
@@ -77,7 +78,7 @@ export class PresignedUrlService {
       return {
         presignedUrl,
         fileKey,
-        cloudFrontUrl
+        // cloudFrontUrl
       };
     } catch (error) {
       console.error('Error generating presigned URL for avatar:', error);
@@ -117,7 +118,7 @@ export class PresignedUrlService {
       const presignedUrl = await this.generatePresignedPutUrl(fileKey, contentType, 60);
       
       // Generate the CloudFront URL where the file will be accessible after upload
-      const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
+      // const cloudFrontUrl = this.getCloudFrontUrl(fileKey);
       
       // Check if the chat already has an avatar
       const existingImage = await prisma.image.findUnique({
@@ -149,7 +150,7 @@ export class PresignedUrlService {
       return {
         presignedUrl,
         fileKey,
-        cloudFrontUrl
+        // cloudFrontUrl
       };
     } catch (error) {
       console.error('Error generating presigned URL for chat avatar:', error);
@@ -215,7 +216,7 @@ export class PresignedUrlService {
    * Confirm that an upload has completed and update the database accordingly
    */
   async confirmUpload(fileKey: string, type: 'user' | 'chat' | 'message', messageId?: number) {
-    console.log('confirmUpload called:', { fileKey, type, messageId });
+    console.trace('confirmUpload called:', { fileKey, type, messageId });
     try {
       // Find the pending upload
       const pendingUpload = await prisma.pendingUpload.findFirst({
