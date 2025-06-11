@@ -2,8 +2,11 @@ import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import {visualizer} from 'rollup-plugin-visualizer'
+import { cspHeader } from "./src/utils/cspHeader";
+
 
 export default defineConfig({
+  
   plugins: [
     react(),
     visualizer({
@@ -35,12 +38,14 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',  
     port: parseInt(process.env.PORT as any) || 4173, 
-    strictPort: true, 
+    strictPort: true,
+    headers: cspHeader
   },
   preview: {
     host: '0.0.0.0',
     port: parseInt(process.env.PORT as any) || 4173,
     strictPort: true,
-    allowedHosts: ['echo-chat-cqg2.onrender.com'], 
+    allowedHosts: ['echo-chat-cqg2.onrender.com'],
+    headers: cspHeader
   },
 })

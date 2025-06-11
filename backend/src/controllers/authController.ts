@@ -56,9 +56,11 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
+    const { password, ...userWithoutPassword } = user;
+
     return res.json({ 
       message: 'Login successfully', 
-      user, 
+      user: userWithoutPassword, 
       accessToken 
     });
   })(req, res, next);
@@ -126,7 +128,9 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
       return;
     }
     
-    res.json({ user });
+    const { password, ...userWithoutPassword } = user;
+
+    res.json({ user: userWithoutPassword });
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
       res.status(401).json({ message: 'Token is not valid' });

@@ -14,7 +14,18 @@ export class ChatService {
           include: {
             participants: {
               include: {
-                user: true
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    block: true,
+                    statusMessage: true,
+                    lastSeen: true,
+                    createdAt: true,
+                    updatedAt: true
+                  }
+                }
               }
             },
             messages: {
@@ -127,7 +138,18 @@ export class ChatService {
       include: {
         participants: {
           include: {
-            user: true
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                block: true,
+                statusMessage: true,
+                lastSeen: true,
+                createdAt: true,
+                updatedAt: true
+              }
+            }
           }
         }
       }
