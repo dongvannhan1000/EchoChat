@@ -4,11 +4,13 @@ import api from '@/utils/axios'
 import { AxiosRequestConfig } from "axios";
 import { AuthContext } from './AuthContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useUser } from '@/stores/useUser';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const { setSelectedUser } = useUser();
 
   const [accessToken, setAccessToken] = useState<string | null>(() => {
     return sessionStorage.getItem('accessToken');
@@ -91,6 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       setUser(userData as User);
+      setSelectedUser(userData as User);
+
     } catch (error) {
       console.error('Error refreshing token:', error);
       await refreshToken();
@@ -113,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       sessionStorage.setItem('accessToken', accessToken);
       setAccessToken(accessToken);
       setUser(data.user as User);
+      setSelectedUser(data.user as User);
 
       await useWebSocket.getState().initializeSocket(accessToken);
     } catch (error) {
