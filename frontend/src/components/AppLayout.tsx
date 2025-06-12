@@ -11,11 +11,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useUser } from '@/stores/useUser'
+import { useEffect } from 'react'
 
 export default function AppLayout() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
+  const { selectedUser } = useUser()
   const navigate = useNavigate()
   const location = useLocation()
+
+  useEffect(() => {
+    console.log('AppLayout - selectedUser changed:', selectedUser);
+  }, [selectedUser]);
 
   const handleLogout = async () => {
     await logout()
@@ -59,9 +66,9 @@ export default function AppLayout() {
               className="h-12 w-12 rounded-xl"
             >
               <Avatar>
-                <AvatarImage src={user?.avatar?.url} />
+                <AvatarImage src={selectedUser?.avatar?.url} />
                 <AvatarFallback>
-                  {user?.name.charAt(0).toUpperCase() || 'U'}
+                  {selectedUser?.name.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
             </Button>

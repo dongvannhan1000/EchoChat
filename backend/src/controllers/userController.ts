@@ -132,3 +132,21 @@ export const updateStatus = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+    const updatedUser = await userService.changePassword(userId, currentPassword, newPassword);
+    res.json(updatedUser);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Failed to change password user' });
+    }
+  }
+};

@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/api/users/block', isAuth, userController.blockUser as express.RequestHandler);
 router.post('/api/users/unblock', isAuth, userController.unblockUser as express.RequestHandler);
 router.put('/api/users/status', isAuth, userController.updateStatus as express.RequestHandler);
+router.put('/api/users/change-password', isAuth, userController.changePassword as express.RequestHandler);
 
 router.get('/api/users/:id', userController.getUser);
 router.put('/api/users/:id', isAuth, userController.updateUser);
