@@ -26,10 +26,11 @@ const app = express();
 const server = http.createServer(app);
 
 app.use((req, res, next) => {
+  const domain = API_URL ? API_URL.replace(/^https?:\/\//, '') : '';
 
   const connectSrc = isDevelopment 
     ? `'self' http://localhost:* https://localhost:*`
-    : `'self' ${API_URL}`;
+    : `'self' ${API_URL} wss://${domain}`;
 
   res.setHeader('Content-Security-Policy', 
     `default-src 'self'; ` +

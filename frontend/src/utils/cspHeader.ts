@@ -3,10 +3,11 @@ const SET_CSP = process.env.VITE_SET_CSP;
 
 const getCspHeader = () => {
   const isDev = process.env.NODE_ENV === 'development';
+  const domain = API_URL.replace(/^https?:\/\//, '');
 
   const connectSrc = isDev
     ? `connect-src 'self' http://localhost:* https://localhost:*`
-    : `connect-src 'self' ${API_URL} wss://${API_URL}`;
+    : `connect-src 'self' ${API_URL} wss://${domain}`;
 
   const scriptSrc = isDev
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
