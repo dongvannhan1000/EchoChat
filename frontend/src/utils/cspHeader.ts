@@ -7,7 +7,7 @@ const getCspHeader = () => {
 
   const connectSrc = isDev
     ? `connect-src 'self' http://localhost:* https://localhost:*`
-    : `connect-src 'self' ${API_URL} wss://${domain}`;
+    : `connect-src 'self' ${API_URL} wss://${domain} https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com`;
 
   const scriptSrc = isDev
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
@@ -18,7 +18,7 @@ const getCspHeader = () => {
       "default-src 'self'",
       scriptSrc,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' https://avatars.githubusercontent.com https://loremflickr.com https://*.cloudfront.net data:",
+      "img-src 'self' https://avatars.githubusercontent.com https://loremflickr.com https://*.cloudfront.net data: https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com",
       "font-src 'self' https://fonts.googleapis.com data:",
       connectSrc,
       "frame-src 'none'",

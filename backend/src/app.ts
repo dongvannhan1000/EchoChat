@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 
   const connectSrc = isDevelopment 
     ? `'self' http://localhost:* https://localhost:*`
-    : `'self' ${API_URL} wss://${domain}`;
+    : `'self' ${API_URL} wss://${domain} https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com`;
 
   res.setHeader('Content-Security-Policy', 
     `default-src 'self'; ` +
