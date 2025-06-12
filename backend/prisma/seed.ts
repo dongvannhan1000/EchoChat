@@ -48,7 +48,11 @@ async function seedDatabase() {
       return await prisma.user.update({
         where: { id: user.id },
         data: {
-          avatarId: avatar.id
+          avatar: {
+            connect: {
+              id: avatar.id
+            }
+          }
         }
       });
     })
@@ -200,7 +204,11 @@ async function seedDatabase() {
       await prisma.chat.update({
         where: { id: chat.id },
         data: {
-          groupAvatarId: avatar.id
+          groupAvatar: {
+            connect: {
+              id: avatar.id
+            }
+          }
         }
       })
 
