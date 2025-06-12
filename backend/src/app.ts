@@ -43,7 +43,7 @@ app.use((req, res, next) => {
     `connect-src ${connectSrc}; ` +
     `script-src 'self' 'unsafe-inline' 'unsafe-eval'; ` +
     `style-src 'self' 'unsafe-inline'; ` +
-    `img-src 'self' https://avatars.githubusercontent.com https://loremflickr.com https://*.cloudfront.net data:; ` +
+    `img-src 'self' https://avatars.githubusercontent.com https://loremflickr.com https://*.cloudfront.net data: https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com; ` +
     `font-src 'self' https://fonts.googleapis.com data:`
   );
   next();
