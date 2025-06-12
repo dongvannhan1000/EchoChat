@@ -19,8 +19,28 @@ import { prisma } from './models/prisma';
 
 dotenv.config();
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+const API_URL = process.env.API_URL;
+
 const app = express();
 const server = http.createServer(app);
+
+app.use((req, res, next) => {
+
+  const connectSrc = isDevelopment 
+    ? `'self' http://localhost:* https://localhost:*`
+    : `'self' ${API_URL}`;
+
+  res.setHeader('Content-Security-Policy', 
+    `default-src 'self'; ` +
+    `connect-src ${connectSrc}; ` +
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval'; ` +
+    `style-src 'self' 'unsafe-inline'; ` +
+    `img-src 'self' https://avatars.githubusercontent.com https://loremflickr.com https://*.cloudfront.net data:; ` +
+    `font-src 'self' https://fonts.googleapis.com data:`
+  );
+  next();
+});
 
 
 const io = new Server(server, {

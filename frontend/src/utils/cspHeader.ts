@@ -5,7 +5,7 @@ const getCspHeader = () => {
   const isDev = process.env.NODE_ENV === 'development';
 
   const connectSrc = isDev
-    ? `connect-src 'self' * ws: wss:`
+    ? `connect-src 'self' http://localhost:* https://localhost:*`
     : "connect-src 'self' https://your-api.com wss://your-api.com";
 
   const scriptSrc = isDev
@@ -17,8 +17,8 @@ const getCspHeader = () => {
       "default-src 'self'",
       scriptSrc,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "font-src 'self'",
+      "img-src 'self' https://avatars.githubusercontent.com https://loremflickr.com https://*.cloudfront.net data:",
+      "font-src 'self' https://fonts.googleapis.com data:",
       connectSrc,
       "frame-src 'none'",
       "frame-ancestors 'none'",
