@@ -23,6 +23,12 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const API_URL = process.env.API_URL;
 
 const app = express();
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true
+}));
+
 const server = http.createServer(app);
 
 app.use((req, res, next) => {
@@ -167,10 +173,7 @@ io.on('connect', (socket) => {
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended: true}));
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
+
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
