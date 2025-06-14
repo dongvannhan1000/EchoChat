@@ -3,6 +3,8 @@ import jwtStrategy from './passport-jwt';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { googleStrategy } from './passport-oauth';
+import { facebookStrategy } from './passport-oauth';
 
 const prisma = new PrismaClient();
 
@@ -27,6 +29,8 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
 }));
 
 passport.use(jwtStrategy);
+passport.use('google', googleStrategy);
+passport.use('facebook', facebookStrategy);
 
 passport.serializeUser((user: any, done) => {
   done(null, user.id);

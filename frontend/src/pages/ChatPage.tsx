@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useChat } from '@/stores/useChat'
 import { useUser } from '@/stores/useUser'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { User } from '@/types/chat'
+import { Chat, User } from '@/types/chat'
 import {
   Popover,
   PopoverContent,
@@ -179,7 +179,7 @@ export const ChatPage: React.FC = () => {
     setSearchTerm('')
 
     const chatData = await createChat([newUser.id], 'private');
-    setSelectedChatId(chatData.id);
+    useChatStore.getState().setCurrentChat(chatData as Chat)
   }
 
   const handleNewGroupChat = async (newUser: User) => {
