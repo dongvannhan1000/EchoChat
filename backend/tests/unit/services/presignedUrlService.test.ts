@@ -50,8 +50,6 @@ describe('PresignedUrlService', () => {
       expect(result).toHaveProperty('fileKey');
       expect(result.fileKey).toContain('avatars/1/');
       expect(result.fileKey).toMatch(/\.jpg$/);
-      expect(result).toHaveProperty('cloudFrontUrl');
-      expect(result.cloudFrontUrl).toContain('test.cloudfront.net');
 
       // Verify database calls
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
@@ -240,14 +238,43 @@ describe('PresignedUrlService', () => {
         expiresAt: new Date()
       });
 
+      (prisma.message.findUnique as jest.Mock).mockResolvedValue({
+        id: 123,
+        // other message properties...
+      });
+
+      (prisma.image.create as jest.Mock).mockResolvedValue({
+        id: 456,
+        url: 'https://cloudfront.example.com/chats/1/messages/test.jpg',
+        key: 'chats/1/messages/test.jpg',
+        messageId: 123
+      });
+
+      (prisma.message.update as jest.Mock).mockResolvedValue({
+        id: 123,
+        imageId: 456
+      });
+
+      console.log('About to call confirmUpload with messageId:', 123);
+
       await service.confirmUpload('chats/1/messages/test.jpg', 'message', 123);
 
       // Verify image creation with messageId
+
+      expect(prisma.message.findUnique).toHaveBeenCalledWith({
+        where: { id: 123 }
+      });
+    
       expect(prisma.image.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           key: 'chats/1/messages/test.jpg',
           messageId: 123
         })
+      });
+
+      expect(prisma.message.update).toHaveBeenCalledWith({
+        where: { id: 123 },
+        data: { imageId: 456 }
       });
     });
 

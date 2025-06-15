@@ -16,6 +16,7 @@ import http from 'http';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { prisma } from './models/prisma';
+import oauthRoutes from './routes/oauthRoutes';
 
 dotenv.config();
 
@@ -184,6 +185,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/', authRoutes);
+app.use('/', oauthRoutes);
 app.use('/', userRoutes);
 app.use('/', chatRoutes);
 app.use('/', messageRoutes);

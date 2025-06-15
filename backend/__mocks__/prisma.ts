@@ -2,6 +2,7 @@
 export const prisma = {
     user: {
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
     chat: {
       findUnique: jest.fn(),
