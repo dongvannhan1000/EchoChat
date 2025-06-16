@@ -1,34 +1,6 @@
 import express, { Express } from 'express';
 import request from 'supertest';
 
-// Mock controllers trước khi import
-const mockController = {
-  handleOAuthCallback: jest.fn(),
-  linkGoogle: jest.fn(),
-  unlinkGoogle: jest.fn(),
-  linkFacebook: jest.fn(),
-  unlinkFacebook: jest.fn(),
-};
-
-jest.mock('../../src/controllers/oauthController', () => mockController);
-
-// Mock passport
-const mockAuthenticate = jest.fn().mockImplementation(() => {
-  // Trả về một middleware function mặc định
-  return jest.fn((req, res, next) => next());
-});
-const mockPassport = {
-  authenticate: mockAuthenticate,
-  use: jest.fn(),
-  serializeUser: jest.fn(),
-  deserializeUser: jest.fn(),
-};
-
-jest.mock('../../src/config/passport', () => ({
-  __esModule: true,
-  default: mockPassport,
-}));
-
 // ===== INTEGRATION TEST APPROACH (Alternative) =====
 describe('OAuth Routes - Integration Test', () => {
   let app: Express;
