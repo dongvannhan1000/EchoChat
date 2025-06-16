@@ -8,47 +8,28 @@ import {
   unlinkFacebook,
 } from '../controllers/oauthController';
 
+import {
+  authenticateGoogle,
+  authenticateGoogleCallback,
+  authenticateFacebook,
+  authenticateFacebookCallback,
+  authenticateJWT
+} from '../middleware/authMiddleware';
+
 const router = Router();
 
 // Google OAuth
-router.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
-
-router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login?error=oauth_failed' }),
-  handleOAuthCallback
-);
+router.get('/auth/google', authenticateGoogle);
+router.get('/auth/google/callback', authenticateGoogleCallback, handleOAuthCallback);
 
 // Facebook OAuth
-router.get('/auth/facebook',
-  passport.authenticate('facebook', { scope: ['email'] })
-);
-
-router.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/login?error=oauth_failed' }),
-  handleOAuthCallback
-);
+router.get('/auth/facebook', authenticateFacebook);
+router.get('/auth/facebook/callback', authenticateFacebookCallback, handleOAuthCallback);
 
 // Link/Unlink (protected with JWT)
-router.post('/auth/link/google',
-  passport.authenticate('jwt', { session: false }),
-  linkGoogle
-);
-
-router.post('/auth/unlink/google',
-  passport.authenticate('jwt', { session: false }),
-  unlinkGoogle
-);
-
-router.post('/auth/link/facebook',
-  passport.authenticate('jwt', { session: false }),
-  linkFacebook
-);
-
-router.post('/auth/unlink/facebook',
-  passport.authenticate('jwt', { session: false }),
-  unlinkFacebook
-);
+router.post('/auth/link/google', authenticateJWT, linkGoogle);
+router.post('/auth/unlink/google', authenticateJWT, unlinkGoogle);
+router.post('/auth/link/facebook', authenticateJWT, linkFacebook);
+router.post('/auth/unlink/facebook', authenticateJWT, unlinkFacebook);
 
 export default router;
