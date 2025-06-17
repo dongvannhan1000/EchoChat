@@ -12,12 +12,13 @@ import { errorHandler } from './middleware/errorHandler';
 import methodOverride from 'method-override';
 import messageRoutes from './routes/messageRoutes';
 import { Server } from 'socket.io';
-import http from 'http';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { prisma } from './models/prisma';
 import oauthRoutes from './routes/oauthRoutes';
-
+import fs from 'fs';
+import https from 'https';
+import path from 'path';
 dotenv.config();
 
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -25,12 +26,21 @@ const API_URL = process.env.API_URL;
 
 const app = express();
 
+const keyPath = path.join(process.cwd(), 'server/localhost+1-key.pem');
+const certPath = path.join(process.cwd(), 'server/localhost+1.pem');
+
+const options = {
+  key: fs.readFileSync(keyPath),
+  cert: fs.readFileSync(certPath),
+};
+
+
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 
-const server = http.createServer(app);
+const server = https.createServer(options, app);
 
 app.use((req, res, next) => {
   const domain = API_URL ? API_URL.replace(/^https?:\/\//, '') : '';
@@ -181,7 +191,7 @@ app.use(passport.session());
 app.use(methodOverride('_method'));
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the Blog API!');
+  res.send('Hello HTTPS!');
 });
 
 app.use('/', authRoutes);
@@ -199,7 +209,7 @@ const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
   server.listen(5000, () => {
     console.log('Server is running on port 5000');
-    console.log('Open your browser and visit: http://localhost:5000');
+    console.log('Open your browser and visit: https://localhost:5000');
   });
 }
 
