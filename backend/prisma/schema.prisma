@@ -117,6 +117,18 @@ model PendingUpload {
   @@map("pending_uploads")
 }
 
+model Session {
+  id            String   @id @default(cuid())
+  sid           String   @unique
+  data          String
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+
 enum ChatType {
   private
   group

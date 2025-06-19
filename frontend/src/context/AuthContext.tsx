@@ -5,6 +5,7 @@ import { User } from '@/types/chat'
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<void>
+  loginWithToken: (token: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshToken: () => Promise<string | null>;
