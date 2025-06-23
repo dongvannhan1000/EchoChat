@@ -2,17 +2,11 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import * as authService from '../services/authService';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { generateTokens } from '../config/token';
 
-const ACCESS_TOKEN_EXPIRES = '15m'; 
-const REFRESH_TOKEN_EXPIRES = '7d'; 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 const REFRESH_SECRET = process.env.REFRESH_SECRET || 'your_refresh_secret';
-
-const generateTokens = (userId: number) => {
-  const accessToken = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES });
-  const refreshToken = jwt.sign({ id: userId }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
-  return { accessToken, refreshToken };
-};
+const ACCESS_TOKEN_EXPIRES = '15m'; 
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -66,6 +60,8 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
   })(req, res, next);
 };
 
+
+
 export const logout = (req: Request, res: Response, next: NextFunction) => {
   res.clearCookie('refreshToken');
   res.status(200).json({ message: 'Logout successful' });
@@ -95,10 +91,12 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
       { expiresIn: ACCESS_TOKEN_EXPIRES }
     );
 
+    const { password, ...userWithoutPassword } = user;
+
     res.json({
       message: 'Token refreshed',
       accessToken,
-      user
+      user: userWithoutPassword
     });
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {

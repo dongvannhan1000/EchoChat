@@ -20,7 +20,13 @@ model User {
   name          String
   email         String     @unique
   password      String
-  avatar        Image?     
+  avatar        Image?
+
+  googleId      String?  @unique
+  facebookId    String?  @unique
+  provider      String?  @default("local") // "local", "google", "facebook"
+  emailVerified Boolean  @default(false)
+       
   block         Int[]      @default([])
   statusMessage String?
   lastSeen      DateTime?
