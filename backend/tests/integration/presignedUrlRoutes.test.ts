@@ -1,12 +1,12 @@
 import request from 'supertest';
 import express, { Express } from 'express';
-import presignedUrlRoutes from '../../../src/routes/presignedUrlRoutes';
-import { isAuth } from '../../../src/middleware/authMiddleware';
-import * as controller from '../../../src/controllers/presignedUrlController';
+import presignedUrlRoutes from '../../src/routes/presignedUrlRoutes';
+import { isAuth } from '../../src/middleware/authMiddleware';
+import * as controller from '../../src/controllers/presignedUrlController';
 
 // Mock middleware and controllers
-jest.mock('../../../src/middleware/authMiddleware');
-jest.mock('../../../src/controllers/presignedUrlController');
+jest.mock('../../src/middleware/authMiddleware');
+jest.mock('../../src/controllers/presignedUrlController');
 
 describe('PresignedUrl Routes', () => {
   let app: Express;

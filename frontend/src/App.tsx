@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'r
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import AppLayout from './components/AppLayout'
+import { OAuthCallback } from './pages/OAuthCallback'
 
 // Lazy load các pages
 const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })))
@@ -65,6 +66,11 @@ const App = () => {
             <Route path="/register" element={
               <PublicRoute>
                 <RegisterPage />
+              </PublicRoute>
+            } />
+            <Route path="/auth/callback" element={
+              <PublicRoute>
+                <OAuthCallback />
               </PublicRoute>
             } />
             <Route

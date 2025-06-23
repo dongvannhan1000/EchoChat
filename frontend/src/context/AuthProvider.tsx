@@ -126,6 +126,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithToken = async (token: string) => {
+    try {
+      sessionStorage.setItem('accessToken', token);
+      setAccessToken(token);
+  
+      const response = await api.get('/api/me');
+      const { user: userData } = response.data;
+  
+      if (!userData) {
+        throw new Error('No user data received');
+      }
+  
+      setUser(userData as User);
+      setSelectedUser(userData as User);
+  
+      await useWebSocket.getState().initializeSocket(token);
+    } catch (error) {
+      console.error('Error during loginWithToken:', error);
+      throw error;
+    }
+  };
+
   const register = async (name: string, email: string, password: string) => {
     try {
       await api.post('/api/register', { name, email, password });
@@ -189,7 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, refreshToken, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, login, loginWithToken, register, logout, refreshToken, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   )

@@ -25,7 +25,7 @@
     "test:integrate": "dotenv -e .env.test -- cross-env NODE_ENV=test jest tests/integration",
     "test:service": "dotenv -e .env.test -- cross-env NODE_ENV=test jest tests/unit/services",
     "test:controller": "dotenv -e .env.test -- cross-env NODE_ENV=test jest tests/unit/controllers",
-    "test:routes": "dotenv -e .env.test -- cross-env NODE_ENV=test jest tests/unit/routes"
+    "test:routes": "dotenv -e .env.test -- cross-env NODE_ENV=test jest tests/integration/routes"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

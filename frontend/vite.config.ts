@@ -3,11 +3,12 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import {visualizer} from 'rollup-plugin-visualizer'
 import { cspHeader } from "./src/utils/cspHeader";
-
+import mkcert from 'vite-plugin-mkcert'
 
 export default defineConfig({
   
   plugins: [
+    mkcert(),
     react(),
     visualizer({
       filename: './dist/stats.html',
