@@ -18,6 +18,7 @@ import { prisma } from './models/prisma';
 import oauthRoutes from './routes/oauthRoutes';
 import fs from 'fs';
 import https from 'https';
+import http from 'http';
 import path from 'path';
 dotenv.config();
 
@@ -26,13 +27,21 @@ const API_URL = process.env.API_URL;
 
 const app = express();
 
-const keyPath = path.join(process.cwd(), 'server/localhost+1-key.pem');
-const certPath = path.join(process.cwd(), 'server/localhost+1.pem');
+let server;
 
-const options = {
-  key: fs.readFileSync(keyPath),
-  cert: fs.readFileSync(certPath),
-};
+if (isDevelopment) {
+  console.log('Running in development mode with HTTPS.');
+  const keyPath = path.join(process.cwd(), 'server/localhost+1-key.pem');
+  const certPath = path.join(process.cwd(), 'server/localhost+1.pem');
+  const options = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
+  server = https.createServer(options, app);
+} else {
+  console.log('Running in production mode with HTTP.');
+  server = http.createServer(app);
+}
 
 console.log("CORS Origin being used:", process.env.FRONTEND_URL);
 
@@ -41,7 +50,7 @@ app.use(cors({
   credentials: true
 }));
 
-const server = https.createServer(options, app);
+
 
 app.use((req, res, next) => {
   const domain = API_URL ? API_URL.replace(/^https?:\/\//, '') : '';
