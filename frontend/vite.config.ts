@@ -6,10 +6,12 @@ import {visualizer} from 'rollup-plugin-visualizer'
 import { cspHeader } from "./src/utils/cspHeader";
 import mkcert from 'vite-plugin-mkcert'
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export default defineConfig({
   
   plugins: [
-    mkcert(),
+    isDev ? mkcert() : [],
     react(),
     tailwindcss(),
     visualizer({
