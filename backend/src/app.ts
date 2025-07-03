@@ -34,6 +34,7 @@ const options = {
   cert: fs.readFileSync(certPath),
 };
 
+console.log("CORS Origin being used:", process.env.FRONTEND_URL);
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
