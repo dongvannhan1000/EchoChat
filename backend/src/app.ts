@@ -206,10 +206,11 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+
 if (process.env.NODE_ENV !== 'test') {
-  server.listen(5000, () => {
-    console.log('Server is running on port 5000');
-    console.log('Open your browser and visit: https://localhost:5000');
+  server.listen(PORT, () => {
+    console.log('Server is running on port ' + PORT);
+    console.log(`Open your browser and visit: ${API_URL}`);
   });
 }
 
