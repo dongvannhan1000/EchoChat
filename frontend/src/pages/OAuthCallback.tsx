@@ -21,8 +21,8 @@ export const OAuthCallback: React.FC = () => {
         if (error) {
           setStatus('error')
           setMessage(`Login failed: ${error}`)
-          navigate('/login');
-          // setTimeout(() => navigate('/login'), 3000)
+          // navigate('/login');
+          setTimeout(() => navigate('/login'), 3000)
           return
         }
 
@@ -31,13 +31,13 @@ export const OAuthCallback: React.FC = () => {
             await loginWithToken(token);
             setStatus('success');
             setMessage('Login successful! Redirecting to chat...');
-            navigate('/chat');
-            // setTimeout(() => navigate('/chat'), 2000);
+            // navigate('/chat');
+            setTimeout(() => navigate('/chat'), 2000);
           } else {
             setStatus('error');
             setMessage('No token received');
-            navigate('/login');
-            // setTimeout(() => navigate('/login'), 3000);
+            // navigate('/login');
+            setTimeout(() => navigate('/login'), 3000);
           }
       } catch (error) {
         console.error('OAuth callback error:', error)
