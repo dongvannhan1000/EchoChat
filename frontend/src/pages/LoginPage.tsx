@@ -34,8 +34,9 @@ export const LoginPage: React.FC = () => {
   }
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
+    console.log(import.meta.env.VITE_BACKEND_URL)
     // Redirect to OAuth endpoint
-    window.location.href = `${process.env.VITE_BACKEND_URL || 'https://localhost:5000'}/auth/${provider}`
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL || 'https://localhost:5000'}/auth/${provider}`
   }
 
   return (
