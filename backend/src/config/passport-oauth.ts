@@ -4,6 +4,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+console.log("!!! Reading GOOGLE_CALLBACK_URL from env:", process.env.GOOGLE_CALLBACK_URL);
+console.log("!!! Reading FACEBOOK_CALLBACK_URL from env:", process.env.FACEBOOK_CALLBACK_URL);
+
 // Google OAuth Strategy
 export const googleStrategy = new GoogleStrategy(
     {
